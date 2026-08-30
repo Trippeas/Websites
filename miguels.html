@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Miguel&rsquo;s Landscaping and Lawn Care | Landscaping in St. George, Utah</title>
+<meta name="description" content="Weekly lawn care, sprinkler repair, desert cleanups, and sod installation in St. George, Utah and Washington County. Free estimates - call (435) 619-1210." />
+
+<!-- ============================================================
+     Miguel's Landscaping and Lawn Care - single-file landing page
+     Deploy: upload this one file to any host (Netlify, GitHub
+     Pages, cPanel, S3). No build step required.
+     TODO before launch: replace the business name, phone number,
+     email, and the picsum.photos placeholder images.
+     ============================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+        colors: {
+          brand: {
+            50:'#f2f8f3', 100:'#e0efe3', 200:'#c2dfc9', 300:'#94c6a2', 400:'#5ea674',
+            500:'#3c8955', 600:'#2c6d43', 700:'#245737', 800:'#1f462e', 900:'#16321f'
+          },
+          rock: {
+            100:'#fbeee5', 200:'#f3d6c1', 300:'#e7b48c', 400:'#d98e5b',
+            500:'#c96f38', 600:'#ad552a', 700:'#8b4222', 800:'#6b331b'
+          }
+        },
+        boxShadow: { soft: '0 10px 40px -12px rgba(22,50,31,.25)' }
+      }
+    }
+  }
+</script>
+<style>
+  .hero-img{
+    background-image:linear-gradient(to right,rgba(22,50,31,.88),rgba(22,50,31,.45)),
+      url('https://picsum.photos/seed/greenlawn/1920/1080');
+    background-size:cover;background-position:center;
+  }
+  .band-img{
+    background-image:linear-gradient(rgba(22,50,31,.80),rgba(22,50,31,.80)),
+      url('https://picsum.photos/seed/desertrock/1920/900');
+    background-size:cover;background-position:center;background-attachment:fixed;
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .band-img{background-attachment:scroll}
+  }
+</style>
+</head>
+
+<body class="font-sans bg-white text-slate-700 antialiased">
+
+<!-- ===================== HEADER ===================== -->
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex h-20 items-center justify-between gap-4">
+
+      <a href="#top" class="flex items-center gap-3 shrink-0">
+        <span class="grid h-11 w-11 place-items-center rounded-xl bg-brand-600 text-white shadow-soft">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 21c0-6 3-10 8-12-1 7-4 11-8 12Z"/><path d="M12 21c0-5-2.5-8.5-7-10 .8 5.6 3.2 9 7 10Z"/><path d="M12 21v-4"/>
+          </svg>
+        </span>
+        <span class="hidden sm:block leading-tight">
+          <span class="block text-lg font-extrabold tracking-tight text-brand-900">Miguel&rsquo;s Landscaping</span>
+          <span class="block text-xs font-medium uppercase tracking-[.18em] text-rock-600">and Lawn Care</span>
+        </span>
+      </a>
+
+      <nav class="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-600">
+        <a href="#services" class="hover:text-brand-700 transition">Services</a>
+        <a href="#areas" class="hover:text-brand-700 transition">Service Area</a>
+        <a href="#work" class="hover:text-brand-700 transition">Our Work</a>
+        <a href="#contact" class="hover:text-brand-700 transition">Contact</a>
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <div class="hidden sm:block text-right leading-tight mr-1">
+          <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Free estimates</p>
+          <p class="text-xs font-medium text-slate-500">Mon&ndash;Sat, 7am&ndash;6pm</p>
+        </div>
+        <a href="tel:+14356191210"
+           class="inline-flex items-center gap-2 rounded-full bg-brand-600 px-5 py-3 text-sm sm:text-base font-bold text-white shadow-soft transition hover:bg-brand-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+          </svg>
+          <span class="whitespace-nowrap">(435) 619-1210</span>
+        </a>
+        <button id="navToggle" type="button" aria-expanded="false" aria-controls="mobileNav"
+                class="lg:hidden grid h-11 w-11 place-items-center rounded-xl border border-slate-300 text-slate-700">
+          <span class="sr-only">Toggle navigation</span>
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobileNav" class="hidden lg:hidden border-t border-slate-200 bg-white">
+    <nav class="mx-auto max-w-7xl px-4 py-3 grid gap-1 text-sm font-semibold text-slate-700">
+      <a href="#services" class="rounded-lg px-3 py-3 hover:bg-brand-50">Services</a>
+      <a href="#areas" class="rounded-lg px-3 py-3 hover:bg-brand-50">Service Area</a>
+      <a href="#work" class="rounded-lg px-3 py-3 hover:bg-brand-50">Our Work</a>
+      <a href="#contact" class="rounded-lg px-3 py-3 hover:bg-brand-50">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section id="top" class="hero-img relative">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
+    <div class="max-w-2xl">
+      <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-brand-100 ring-1 ring-white/20">
+        Locally owned in Washington County
+      </p>
+      <h1 class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-tight text-white">
+        A yard that looks great in the desert heat.
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl leading-relaxed text-brand-50/90">
+        Weekly lawn care, sprinkler repair, desert cleanups, and sod installation for
+        homeowners and property managers across St.&nbsp;George, Utah.
+      </p>
+      <div class="mt-9 flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <a href="tel:+14356191210"
+           class="inline-flex items-center justify-center gap-2 rounded-full bg-rock-500 px-8 py-4 text-base font-bold text-white shadow-soft transition hover:bg-rock-600 focus:outline-none focus-visible:ring-4 focus-visible:ring-rock-300">
+          Call (435) 619-1210
+        </a>
+        <a href="#contact"
+           class="inline-flex items-center justify-center gap-2 rounded-full bg-white/10 px-8 py-4 text-base font-bold text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-white/20">
+          Request a free quote
+        </a>
+      </div>
+      <dl class="mt-12 grid grid-cols-3 gap-6 max-w-lg border-t border-white/15 pt-8">
+        <div><dt class="text-2xl font-extrabold text-white">12+</dt><dd class="text-sm text-brand-100/80">Years local</dd></div>
+        <div><dt class="text-2xl font-extrabold text-white">400+</dt><dd class="text-sm text-brand-100/80">Yards served</dd></div>
+        <div><dt class="text-2xl font-extrabold text-white">5.0&#9733;</dt><dd class="text-sm text-brand-100/80">Avg. review</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TRUST BAR ===================== -->
+<section class="border-b border-slate-200 bg-brand-50/60">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 grid gap-4 sm:grid-cols-3 text-sm font-semibold text-brand-800">
+    <p class="flex items-center gap-2"><span class="text-rock-500">&#10003;</span> Licensed &amp; insured</p>
+    <p class="flex items-center gap-2"><span class="text-rock-500">&#10003;</span> Same-week estimates</p>
+    <p class="flex items-center gap-2"><span class="text-rock-500">&#10003;</span> No long-term contracts</p>
+  </div>
+</section>
+
+<!-- ===================== SERVICES ===================== -->
+<section id="services" class="py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl">
+      <p class="text-sm font-bold uppercase tracking-[.18em] text-rock-600">What we do</p>
+      <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-brand-900">Services built for southern Utah yards</h2>
+      <p class="mt-4 text-lg text-slate-600">
+        Hard water, clay soil, and 110&deg; summers are rough on a landscape. Every service below is
+        priced flat and scheduled on a route, so you know who is coming and when.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+
+      <!-- Weekly lawn care -->
+      <article class="group flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-sm transition hover:shadow-soft hover:-translate-y-1">
+        <div class="overflow-hidden">
+          <img src="https://picsum.photos/seed/mowing/800/600" alt="Freshly mowed lawn with clean stripe lines" loading="lazy"
+               class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="flex flex-1 flex-col p-6">
+          <h3 class="text-xl font-bold text-brand-900">Weekly Lawn Care</h3>
+          <p class="mt-3 flex-1 text-slate-600">
+            Mow, edge, string-trim, and blow down every visit. We haul the clippings and adjust
+            cut height through the season so the turf holds color into July.
+          </p>
+          <ul class="mt-5 space-y-2 text-sm text-slate-600">
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Same crew, same day each week</li>
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Fertilization add-on available</li>
+          </ul>
+          <a href="#contact" class="mt-6 text-sm font-bold text-brand-700 hover:text-brand-800">Get pricing &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Sprinkler repair -->
+      <article class="group flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-sm transition hover:shadow-soft hover:-translate-y-1">
+        <div class="overflow-hidden">
+          <img src="https://picsum.photos/seed/sprinkler/800/600" alt="Sprinkler head watering a green lawn" loading="lazy"
+               class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="flex flex-1 flex-col p-6">
+          <h3 class="text-xl font-bold text-brand-900">Sprinkler Repair</h3>
+          <p class="mt-3 flex-1 text-slate-600">
+            Broken heads, cracked laterals, dead valves, and controllers that never got programmed
+            right. We find the problem and fix it the same visit when parts allow.
+          </p>
+          <ul class="mt-5 space-y-2 text-sm text-slate-600">
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Leak &amp; valve diagnostics</li>
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Smart timer setup for water rules</li>
+          </ul>
+          <a href="#contact" class="mt-6 text-sm font-bold text-brand-700 hover:text-brand-800">Get pricing &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Desert cleanups -->
+      <article class="group flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-sm transition hover:shadow-soft hover:-translate-y-1">
+        <div class="overflow-hidden">
+          <img src="https://picsum.photos/seed/desertyard/800/600" alt="Desert landscaping with gravel, boulders, and native plants" loading="lazy"
+               class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="flex flex-1 flex-col p-6">
+          <h3 class="text-xl font-bold text-brand-900">Desert Cleanups</h3>
+          <p class="mt-3 flex-1 text-slate-600">
+            Overgrown xeriscape reset: weed removal, gravel refresh, palm and shrub trimming,
+            pruning back sage and oleander, and full debris haul-off.
+          </p>
+          <ul class="mt-5 space-y-2 text-sm text-slate-600">
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> One-time or seasonal</li>
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Pre-emergent weed treatment</li>
+          </ul>
+          <a href="#contact" class="mt-6 text-sm font-bold text-brand-700 hover:text-brand-800">Get pricing &rarr;</a>
+        </div>
+      </article>
+
+      <!-- Sod installation -->
+      <article class="group flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200 shadow-sm transition hover:shadow-soft hover:-translate-y-1">
+        <div class="overflow-hidden">
+          <img src="https://picsum.photos/seed/sodroll/800/600" alt="Rolls of fresh sod laid across a prepared yard" loading="lazy"
+               class="h-48 w-full object-cover transition duration-500 group-hover:scale-105" />
+        </div>
+        <div class="flex flex-1 flex-col p-6">
+          <h3 class="text-xl font-bold text-brand-900">Sod Installation</h3>
+          <p class="mt-3 flex-1 text-slate-600">
+            Grade, amend, and lay heat-tolerant sod cut fresh from the farm &mdash; plus a watering
+            schedule that gets roots down before the first heat wave.
+          </p>
+          <ul class="mt-5 space-y-2 text-sm text-slate-600">
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Old turf removal &amp; soil prep</li>
+            <li class="flex gap-2"><span class="text-brand-500">&bull;</span> Irrigation adjusted for new sod</li>
+          </ul>
+          <a href="#contact" class="mt-6 text-sm font-bold text-brand-700 hover:text-brand-800">Get pricing &rarr;</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SERVICE AREA ===================== -->
+<section id="areas" class="bg-brand-50/70 py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid items-center gap-14 lg:grid-cols-2">
+
+      <div>
+        <p class="text-sm font-bold uppercase tracking-[.18em] text-rock-600">Service area</p>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-brand-900">
+          Proudly serving St. George, Utah
+        </h2>
+        <p class="mt-5 text-lg text-slate-600">
+          We are based off Bluff Street and run tight weekly routes across Washington County &mdash;
+          which means shorter drive times, on-time crews, and someone who can swing by when a
+          valve fails on a Saturday.
+        </p>
+
+        <ul class="mt-8 grid grid-cols-2 gap-3 text-sm font-semibold text-brand-900">
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">St. George</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Washington City</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Santa Clara</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Ivins</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Hurricane</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Bloomington</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Washington Fields</li>
+          <li class="rounded-xl bg-white px-4 py-3 ring-1 ring-brand-100">Coral Canyon</li>
+        </ul>
+
+        <p class="mt-6 text-sm text-slate-500">
+          Outside these areas? Call us anyway &mdash; we add stops when the route makes sense.
+        </p>
+
+        <a href="tel:+14356191210"
+           class="mt-8 inline-flex items-center gap-2 rounded-full bg-brand-600 px-7 py-3.5 text-base font-bold text-white shadow-soft transition hover:bg-brand-700">
+          Check my address &mdash; (435) 619-1210
+        </a>
+      </div>
+
+      <div class="relative mb-16 lg:mb-0">
+        <img src="https://picsum.photos/seed/stgeorgeredrock/1000/900" alt="Red rock bluffs above a St. George neighborhood" loading="lazy"
+             class="h-[420px] w-full rounded-3xl object-cover shadow-soft ring-1 ring-brand-100" />
+        <div class="absolute -bottom-10 left-6 right-6 sm:right-auto sm:w-72 rounded-2xl bg-white p-5 shadow-soft ring-1 ring-slate-200">
+          <p class="text-xs font-bold uppercase tracking-wider text-rock-600">Route days</p>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">
+            <span class="font-semibold text-brand-900">Mon&ndash;Tue:</span> Bloomington &amp; Santa Clara<br />
+            <span class="font-semibold text-brand-900">Wed&ndash;Thu:</span> Downtown &amp; Washington Fields<br />
+            <span class="font-semibold text-brand-900">Fri:</span> Hurricane &amp; Coral Canyon
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== WORK / GALLERY ===================== -->
+<section id="work" class="py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div class="max-w-xl">
+        <p class="text-sm font-bold uppercase tracking-[.18em] text-rock-600">Recent work</p>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-brand-900">Yards around town</h2>
+      </div>
+      <a href="#contact" class="text-sm font-bold text-brand-700 hover:text-brand-800">Start your project &rarr;</a>
+    </div>
+
+    <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <img src="https://picsum.photos/seed/yard1/900/700" alt="Manicured front lawn with a rock border" loading="lazy" class="h-64 w-full rounded-2xl object-cover ring-1 ring-slate-200 lg:col-span-2 lg:h-80" />
+      <img src="https://picsum.photos/seed/yard2/700/900" alt="Backyard with new sod and shade trees" loading="lazy" class="h-64 w-full rounded-2xl object-cover ring-1 ring-slate-200 lg:h-80" />
+      <img src="https://picsum.photos/seed/yard3/700/700" alt="Xeriscaped side yard with gravel and agave" loading="lazy" class="h-64 w-full rounded-2xl object-cover ring-1 ring-slate-200" />
+      <img src="https://picsum.photos/seed/yard4/700/700" alt="Drip irrigation line installed in a planter bed" loading="lazy" class="h-64 w-full rounded-2xl object-cover ring-1 ring-slate-200" />
+      <img src="https://picsum.photos/seed/yard5/700/700" alt="Trimmed palms above clean gravel beds" loading="lazy" class="h-64 w-full rounded-2xl object-cover ring-1 ring-slate-200" />
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIAL BAND ===================== -->
+<section class="band-img py-20 sm:py-24">
+  <div class="mx-auto max-w-3xl px-4 text-center">
+    <p class="text-2xl tracking-[.3em] text-rock-300">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
+    <blockquote class="mt-6 text-xl sm:text-2xl font-medium leading-relaxed text-white">
+      &ldquo;They found a broken valve two other companies missed, fixed it that afternoon, and my
+      water bill dropped by a third. They have mowed for us every Tuesday since.&rdquo;
+    </blockquote>
+    <p class="mt-6 text-sm font-semibold uppercase tracking-[.18em] text-brand-100">
+      Dana R. &mdash; Bloomington Hills
+    </p>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section id="contact" class="py-20 sm:py-28">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid gap-14 lg:grid-cols-5">
+
+      <div class="lg:col-span-2">
+        <p class="text-sm font-bold uppercase tracking-[.18em] text-rock-600">Get in touch</p>
+        <h2 class="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-brand-900">Request a free estimate</h2>
+        <p class="mt-5 text-lg text-slate-600">
+          Tell us about the property and we will get back to you within one business day &mdash;
+          usually the same afternoon.
+        </p>
+
+        <div class="mt-10 space-y-5 text-slate-700">
+          <a href="tel:+14356191210" class="group flex items-start gap-4">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-brand-700">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/></svg>
+            </span>
+            <span>
+              <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400">Phone</span>
+              <span class="block text-lg font-bold text-brand-900 group-hover:text-brand-700">(435) 619-1210</span>
+            </span>
+          </a>
+          <a href="mailto:hello@redrocklawn.example" class="group flex items-start gap-4">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-brand-700">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+            </span>
+            <span>
+              <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400">Email</span>
+              <span class="block text-lg font-bold text-brand-900 group-hover:text-brand-700">hello@redrocklawn.example</span>
+            </span>
+          </a>
+          <div class="flex items-start gap-4">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-brand-700">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            </span>
+            <span>
+              <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400">Hours</span>
+              <span class="block text-lg font-bold text-brand-900">Mon&ndash;Sat, 7:00am &ndash; 6:00pm</span>
+            </span>
+          </div>
+          <div class="flex items-start gap-4">
+            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-100 text-brand-700">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <span>
+              <span class="block text-sm font-semibold uppercase tracking-wider text-slate-400">Based in</span>
+              <span class="block text-lg font-bold text-brand-900">St. George, Utah 84770</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3">
+        <!-- To collect real submissions, point action/method at your form
+             handler (Formspree, Netlify Forms, Basin, your own endpoint) and
+             delete the demo submit handler in the script at the bottom. -->
+        <form id="quoteForm" novalidate
+              class="rounded-3xl bg-white p-6 sm:p-9 shadow-soft ring-1 ring-slate-200">
+          <div class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <label for="name" class="block text-sm font-semibold text-brand-900">Name <span class="text-rock-500">*</span></label>
+              <input id="name" name="name" type="text" required autocomplete="name" placeholder="Jane Smith"
+                     class="mt-2 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <div>
+              <label for="phone" class="block text-sm font-semibold text-brand-900">Phone <span class="text-rock-500">*</span></label>
+              <input id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="(435) 555-0199"
+                     class="mt-2 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-semibold text-brand-900">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="jane@example.com"
+                     class="mt-2 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <div>
+              <label for="service" class="block text-sm font-semibold text-brand-900">Service needed</label>
+              <select id="service" name="service"
+                      class="mt-2 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200 outline-none transition focus:bg-white focus:ring-2 focus:ring-brand-500">
+                <option>Weekly lawn care</option>
+                <option>Sprinkler repair</option>
+                <option>Desert cleanup</option>
+                <option>Sod installation</option>
+                <option>Something else</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2">
+              <label for="address" class="block text-sm font-semibold text-brand-900">Property address or neighborhood</label>
+              <input id="address" name="address" type="text" placeholder="Bloomington Hills, St. George"
+                     class="mt-2 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500" />
+            </div>
+            <div class="sm:col-span-2">
+              <label for="message" class="block text-sm font-semibold text-brand-900">How can we help?</label>
+              <textarea id="message" name="message" rows="4" placeholder="About 4,000 sq ft of lawn, two zones not spraying, and the gravel beds need a weed cleanup."
+                        class="mt-2 w-full rounded-xl border-0 bg-slate-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200 outline-none transition placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500"></textarea>
+            </div>
+          </div>
+
+          <p id="formError" class="mt-4 hidden rounded-xl bg-rock-100 px-4 py-3 text-sm font-semibold text-rock-700"></p>
+
+          <button id="submitBtn" type="submit"
+                  class="mt-6 w-full rounded-full bg-brand-600 px-8 py-4 text-base font-bold text-white shadow-soft transition hover:bg-brand-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300">
+            Send my request
+          </button>
+          <p id="formNote" class="mt-4 text-center text-xs text-slate-500">
+            Prefer to talk? Call <a href="tel:+14356191210" class="font-semibold text-brand-700 hover:underline">(435) 619-1210</a>. We never share your information.
+          </p>
+
+          <div id="formSuccess" class="mt-6 hidden rounded-2xl bg-brand-50 p-6 text-center ring-1 ring-brand-200">
+            <p class="text-lg font-bold text-brand-900">Thanks &mdash; your request is in.</p>
+            <p class="mt-1 text-sm text-slate-600">We will reach out within one business day.</p>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="bg-brand-900 text-brand-100">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 pb-28 sm:pb-14">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="lg:col-span-2">
+        <p class="text-xl font-extrabold text-white">Miguel&rsquo;s Landscaping and Lawn Care</p>
+        <p class="mt-3 max-w-sm text-sm leading-relaxed text-brand-100/75">
+          Weekly lawn care, sprinkler repair, desert cleanups, and sod installation for
+          St. George and Washington County, Utah. Licensed and insured.
+        </p>
+      </div>
+      <div>
+        <p class="text-sm font-bold uppercase tracking-wider text-white">Services</p>
+        <ul class="mt-4 space-y-2 text-sm text-brand-100/75">
+          <li><a href="#services" class="hover:text-white">Weekly lawn care</a></li>
+          <li><a href="#services" class="hover:text-white">Sprinkler repair</a></li>
+          <li><a href="#services" class="hover:text-white">Desert cleanups</a></li>
+          <li><a href="#services" class="hover:text-white">Sod installation</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-sm font-bold uppercase tracking-wider text-white">Contact</p>
+        <ul class="mt-4 space-y-2 text-sm text-brand-100/75">
+          <li><a href="tel:+14356191210" class="font-bold text-white hover:underline">(435) 619-1210</a></li>
+          <li><a href="mailto:hello@redrocklawn.example" class="hover:text-white">hello@redrocklawn.example</a></li>
+          <li>St. George, UT 84770</li>
+          <li>Mon&ndash;Sat, 7am&ndash;6pm</li>
+        </ul>
+      </div>
+    </div>
+    <div class="mt-12 border-t border-white/10 pt-6 text-xs text-brand-100/60">
+      &copy; <span id="year">2026</span> Miguel&rsquo;s Landscaping and Lawn Care. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<!-- Sticky mobile call bar -->
+<a href="tel:+14356191210"
+   class="fixed inset-x-4 bottom-4 z-40 flex items-center justify-center gap-2 rounded-full bg-rock-500 px-6 py-4 text-base font-bold text-white shadow-soft sm:hidden">
+  Call (435) 619-1210
+</a>
+
+<script>
+  // --- Mobile nav ---------------------------------------------------------
+  var toggle = document.getElementById('navToggle');
+  var nav = document.getElementById('mobileNav');
+  toggle.addEventListener('click', function () {
+    var open = !nav.classList.toggle('hidden');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  nav.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') {
+      nav.classList.add('hidden');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // --- Demo submit handler ------------------------------------------------
+  // Replace this with a real form action (see the comment above the form).
+  var form = document.getElementById('quoteForm');
+  var err = document.getElementById('formError');
+  var ok = document.getElementById('formSuccess');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = form.elements['name'].value.trim();
+    var phone = form.elements['phone'].value.trim();
+    if (!name || !phone) {
+      err.textContent = 'Please add your name and a phone number so we can reach you.';
+      err.classList.remove('hidden');
+      return;
+    }
+    err.classList.add('hidden');
+    document.getElementById('submitBtn').classList.add('hidden');
+    document.getElementById('formNote').classList.add('hidden');
+    ok.classList.remove('hidden');
+    ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+</body>
+</html>
