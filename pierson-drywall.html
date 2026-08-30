@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Pierson Drywall Inc. | Drywall Installation &amp; Repair in St. George, Utah</title>
+<meta name="description" content="Drywall installation, repair, taping, texture, patching, and finishing for homes and projects in St. George and Southern Utah. Request a quote - (435) 574-3307." />
+<meta name="theme-color" content="#F7F6F3" />
+
+<!-- =====================================================================
+     PIERSON DRYWALL INC. - single-page site (SALES DEMO)
+     ---------------------------------------------------------------------
+     One file. No build step, no backend. Open it directly, email it,
+     or drop it on any host.
+
+     >>> CONFIRM WITH THE OWNER BEFORE THIS GOES LIVE:
+         1. PHOTOS      - every <img> is marked "REPLACE:". All are stock
+                          placeholders and are NOT presented as Pierson
+                          Drywall projects. Swap in real job photos
+                          (same folder = src="photos/name.jpg").
+         2. BEFORE/AFTER - search "BEFORE / AFTER". Both panes use the same
+                          stock photo today; the left one carries a filter
+                          that fakes the "before". Drop in a real pair and
+                          delete class="is-demo-before".
+         3. SERVICE AREA - search "SERVICE AREA - CONFIRM". The town list is
+                          a guess based on the St. George area, not a
+                          confirmed coverage map.
+         4. ABOUT       - search "ABOUT - CONFIRM". Deliberately generic:
+                          no owner name, founding date, or history.
+         5. SOCIAL      - footer icons link to "#". Search "SOCIAL LINKS".
+
+     NOT CLAIMED ANYWHERE (by design): reviews, testimonials, awards,
+     certifications, licenses, years in business, guarantees, pricing,
+     customer counts, or named past projects.
+
+     QUICK EDITS:
+       - Phone number: search 574-3307 (appears as text and in tel: links)
+       - Colors: the tailwind.config block below (paper / charcoal / blueprint)
+       - The quote form is a demo - it shows a thank-you and sends nothing.
+     ===================================================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // If a photo fails to load, drop in a flat concrete panel rather than a
+  // broken-image icon, so every placeholder degrades to something presentable.
+  function imgFallback(el) {
+    el.onerror = null;
+    el.classList.add('is-fallback');
+    el.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23e6e4df'/%3E%3Cstop offset='.5' stop-color='%23d5d2cc'/%3E%3Cstop offset='1' stop-color='%23e9e7e2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23000000' stroke-opacity='.045'%3E%3Cpath d='M-100 700 L700 -100'/%3E%3Cpath d='M100 900 L900 100'/%3E%3Cpath d='M300 900 L1100 100'/%3E%3C/g%3E%3Ctext x='600' y='395' text-anchor='middle' font-family='Inter,Helvetica,sans-serif' font-size='24' letter-spacing='7' fill='%2335576e' fill-opacity='.85'%3EPHOTO PLACEHOLDER%3C/text%3E%3Ctext x='600' y='432' text-anchor='middle' font-family='Inter,Helvetica,sans-serif' font-size='16' letter-spacing='2' fill='%232a2e33' fill-opacity='.45'%3Eproject photo goes here%3C/text%3E%3C/svg%3E";
+  }
+
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Archivo', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+        },
+        colors: {
+          paper:     { DEFAULT: '#F7F6F3', warm: '#EFEDE8', deep: '#E7E4DE' },
+          concrete:  { DEFAULT: '#DCDAD5', line: '#E3E1DB', dark: '#C6C3BC' },
+          charcoal:  { DEFAULT: '#2A2E33', deep: '#1B1E22', soft: '#3D434A' },
+          stone:     { DEFAULT: '#6B7176', light: '#8C9298' },
+          blueprint: { DEFAULT: '#35576E', dark: '#274557', light: '#5B8199', pale: '#E8EDF1' }
+        },
+        borderRadius: { xs: '2px', sm2: '4px' },
+        boxShadow: {
+          card: '0 1px 2px rgba(27,30,34,.05)',
+          lift: '0 20px 44px -22px rgba(27,30,34,.4)',
+          deep: '0 28px 60px -30px rgba(27,30,34,.55)'
+        },
+        maxWidth: { site: '1200px' }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* On <html> only: it propagates to the viewport and clips sideways
+     overflow. Putting it on <body> too would make body its own scroll
+     box, which is what breaks position:sticky on iOS. */
+  html { overflow-x: hidden; }
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  ::selection { background: #35576E; color: #fff; }
+
+  .eyebrow { letter-spacing: .22em; }
+
+  /* Scroll reveal - one quiet move, nothing bouncy */
+  .reveal { opacity: 0; transform: translateY(18px); }
+  .reveal.is-visible {
+    opacity: 1; transform: none;
+    transition: opacity .7s cubic-bezier(.22,.61,.36,1), transform .7s cubic-bezier(.22,.61,.36,1);
+  }
+
+  /* Slow photo push on hover */
+  .photo img { transition: transform 1.2s cubic-bezier(.22,.61,.36,1); }
+  .photo:hover img { transform: scale(1.045); }
+
+  /* Accent rule that draws itself across a card on hover */
+  .card { position: relative; }
+  .card::after {
+    content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+    background: #35576E; transition: width .45s cubic-bezier(.22,.61,.36,1);
+  }
+  .card:hover::after { width: 100%; }
+
+  /* Faint blueprint grid, used behind the service-area panel */
+  .grid-paper {
+    background-image:
+      linear-gradient(rgba(53,87,110,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(53,87,110,.07) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+
+  /* ---- BEFORE / AFTER SLIDER ---- */
+  .ba { position: relative; overflow: hidden; background: #DCDAD5; }
+  .ba img { position: absolute; inset: 0; height: 100%; width: 100%; object-fit: cover; }
+  .ba .ba-before { clip-path: inset(0 calc(100% - var(--pos, 50%)) 0 0); }
+  /* DEMO ONLY: fakes an unfinished "before" from the same photo.
+     Delete this class once a real before photo is dropped in. */
+  .is-demo-before { filter: saturate(.4) brightness(.78) contrast(.9) blur(.5px); }
+  .ba-line {
+    position: absolute; top: 0; bottom: 0; left: var(--pos, 50%);
+    width: 2px; background: #fff; transform: translateX(-1px); pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(27,30,34,.18);
+  }
+  .ba-grip {
+    position: absolute; top: 50%; left: var(--pos, 50%);
+    transform: translate(-50%, -50%); pointer-events: none;
+    height: 52px; width: 52px; display: grid; place-items: center;
+    border-radius: 9999px; background: #fff; color: #2A2E33;
+    box-shadow: 0 6px 18px -6px rgba(27,30,34,.5);
+  }
+  .ba-range {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; opacity: 0; cursor: ew-resize; -webkit-appearance: none; appearance: none;
+    background: transparent; touch-action: pan-y;
+  }
+  .ba-range::-webkit-slider-thumb { -webkit-appearance: none; width: 56px; height: 400px; }
+  .ba-range::-moz-range-thumb { border: 0; width: 56px; height: 400px; }
+
+  /* Form fields */
+  .field {
+    box-sizing: border-box; width: 100%; background: #fff;
+    border: 1px solid #DCDAD5; border-radius: 2px; padding: 13px 15px;
+    font-size: 16px; color: #2A2E33; outline: none;
+    transition: border-color .22s, box-shadow .22s;
+  }
+  .field::placeholder { color: #9AA0A5; }
+  .field:focus { border-color: #35576E; box-shadow: 0 0 0 3px rgba(53,87,110,.12); }
+  select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7176' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 42px; }
+
+  /* Radio pills for the preferred contact method */
+  .pill input { position: absolute; opacity: 0; pointer-events: none; }
+  .pill span {
+    display: block; text-align: center; cursor: pointer;
+    border: 1px solid #DCDAD5; background: #fff; border-radius: 2px;
+    padding: 12px 10px; font-size: 14.5px; font-weight: 500; color: #3D434A;
+    transition: border-color .2s, background-color .2s, color .2s;
+  }
+  .pill input:checked + span { border-color: #35576E; background: #E8EDF1; color: #274557; }
+  .pill input:focus-visible + span { box-shadow: 0 0 0 3px rgba(53,87,110,.22); }
+
+  /* Mobile sticky bar sits above the home indicator on iPhone */
+  .safe-b { padding-bottom: env(safe-area-inset-bottom); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .photo img, .photo:hover img { transition: none; transform: none; }
+  }
+</style>
+</head>
+
+<body class="bg-paper font-sans text-charcoal pb-[76px] md:pb-0">
+
+<!-- ============================== NAV ============================== -->
+<header id="nav" class="sticky top-0 z-50 border-b border-concrete-line bg-paper/95 backdrop-blur transition-shadow">
+  <div class="mx-auto flex h-[74px] max-w-site items-center justify-between gap-6 px-5 sm:px-8">
+
+    <a href="#top" class="flex items-center gap-3">
+      <span class="grid h-10 w-10 place-items-center rounded-xs bg-charcoal text-paper">
+        <!-- mark: stacked drywall panels -->
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="4.5" width="18" height="6.5" rx="1"/><rect x="3" y="13" width="18" height="6.5" rx="1"/>
+          <path d="M9 4.5V11M15 13v6.5"/>
+        </svg>
+      </span>
+      <span class="leading-none">
+        <span class="block font-display text-[17px] font-semibold tracking-tight">Pierson Drywall Inc.</span>
+        <span class="eyebrow mt-[5px] block text-[9px] font-semibold uppercase text-stone">St. George, Utah</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-9 text-[15px] text-charcoal-soft lg:flex">
+      <a href="#services" class="transition hover:text-blueprint">Services</a>
+      <a href="#work" class="transition hover:text-blueprint">Our Work</a>
+      <a href="#about" class="transition hover:text-blueprint">About</a>
+      <a href="#contact" class="transition hover:text-blueprint">Contact</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="tel:+14355743307" class="hidden text-[15px] font-medium text-charcoal transition hover:text-blueprint xl:block">(435)&nbsp;574-3307</a>
+      <a href="#contact" class="hidden rounded-xs bg-blueprint px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-blueprint-dark sm:inline-block">Request a Quote</a>
+      <button id="navToggle" type="button" aria-expanded="false" aria-controls="mobileNav"
+              class="grid h-11 w-11 place-items-center rounded-xs border border-concrete text-charcoal lg:hidden">
+        <span class="sr-only">Menu</span>
+        <svg id="iconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg id="iconClose" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobileNav" class="hidden border-t border-concrete-line bg-paper lg:hidden">
+    <nav class="mx-auto grid max-w-site gap-1 px-5 py-4 text-[16px]">
+      <a href="#services" class="rounded-xs px-3 py-3.5 transition hover:bg-paper-warm">Services</a>
+      <a href="#work" class="rounded-xs px-3 py-3.5 transition hover:bg-paper-warm">Our Work</a>
+      <a href="#about" class="rounded-xs px-3 py-3.5 transition hover:bg-paper-warm">About</a>
+      <a href="#contact" class="rounded-xs px-3 py-3.5 transition hover:bg-paper-warm">Contact</a>
+      <a href="#contact" class="mt-2 rounded-xs bg-blueprint px-3 py-3.5 text-center font-semibold text-white">Request a Quote</a>
+      <a href="tel:+14355743307" class="rounded-xs border border-concrete px-3 py-3.5 text-center font-semibold text-charcoal">Call (435) 574-3307</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================== HERO ============================== -->
+<section id="top" class="border-b border-concrete-line bg-paper">
+  <div class="mx-auto grid max-w-site items-stretch px-5 sm:px-8 lg:grid-cols-12 lg:gap-14">
+
+    <div class="flex flex-col justify-center py-14 sm:py-20 lg:col-span-6 lg:py-28">
+      <p class="eyebrow flex items-center gap-3 text-[11px] font-semibold uppercase text-stone">
+        <span class="h-[6px] w-[6px] bg-blueprint"></span> Drywall Contractor &mdash; Southern Utah
+      </p>
+
+      <h1 class="mt-6 font-display text-[2.5rem] font-semibold leading-[1.04] tracking-[-.025em] sm:text-[3.3rem] lg:text-[3.8rem]">
+        Quality Drywall Work, Built to Last.
+      </h1>
+
+      <p class="mt-6 max-w-md text-[17px] leading-relaxed text-stone">
+        Professional drywall installation, repair, and finishing for homes and
+        projects throughout Southern Utah.
+      </p>
+
+      <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+        <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xs bg-blueprint px-7 py-4 text-[15px] font-semibold text-white shadow-card transition hover:bg-blueprint-dark">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a href="tel:+14355743307" class="inline-flex items-center justify-center gap-2.5 rounded-xs border border-charcoal/20 px-7 py-4 text-[15px] font-semibold text-charcoal transition hover:border-charcoal hover:bg-charcoal hover:text-paper">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+          </svg>
+          Call (435) 574-3307
+        </a>
+      </div>
+
+      <p class="mt-7 text-[14px] text-stone">
+        Installation &middot; Repair &middot; Taping &amp; mudding &middot; Texture &middot; Patching &middot; Finishing
+      </p>
+    </div>
+
+    <div class="relative pb-14 lg:col-span-6 lg:pb-0">
+      <div class="photo relative h-[320px] overflow-hidden rounded-xs bg-concrete sm:h-[460px] lg:h-full lg:min-h-[580px]">
+        <!-- REPLACE: hero photo - drywall installation or a clean finished interior -->
+        <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1600&q=80"
+             onerror="imgFallback(this)" alt="Drywall installation in progress on an interior wall"
+             class="h-full w-full object-cover" />
+      </div>
+      <div class="absolute bottom-0 left-0 hidden bg-charcoal px-6 py-5 lg:block">
+        <p class="eyebrow text-[10px] font-semibold uppercase text-paper/60">Call today</p>
+        <a href="tel:+14355743307" class="mt-1 block font-display text-2xl font-semibold text-paper transition hover:text-blueprint-light">(435) 574-3307</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================== TRUST / VALUE ============================== -->
+<section class="border-b border-concrete-line bg-paper-warm py-16 sm:py-20">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid gap-px overflow-hidden bg-concrete-line sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="reveal bg-paper-warm p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-blueprint-pale text-blueprint">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.4 12.2 2.4 2.4 4.8-4.8"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold">Quality Workmanship</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-stone">Careful work with attention to the finished result.</p>
+      </div>
+
+      <div class="reveal bg-paper-warm p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-blueprint-pale text-blueprint">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="9" width="19" height="6" rx="1"/><circle cx="12" cy="12" r="1.7"/><path d="M7 9v6M17 9v6"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold">Clean Finishes</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-stone">Walls and ceilings prepared for the next stage of your project.</p>
+      </div>
+
+      <div class="reveal bg-paper-warm p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-blueprint-pale text-blueprint">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 12.2a7.5 7.5 0 0 1-10.9 6.7L4.5 20.4l1.4-5A7.5 7.5 0 1 1 20.5 12.2Z"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold">Reliable Service</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-stone">Clear communication and straightforward service.</p>
+      </div>
+
+      <div class="reveal bg-paper-warm p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-blueprint-pale text-blueprint">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold">Southern Utah Service</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-stone">Serving homeowners and projects in the St. George area.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SERVICES ============================== -->
+<!-- ############################################################
+     SERVICES - each card is a self-contained <article>. Copy one to
+     add a service, delete one to remove it; the grid reflows on its
+     own. No pricing anywhere by design.
+     ############################################################ -->
+<section id="services" class="scroll-mt-24 border-b border-concrete-line bg-paper py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint">What we do</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] sm:text-[2.7rem]">
+        Drywall services, start to finish
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-stone">
+        From hanging board on new construction to patching a hole in an
+        existing wall &mdash; and everything in between.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- SERVICE 1 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-concrete-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-paper-warm text-blueprint">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="6.5" rx="1"/><rect x="3" y="13" width="18" height="6.5" rx="1"/><path d="M9 4.5V11M15 13v6.5"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold">Drywall Installation</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-stone">
+          Professional drywall installation for new construction and remodeling projects.
+        </p>
+      </article>
+
+      <!-- SERVICE 2 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-concrete-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-paper-warm text-blueprint">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M12 7.9 16.1 12 12 16.1 7.9 12z"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold">Drywall Repair</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-stone">
+          Repair damaged drywall and restore the appearance of walls and ceilings.
+        </p>
+      </article>
+
+      <!-- SERVICE 3 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-concrete-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-paper-warm text-blueprint">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.2" y="4.6" width="17.6" height="14.8" rx="1"/><path d="M12 4.6v14.8"/><rect x="8.6" y="9.6" width="6.8" height="4.8" rx=".6"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold">Taping &amp; Mudding</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-stone">
+          Smooth seams and joints prepared for a clean finished surface.
+        </p>
+      </article>
+
+      <!-- SERVICE 4 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-concrete-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-paper-warm text-blueprint">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1"/><circle cx="8.2" cy="9.2" r=".95" fill="currentColor" stroke="none"/><circle cx="13" cy="11.8" r=".95" fill="currentColor" stroke="none"/><circle cx="16.8" cy="8.6" r=".95" fill="currentColor" stroke="none"/><circle cx="9.6" cy="15.2" r=".95" fill="currentColor" stroke="none"/><circle cx="15.4" cy="15.6" r=".95" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold">Texture</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-stone">
+          Wall and ceiling texture services.
+        </p>
+      </article>
+
+      <!-- SERVICE 5 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-concrete-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-paper-warm text-blueprint">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="m9.2 7.6 2.6 3.2-1.7 2.1 3.1 3.4"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold">Patching</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-stone">
+          Repair holes, cracks, and other drywall damage.
+        </p>
+      </article>
+
+      <!-- SERVICE 6 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-concrete-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-paper-warm text-blueprint">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.6" y="4.4" width="11" height="5.2" rx="1"/><path d="M14.6 7h2.9a1.6 1.6 0 0 1 1.6 1.6v2.2a1.6 1.6 0 0 1-1.6 1.6H12v2.2"/><rect x="10.4" y="14.6" width="3.2" height="5.4" rx="1"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold">Finishing</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-stone">
+          Prepare drywall surfaces for painting and the final stages of a project.
+        </p>
+      </article>
+
+    </div>
+
+    <!-- CTA beneath the services -->
+    <div class="reveal mt-12 flex flex-col items-start justify-between gap-5 border-t border-concrete-line pt-10 sm:flex-row sm:items-center">
+      <div>
+        <p class="font-display text-[1.5rem] font-semibold">Need a Quote?</p>
+        <p class="mt-1.5 text-[15.5px] text-stone">Tell us about the project and we&rsquo;ll take it from there.</p>
+      </div>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <a href="#contact" class="inline-flex items-center justify-center rounded-xs bg-charcoal px-7 py-3.5 text-[15px] font-semibold text-paper transition hover:bg-blueprint">Request a Quote</a>
+        <a href="tel:+14355743307" class="inline-flex items-center justify-center rounded-xs border border-concrete-dark px-7 py-3.5 text-[15px] font-semibold text-charcoal transition hover:border-charcoal">(435)&nbsp;574-3307</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== OUR WORK ============================== -->
+<!-- ############################################################
+     GALLERY - all stock placeholders, labelled as such on every tile
+     so nothing here reads as a Pierson Drywall project. Swap each src
+     for a real photo and change the caption; delete the "Example"
+     badge once the photos are genuine.
+     ############################################################ -->
+<section id="work" class="scroll-mt-24 border-b border-concrete-line bg-paper-warm py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint">Our work</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] sm:text-[2.7rem]">
+        Work You Can See.
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-stone">
+        See the difference that careful drywall work makes.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-concrete-line bg-concrete sm:col-span-2">
+        <!-- REPLACE: drywall installation -->
+        <img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1400&q=80"
+             onerror="imgFallback(this)" alt="Drywall panels being installed on a framed wall"
+             class="h-[260px] w-full object-cover sm:h-[350px]" loading="lazy" />
+        <span class="eyebrow absolute left-4 top-4 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 to-transparent p-6">
+          <p class="font-display text-[1.1rem] font-semibold text-paper">Drywall installation</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-concrete-line bg-concrete">
+        <!-- REPLACE: taped drywall / seams -->
+        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Taped and mudded drywall seams"
+             class="h-[260px] w-full object-cover sm:h-[350px]" loading="lazy" />
+        <span class="eyebrow absolute left-4 top-4 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 to-transparent p-6">
+          <p class="font-display text-[1.1rem] font-semibold text-paper">Taped seams</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-concrete-line bg-concrete">
+        <!-- REPLACE: interior construction -->
+        <img src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Interior under construction"
+             class="h-[260px] w-full object-cover sm:h-[300px]" loading="lazy" />
+        <span class="eyebrow absolute left-4 top-4 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 to-transparent p-6">
+          <p class="font-display text-[1.1rem] font-semibold text-paper">Interior construction</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-concrete-line bg-concrete">
+        <!-- REPLACE: drywall repair / patch -->
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Wall repair in progress"
+             class="h-[260px] w-full object-cover sm:h-[300px]" loading="lazy" />
+        <span class="eyebrow absolute left-4 top-4 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 to-transparent p-6">
+          <p class="font-display text-[1.1rem] font-semibold text-paper">Drywall repairs</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-concrete-line bg-concrete">
+        <!-- REPLACE: finished walls / clean finished room -->
+        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Clean finished interior room"
+             class="h-[260px] w-full object-cover sm:h-[300px]" loading="lazy" />
+        <span class="eyebrow absolute left-4 top-4 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 to-transparent p-6">
+          <p class="font-display text-[1.1rem] font-semibold text-paper">Finished walls</p>
+        </figcaption>
+      </figure>
+
+    </div>
+
+    <p class="reveal mt-6 text-[13px] text-stone-light">
+      Stock photography, shown as examples of the work described. To be replaced with
+      Pierson Drywall Inc.&rsquo;s own project photos.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== BEFORE / AFTER ============================== -->
+<!-- ############################################################
+     BEFORE / AFTER
+     DEMO NOTE: both panes currently use the SAME stock photo. The left
+     one carries class="is-demo-before", a CSS filter that fakes an
+     unfinished "before". To use real photos:
+       1. put the real before photo in the first <img> src
+       2. put the real after photo in the second <img> src
+       3. delete class="is-demo-before"
+     ############################################################ -->
+<section class="border-b border-concrete-line bg-paper py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint">Before &amp; after</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] sm:text-[2.7rem]">
+        From rough to ready
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-stone">
+        Drag the slider to see what repair and finishing work does to a room.
+      </p>
+    </div>
+
+    <figure class="reveal mt-12">
+      <div class="ba aspect-[16/11] w-full overflow-hidden rounded-xs border border-concrete-line shadow-card sm:aspect-[16/9]" style="--pos:50%">
+        <!-- REPLACE: AFTER photo (the finished room) -->
+        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=80"
+             onerror="imgFallback(this)" alt="Room after drywall finishing" />
+        <!-- REPLACE: BEFORE photo (the unfinished room) - then delete is-demo-before -->
+        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=80"
+             onerror="imgFallback(this)" alt="Room before drywall finishing"
+             class="ba-before is-demo-before" />
+
+        <span class="ba-line"></span>
+        <span class="ba-grip">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6-5 6 5 6M15 6l5 6-5 6"/></svg>
+        </span>
+
+        <span class="eyebrow pointer-events-none absolute left-4 top-4 rounded-xs bg-charcoal-deep/80 px-3 py-1.5 text-[10px] font-semibold uppercase text-paper backdrop-blur-sm">Before</span>
+        <span class="eyebrow pointer-events-none absolute right-4 top-4 rounded-xs bg-blueprint px-3 py-1.5 text-[10px] font-semibold uppercase text-white">After</span>
+
+        <input id="baRange" class="ba-range" type="range" min="0" max="100" value="50" step="0.1"
+               aria-label="Drag to compare before and after" />
+      </div>
+      <figcaption class="mt-3 text-[13px] text-stone-light">
+        Demo images &mdash; to be replaced with a real before &amp; after pair.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================== PROCESS ============================== -->
+<section class="border-b border-concrete-line bg-charcoal py-20 text-paper sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint-light">How it works</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] text-white sm:text-[2.7rem]">
+        A straightforward process
+      </h2>
+    </div>
+
+    <div class="mt-14 grid gap-px overflow-hidden border border-white/10 bg-white/10 md:grid-cols-3">
+
+      <div class="reveal bg-charcoal p-8 sm:p-10">
+        <span class="font-display text-[2.4rem] font-semibold leading-none text-blueprint-light/45">01</span>
+        <h3 class="mt-5 font-display text-[1.25rem] font-semibold text-white">Tell Us About Your Project</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-paper/65">Contact Pierson Drywall and describe what you need.</p>
+      </div>
+
+      <div class="reveal bg-charcoal p-8 sm:p-10">
+        <span class="font-display text-[2.4rem] font-semibold leading-none text-blueprint-light/45">02</span>
+        <h3 class="mt-5 font-display text-[1.25rem] font-semibold text-white">Get a Quote</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-paper/65">Discuss the project and determine the appropriate scope of work.</p>
+      </div>
+
+      <div class="reveal bg-charcoal p-8 sm:p-10">
+        <span class="font-display text-[2.4rem] font-semibold leading-none text-blueprint-light/45">03</span>
+        <h3 class="mt-5 font-display text-[1.25rem] font-semibold text-white">Get the Job Done</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-paper/65">Move forward with the drywall work.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ABOUT ============================== -->
+<!-- ############################################################
+     ABOUT - CONFIRM
+     Deliberately generic. No owner name, founding date, crew size, or
+     company history is stated, because none of it has been confirmed.
+     Replace this copy once the owner provides the real story.
+     ############################################################ -->
+<section id="about" class="scroll-mt-24 border-b border-concrete-line bg-paper py-20 sm:py-28">
+  <div class="mx-auto grid max-w-site items-center gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-16">
+
+    <div class="reveal lg:col-span-5">
+      <div class="photo overflow-hidden rounded-xs border border-concrete-line bg-concrete">
+        <!-- REPLACE: about photo - drywall finishing work or a tidy job site -->
+        <img src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Drywall finishing work in progress"
+             class="h-[380px] w-full object-cover sm:h-[480px]" loading="lazy" />
+      </div>
+    </div>
+
+    <div class="reveal lg:col-span-7">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint">About</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] sm:text-[2.7rem]">
+        A drywall contractor serving Southern Utah
+      </h2>
+      <p class="mt-6 text-[17px] leading-relaxed text-stone">
+        Pierson Drywall Inc. provides drywall installation, repair, and finishing
+        for homes and projects in the St.&nbsp;George area. The work covers every
+        stage &mdash; hanging board, taping and mudding, texture, patching, and
+        preparing surfaces for paint.
+      </p>
+      <p class="mt-4 text-[17px] leading-relaxed text-stone">
+        The focus is on quality workmanship and attention to detail, so the
+        finished walls and ceilings are ready for whatever comes next.
+      </p>
+
+      <div class="mt-10 grid gap-x-10 gap-y-7 sm:grid-cols-2">
+        <div class="border-t border-concrete-line pt-5">
+          <h3 class="font-display text-[1.1rem] font-semibold">Quality Workmanship</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-stone">Work done properly, with care taken on the details that show.</p>
+        </div>
+        <div class="border-t border-concrete-line pt-5">
+          <h3 class="font-display text-[1.1rem] font-semibold">Attention to Detail</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-stone">Smooth seams, clean corners, and surfaces that are ready for paint.</p>
+        </div>
+        <div class="border-t border-concrete-line pt-5">
+          <h3 class="font-display text-[1.1rem] font-semibold">Professional Service</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-stone">Straightforward communication from the first call to the last coat.</p>
+        </div>
+        <div class="border-t border-concrete-line pt-5">
+          <h3 class="font-display text-[1.1rem] font-semibold">Local to St. George</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-stone">Based in St.&nbsp;George and working throughout Southern Utah.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================== SERVICE AREA ============================== -->
+<!-- ############################################################
+     SERVICE AREA - CONFIRM
+     These towns are nearby communities in the St. George area, listed
+     as a starting point. They are NOT a confirmed coverage map -
+     check the real service area with the owner and edit the list.
+     ############################################################ -->
+<section id="areas" class="scroll-mt-24 border-b border-concrete-line bg-paper-warm py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-6">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint">Service area</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] sm:text-[2.7rem]">
+          Based in St. George, Utah
+        </h2>
+        <p class="mt-5 text-[17px] leading-relaxed text-stone">
+          Serving homeowners, builders, and projects across the St.&nbsp;George area
+          and nearby Southern Utah communities.
+        </p>
+
+        <ul class="mt-8 flex flex-wrap gap-2.5">
+          <li class="rounded-xs border border-blueprint/25 bg-blueprint-pale px-4 py-2 text-[14.5px] font-semibold text-blueprint-dark">St. George</li>
+          <li class="rounded-xs border border-concrete-dark bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Washington</li>
+          <li class="rounded-xs border border-concrete-dark bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Santa Clara</li>
+          <li class="rounded-xs border border-concrete-dark bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Ivins</li>
+          <li class="rounded-xs border border-concrete-dark bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Hurricane</li>
+          <li class="rounded-xs border border-concrete-dark bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Bloomington</li>
+          <li class="rounded-xs border border-concrete-dark bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Nearby communities</li>
+        </ul>
+
+        <p class="mt-6 text-[13px] text-stone-light">
+          Surrounding areas listed as a starting point &mdash; to be confirmed before launch.
+        </p>
+      </div>
+
+      <div class="reveal lg:col-span-6">
+        <!-- Stylised location graphic, deliberately NOT a map. Abstract
+             mesa horizon with a marker over St. George. -->
+        <div class="grid-paper relative overflow-hidden rounded-xs border border-concrete-line bg-white">
+          <svg viewBox="0 0 600 420" class="block h-auto w-full" role="img" aria-label="Stylised graphic of the Southern Utah landscape with a marker on St. George">
+            <!-- distant mesas -->
+            <path d="M0 356 L70 356 L70 330 L150 330 L150 356 L240 356 L240 318 L330 318 L330 356 L420 356 L420 336 L510 336 L510 356 L600 356 L600 420 L0 420 Z" fill="#E7E4DE"/>
+            <!-- nearer ridge -->
+            <path d="M0 382 L90 382 L90 362 L200 362 L200 382 L300 382 L300 350 L410 350 L410 382 L520 382 L520 368 L600 368 L600 420 L0 420 Z" fill="#DCDAD5"/>
+            <!-- ground -->
+            <rect x="0" y="399" width="600" height="21" fill="#C6C3BC"/>
+            <!-- range rings -->
+            <g fill="none" stroke="#35576E" stroke-opacity=".22">
+              <circle cx="300" cy="186" r="50"/><circle cx="300" cy="186" r="86"/><circle cx="300" cy="186" r="120"/>
+            </g>
+            <!-- marker -->
+            <path d="M300 128c-19 0-34 15-34 34 0 25 34 62 34 62s34-37 34-62c0-19-15-34-34-34Z" fill="#35576E"/>
+            <circle cx="300" cy="161" r="12" fill="#fff"/>
+            <text x="300" y="266" text-anchor="middle" font-family="Archivo,Inter,sans-serif" font-size="21" font-weight="600" fill="#2A2E33">St. George, Utah</text>
+            <text x="300" y="292" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" fill="#6B7176">and the surrounding area</text>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LARGE CTA ============================== -->
+<section class="relative isolate overflow-hidden bg-charcoal-deep py-20 sm:py-28">
+  <div class="absolute inset-0 -z-10">
+    <!-- REPLACE: wide interior/construction photo for the CTA band -->
+    <img src="https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=2000&q=80"
+         onerror="imgFallback(this)" alt=""
+         class="h-full w-full object-cover opacity-20" loading="lazy" />
+    <div class="absolute inset-0 bg-charcoal-deep/80"></div>
+  </div>
+
+  <div class="reveal mx-auto max-w-3xl px-5 text-center sm:px-8">
+    <h2 class="font-display text-[2.1rem] font-semibold leading-[1.06] tracking-[-.025em] text-white sm:text-[2.9rem]">
+      Ready to Get Your Project Started?
+    </h2>
+    <p class="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-paper/70">
+      Tell us what you&rsquo;re working on and let&rsquo;s talk about your drywall needs.
+    </p>
+    <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xs bg-blueprint px-8 py-4 text-[15px] font-semibold text-white transition hover:bg-blueprint-light">
+        Request a Quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="tel:+14355743307" class="inline-flex items-center justify-center gap-2.5 rounded-xs border border-white/25 px-8 py-4 text-[15px] font-semibold text-white transition hover:border-white/60 hover:bg-white/10">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+        </svg>
+        Call (435) 574-3307
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CONTACT ============================== -->
+<section id="contact" class="scroll-mt-24 border-b border-concrete-line bg-paper py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-5">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-blueprint">Get in touch</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.02em] sm:text-[2.6rem]">
+          Request a Quote
+        </h2>
+        <p class="mt-6 text-[17px] leading-relaxed text-stone">
+          Send a few details about the project and we&rsquo;ll get back to you.
+        </p>
+
+        <div class="mt-10 space-y-px overflow-hidden border border-concrete-line bg-concrete-line">
+          <div class="bg-white p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-stone-light">Phone</p>
+            <a href="tel:+14355743307" class="mt-2 block font-display text-[1.6rem] font-semibold text-charcoal transition hover:text-blueprint">(435)&nbsp;574-3307</a>
+          </div>
+          <div class="bg-white p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-stone-light">Business</p>
+            <p class="mt-2 text-[16px] font-semibold text-charcoal">Pierson Drywall Inc.</p>
+            <p class="mt-1 text-[15px] text-stone">St. George, Utah</p>
+          </div>
+          <div class="bg-white p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-stone-light">Service area</p>
+            <p class="mt-2 text-[16px] text-charcoal">St.&nbsp;George and the surrounding Southern&nbsp;Utah area</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal lg:col-span-7">
+        <!-- DEMO FORM: no backend. Submitting shows a thank-you and sends nothing. -->
+        <form id="quoteForm" class="rounded-xs border border-concrete-line bg-paper-warm p-7 shadow-card sm:p-9">
+          <div class="grid gap-5 sm:grid-cols-2">
+
+            <div>
+              <label for="name" class="block text-[13px] font-semibold text-charcoal">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required class="field mt-2" placeholder="Your name" />
+            </div>
+
+            <div>
+              <label for="phone" class="block text-[13px] font-semibold text-charcoal">Phone</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required class="field mt-2" placeholder="(435) 000-0000" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="email" class="block text-[13px] font-semibold text-charcoal">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" class="field mt-2" placeholder="you@example.com" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="projectType" class="block text-[13px] font-semibold text-charcoal">Project Type</label>
+              <!-- Keep these options matched to the SERVICES section above. -->
+              <select id="projectType" name="projectType" class="field mt-2">
+                <option>Drywall installation</option>
+                <option>Drywall repair</option>
+                <option>Taping &amp; mudding</option>
+                <option>Texture</option>
+                <option>Patching</option>
+                <option>Finishing</option>
+                <option>Something else</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="description" class="block text-[13px] font-semibold text-charcoal">Project Description</label>
+              <textarea id="description" name="description" rows="5" class="field mt-2" placeholder="A short description of the work — rooms, size, timing, anything useful."></textarea>
+            </div>
+
+            <fieldset class="sm:col-span-2">
+              <legend class="block text-[13px] font-semibold text-charcoal">Preferred Contact Method</legend>
+              <div class="mt-2 grid grid-cols-3 gap-2.5">
+                <label class="pill relative"><input type="radio" name="contactMethod" value="Phone call" checked /><span>Phone call</span></label>
+                <label class="pill relative"><input type="radio" name="contactMethod" value="Text" /><span>Text</span></label>
+                <label class="pill relative"><input type="radio" name="contactMethod" value="Email" /><span>Email</span></label>
+              </div>
+            </fieldset>
+          </div>
+
+          <button id="submitBtn" type="submit"
+                  class="mt-8 w-full rounded-xs bg-blueprint px-8 py-4 text-[15px] font-semibold text-white transition hover:bg-blueprint-dark sm:w-auto">
+            Request a Quote
+          </button>
+
+          <p id="formNote" class="mt-4 text-[13.5px] text-stone">
+            Prefer to talk? Call
+            <a href="tel:+14355743307" class="font-semibold text-blueprint hover:underline">(435)&nbsp;574-3307</a>.
+          </p>
+
+          <div id="formSuccess" class="mt-6 hidden rounded-xs border border-blueprint/25 bg-blueprint-pale p-6">
+            <p class="font-display text-[1.2rem] font-semibold text-charcoal">Thanks &mdash; your request is in.</p>
+            <p class="mt-1.5 text-[15px] text-stone">We&rsquo;ll be in touch about your project.</p>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="bg-charcoal-deep text-paper/65">
+  <div class="mx-auto max-w-site px-5 py-14 sm:px-8 sm:py-16">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-xs bg-blueprint text-white">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4.5" width="18" height="6.5" rx="1"/><rect x="3" y="13" width="18" height="6.5" rx="1"/><path d="M9 4.5V11M15 13v6.5"/>
+            </svg>
+          </span>
+          <span class="font-display text-[17px] font-semibold text-white">Pierson Drywall Inc.</span>
+        </div>
+        <p class="mt-5 max-w-sm text-[15px] leading-relaxed">
+          Drywall installation, repair, taping, texture, patching, and finishing
+          for homes and projects in St.&nbsp;George, Utah and the surrounding area.
+        </p>
+
+        <!-- SOCIAL LINKS - placeholders. Drop the real profile URLs into href="#",
+             or delete any the business doesn't use. -->
+        <div class="mt-7 flex items-center gap-3">
+          <a href="#" aria-label="Facebook" class="grid h-11 w-11 place-items-center rounded-xs border border-white/15 text-paper/70 transition hover:border-blueprint-light hover:text-white">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 8.5V6.8c0-.8.5-1.3 1.3-1.3H17V2.5h-2.3c-2.4 0-3.7 1.4-3.7 3.8v2.2H9V11.5h2v10h3.5v-10H17l.5-3H14.5Z"/></svg>
+          </a>
+          <a href="#" aria-label="Instagram" class="grid h-11 w-11 place-items-center rounded-xs border border-white/15 text-paper/70 transition hover:border-blueprint-light hover:text-white">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p class="eyebrow text-[10px] font-semibold uppercase text-white">Explore</p>
+        <ul class="mt-3 space-y-0.5 text-[15px]">
+          <li><a href="#services" class="inline-block py-1.5 transition hover:text-white">Services</a></li>
+          <li><a href="#work" class="inline-block py-1.5 transition hover:text-white">Our Work</a></li>
+          <li><a href="#about" class="inline-block py-1.5 transition hover:text-white">About</a></li>
+          <li><a href="#contact" class="inline-block py-1.5 transition hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="eyebrow text-[10px] font-semibold uppercase text-white">Contact</p>
+        <ul class="mt-3 space-y-0.5 text-[15px]">
+          <li><a href="tel:+14355743307" class="inline-block py-1.5 font-semibold text-white transition hover:text-blueprint-light">(435)&nbsp;574-3307</a></li>
+          <li class="py-1.5">St. George, Utah</li>
+          <li><a href="#contact" class="inline-block py-1.5 transition hover:text-white">Request a quote</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="mt-12 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 text-[13px] text-paper/50 sm:flex-row">
+      <p>&copy; <span id="year">2026</span> Pierson Drywall Inc.</p>
+      <p>St. George, Utah &middot; (435) 574-3307</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================== MOBILE STICKY BAR ============================== -->
+<div class="safe-b fixed inset-x-0 bottom-0 z-50 border-t border-concrete bg-paper/97 backdrop-blur md:hidden">
+  <div class="grid grid-cols-2 gap-2 p-3">
+    <a href="tel:+14355743307" class="inline-flex items-center justify-center gap-2 rounded-xs border border-charcoal/25 px-4 py-3.5 text-[15px] font-semibold text-charcoal">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+      </svg>
+      Call
+    </a>
+    <a href="#contact" class="inline-flex items-center justify-center rounded-xs bg-blueprint px-4 py-3.5 text-[15px] font-semibold text-white">
+      Request a Quote
+    </a>
+  </div>
+</div>
+
+<script>
+  // ---- Mobile menu ----
+  var toggle = document.getElementById('navToggle');
+  var mobileNav = document.getElementById('mobileNav');
+  var iconOpen = document.getElementById('iconOpen');
+  var iconClose = document.getElementById('iconClose');
+
+  function setMenu(open) {
+    mobileNav.classList.toggle('hidden', !open);
+    iconOpen.classList.toggle('hidden', open);
+    iconClose.classList.toggle('hidden', !open);
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+  toggle.addEventListener('click', function () {
+    setMenu(mobileNav.classList.contains('hidden'));
+  });
+  mobileNav.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+
+  // ---- Subtle shadow on the nav once you scroll ----
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('shadow-card', window.scrollY > 8);
+  }, { passive: true });
+
+  // ---- Scroll reveal ----
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry, i) {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i * 70) + 'ms';
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -45px 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  } else {
+    items.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  // ---- Before / after slider ----
+  // A full-size transparent range input handles mouse, touch and keyboard.
+  var baRange = document.getElementById('baRange');
+  if (baRange) {
+    var ba = baRange.closest('.ba');
+    baRange.addEventListener('input', function () {
+      ba.style.setProperty('--pos', baRange.value + '%');
+    });
+  }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ---- Demo form (no backend - nothing is sent anywhere) ----
+  var form = document.getElementById('quoteForm');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('submitBtn').classList.add('hidden');
+    document.getElementById('formNote').classList.add('hidden');
+    var ok = document.getElementById('formSuccess');
+    ok.classList.remove('hidden');
+    ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+</body>
+</html>
