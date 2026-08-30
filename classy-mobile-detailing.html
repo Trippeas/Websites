@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Classy Mobile Detailing | Mobile Auto Detailing in St. George, Utah</title>
+<meta name="description" content="Professional mobile auto detailing in St. George and Southern Utah. Interior and exterior detailing at your home or workplace. Request a quote - (801) 884-7236." />
+<meta name="theme-color" content="#0B0C0E" />
+
+<!-- =====================================================================
+     CLASSY MOBILE DETAILING - single-page site (SALES DEMO)
+     ---------------------------------------------------------------------
+     One file. No build step, no backend. Open it directly, email it,
+     or drop it on any host.
+
+     >>> BEFORE SHOWING A CLIENT / GOING LIVE, CONFIRM WITH THE OWNER:
+         1. SERVICES  - search "SERVICES - EDIT HERE". The six cards are
+                        common detailing categories, not a confirmed list.
+                        Add, remove, or rename freely.
+         2. PHOTOS    - every <img> is marked "REPLACE:". All are stock
+                        placeholders. Swap in real job photos
+                        (same folder = src="photos/name.jpg").
+         3. BEFORE/AFTER - search "BEFORE / AFTER". The demo shows one photo
+                        with a filter on the left pane. Drop in a real pair
+                        and delete class="is-demo-before".
+         4. COPY      - deliberately generic. No pricing, reviews, awards,
+                        years in business, or guarantees are claimed anywhere.
+         5. SOCIAL    - footer icons link to "#". Search "SOCIAL LINKS".
+
+     QUICK EDITS:
+       - Phone number: search 884-7236 (appears as text and in tel: links)
+       - Colors: the tailwind.config block below (ink / panel / brass)
+       - The quote form is a demo - it shows a thank-you and sends nothing.
+     ===================================================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // If a photo fails to load, drop in a dark brushed panel rather than a
+  // broken-image icon. Every placeholder degrades to something presentable.
+  function imgFallback(el) {
+    el.onerror = null;
+    el.classList.add('is-fallback');
+    el.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2316191e'/%3E%3Cstop offset='.5' stop-color='%2325292f'/%3E%3Cstop offset='1' stop-color='%23111316'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.05'%3E%3Cpath d='M-100 700 L700 -100'/%3E%3Cpath d='M100 900 L900 100'/%3E%3Cpath d='M300 900 L1100 100'/%3E%3C/g%3E%3Ctext x='600' y='395' text-anchor='middle' font-family='Inter,Helvetica,sans-serif' font-size='24' letter-spacing='7' fill='%23C8A264' fill-opacity='.8'%3EPHOTO PLACEHOLDER%3C/text%3E%3Ctext x='600' y='432' text-anchor='middle' font-family='Inter,Helvetica,sans-serif' font-size='16' letter-spacing='2' fill='%23ffffff' fill-opacity='.35'%3Eyour photo goes here%3C/text%3E%3C/svg%3E";
+  }
+
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+        },
+        colors: {
+          ink:    { DEFAULT: '#0B0C0E', deep: '#060708', soft: '#121419' },
+          panel:  { DEFAULT: '#15181D', raised: '#1C2027' },
+          chrome: { DEFAULT: '#F3F4F6', dim: '#9AA0A9', mid: '#70767F' },
+          brass:  { DEFAULT: '#C8A264', light: '#E3C68F', dark: '#A8834A' }
+        },
+        borderRadius: { xs: '2px', sm2: '4px' },
+        boxShadow: {
+          lift: '0 24px 60px -24px rgba(0,0,0,.85)',
+          glow: '0 0 0 1px rgba(200,162,100,.35), 0 18px 50px -20px rgba(200,162,100,.35)'
+        },
+        maxWidth: { site: '1200px' }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* On <html> only: it propagates to the viewport and clips sideways
+     overflow. Putting it on <body> too would make body its own scroll
+     box, which is what breaks position:sticky on iOS. */
+  html { overflow-x: hidden; }
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  ::selection { background: #C8A264; color: #0B0C0E; }
+
+  .eyebrow { letter-spacing: .24em; }
+
+  /* Scroll reveal - one quiet move, nothing bouncy */
+  .reveal { opacity: 0; transform: translateY(20px); }
+  .reveal.is-visible {
+    opacity: 1; transform: none;
+    transition: opacity .8s cubic-bezier(.22,.61,.36,1), transform .8s cubic-bezier(.22,.61,.36,1);
+  }
+
+  /* Slow photo push on hover */
+  .photo img { transition: transform 1.3s cubic-bezier(.22,.61,.36,1); }
+  .photo:hover img { transform: scale(1.05); }
+
+  /* Hairline that lights up in brass on hover */
+  .card { position: relative; }
+  .card::after {
+    content: ''; position: absolute; left: 0; top: 0; height: 2px; width: 0;
+    background: linear-gradient(90deg, #C8A264, rgba(200,162,100,0));
+    transition: width .5s cubic-bezier(.22,.61,.36,1);
+  }
+  .card:hover::after { width: 100%; }
+
+  /* Live dot on the "mobile service" badge */
+  .pulse { position: relative; }
+  .pulse::before {
+    content: ''; position: absolute; inset: -5px; border-radius: 9999px;
+    background: #C8A264; opacity: .35; animation: pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse { 0% { transform: scale(.6); opacity: .5 } 100% { transform: scale(1.5); opacity: 0 } }
+
+  /* ---- BEFORE / AFTER SLIDER ---- */
+  .ba { position: relative; overflow: hidden; background: #15181D; }
+  .ba img { position: absolute; inset: 0; height: 100%; width: 100%; object-fit: cover; }
+  .ba .ba-before { clip-path: inset(0 calc(100% - var(--pos, 50%)) 0 0); }
+  /* DEMO ONLY: fakes a "dirty" before pane from the same photo.
+     Delete this class once a real before photo is dropped in. */
+  .is-demo-before { filter: saturate(.35) brightness(.62) contrast(.85) blur(.6px); }
+  .ba-line {
+    position: absolute; top: 0; bottom: 0; left: var(--pos, 50%);
+    width: 2px; background: #fff; transform: translateX(-1px); pointer-events: none;
+  }
+  .ba-grip {
+    position: absolute; top: 50%; left: var(--pos, 50%);
+    transform: translate(-50%, -50%); pointer-events: none;
+    height: 52px; width: 52px; display: grid; place-items: center;
+    border-radius: 9999px; background: rgba(11,12,14,.72); border: 2px solid #fff;
+    backdrop-filter: blur(4px);
+  }
+  .ba-range {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; opacity: 0; cursor: ew-resize; -webkit-appearance: none; appearance: none;
+    background: transparent; touch-action: pan-y;
+  }
+  .ba-range::-webkit-slider-thumb { -webkit-appearance: none; width: 56px; height: 400px; }
+  .ba-range::-moz-range-thumb { border: 0; width: 56px; height: 400px; }
+
+  /* Form fields */
+  .field {
+    box-sizing: border-box; width: 100%; background: #0B0C0E; border: 1px solid rgba(255,255,255,.1);
+    border-radius: 2px; padding: 14px 16px; font-size: 16px; color: #F3F4F6;
+    outline: none; transition: border-color .25s, background-color .25s;
+  }
+  .field::placeholder { color: #5A6069; }
+  .field:focus { border-color: #C8A264; background: #101216; }
+  select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239AA0A9' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 44px; }
+
+  /* Nav turns solid once you scroll off the hero (JS toggles .is-solid).
+     Defined here so it beats the bg-ink/80 utility regardless of CSS order. */
+  #nav.is-solid { background-color: #0B0C0E; }
+
+  /* Dropdown options inherit the OS palette otherwise - unreadable on dark */
+  select.field option { background: #15181D; color: #F3F4F6; }
+
+  /* Mobile sticky bar sits above the home indicator on iPhone */
+  .safe-b { padding-bottom: env(safe-area-inset-bottom); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .photo img, .photo:hover img { transition: none; transform: none; }
+    .pulse::before { animation: none; }
+  }
+</style>
+</head>
+
+<body class="bg-ink font-sans text-chrome antialiased pb-[76px] md:pb-0">
+
+<!-- ============================== NAV ============================== -->
+<header id="nav" class="fixed inset-x-0 top-0 z-50 border-b border-white/[.07] bg-ink/80 backdrop-blur-md transition-colors duration-300">
+  <div class="mx-auto flex h-[72px] max-w-site items-center justify-between gap-6 px-5 sm:px-8">
+
+    <a href="#top" class="flex items-center gap-3">
+      <span class="grid h-10 w-10 place-items-center rounded-xs border border-brass/40 bg-brass/10 text-brass">
+        <!-- mark: a car profile -->
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 13.5h18M5 13.5l1.7-4.6A2 2 0 0 1 8.6 7.5h6.8a2 2 0 0 1 1.9 1.4l1.7 4.6"/>
+          <path d="M3 13.5V17h18v-3.5"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/>
+        </svg>
+      </span>
+      <span class="leading-none">
+        <span class="block font-display text-[16px] font-semibold tracking-tight text-white">Classy Mobile Detailing</span>
+        <span class="eyebrow mt-[5px] block text-[9px] font-semibold uppercase text-brass">St. George, Utah</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-9 text-[14.5px] text-chrome-dim lg:flex">
+      <a href="#services" class="transition hover:text-white">Services</a>
+      <a href="#work" class="transition hover:text-white">Our Work</a>
+      <a href="#why" class="transition hover:text-white">Why Us</a>
+      <a href="#contact" class="transition hover:text-white">Contact</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="tel:+18018847236" class="hidden text-[14.5px] font-medium text-chrome transition hover:text-brass xl:block">(801)&nbsp;884-7236</a>
+      <a href="#contact" class="hidden rounded-xs bg-brass px-5 py-2.5 text-[13.5px] font-semibold text-ink transition hover:bg-brass-light sm:inline-block">Get a Quote</a>
+      <button id="navToggle" type="button" aria-expanded="false" aria-controls="mobileNav"
+              class="grid h-11 w-11 place-items-center rounded-xs border border-white/15 text-white lg:hidden">
+        <span class="sr-only">Menu</span>
+        <svg id="iconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg id="iconClose" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobileNav" class="hidden border-t border-white/[.07] bg-ink lg:hidden">
+    <nav class="mx-auto grid max-w-site gap-1 px-5 py-4 text-[16px]">
+      <a href="#services" class="rounded-xs px-3 py-3.5 text-chrome transition hover:bg-white/5">Services</a>
+      <a href="#work" class="rounded-xs px-3 py-3.5 text-chrome transition hover:bg-white/5">Our Work</a>
+      <a href="#why" class="rounded-xs px-3 py-3.5 text-chrome transition hover:bg-white/5">Why Us</a>
+      <a href="#contact" class="rounded-xs px-3 py-3.5 text-chrome transition hover:bg-white/5">Contact</a>
+      <a href="#contact" class="mt-2 rounded-xs bg-brass px-3 py-3.5 text-center font-semibold text-ink">Get a Quote</a>
+      <a href="tel:+18018847236" class="rounded-xs border border-white/15 px-3 py-3.5 text-center font-semibold text-white">Call (801) 884-7236</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================== HERO ============================== -->
+<section id="top" class="relative isolate flex min-h-[92svh] flex-col justify-end overflow-hidden bg-ink-deep pt-[72px]">
+
+  <!-- Photo layer. Even if the image never loads, the gradients below keep
+       the hero looking intentional rather than broken. -->
+  <div class="absolute inset-0 -z-10">
+    <!-- REPLACE: hero photo - a freshly detailed vehicle, shot dark and wide -->
+    <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=2000&q=80"
+         onerror="imgFallback(this)" alt="A freshly detailed dark vehicle"
+         class="h-full w-full object-cover object-center opacity-[.62]" />
+    <div class="absolute inset-0 bg-gradient-to-t from-ink-deep via-ink-deep/70 to-ink-deep/40"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-ink-deep via-ink-deep/55 to-transparent"></div>
+    <!-- warm highlight, top right -->
+    <div class="absolute -right-40 -top-40 h-[520px] w-[520px] rounded-full bg-brass/10 blur-[120px]"></div>
+  </div>
+
+  <div class="mx-auto w-full max-w-site px-5 pb-14 pt-24 sm:px-8 sm:pb-20 sm:pt-32 lg:pb-24">
+
+    <!-- the "we're mobile" indicator -->
+    <div class="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[.06] py-2 pl-4 pr-5 backdrop-blur-sm">
+      <span class="pulse block h-[7px] w-[7px] rounded-full bg-brass"></span>
+      <span class="text-[12.5px] font-medium tracking-wide text-chrome">
+        Mobile service &mdash; St.&nbsp;George &amp; Southern&nbsp;Utah
+      </span>
+    </div>
+
+    <h1 class="mt-7 max-w-3xl font-display text-[2.3rem] font-semibold leading-[1.05] tracking-[-.03em] text-white sm:text-[3.6rem] lg:text-[4.4rem]">
+      Professional Detailing.<br />
+      <span class="text-brass">We Come to You.</span>
+    </h1>
+
+    <p class="mt-7 max-w-xl text-[16.5px] leading-relaxed text-chrome-dim sm:text-[18px]">
+      Give your vehicle the attention it deserves without the hassle of leaving home.
+      Classy Mobile Detailing brings professional automotive detailing directly to you.
+    </p>
+
+    <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xs bg-brass px-8 py-4 text-[15px] font-semibold text-ink transition hover:bg-brass-light">
+        Get a Quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="tel:+18018847236" class="inline-flex items-center justify-center gap-2.5 rounded-xs border border-white/20 bg-white/[.04] px-8 py-4 text-[15px] font-semibold text-white backdrop-blur-sm transition hover:border-white/45 hover:bg-white/10">
+        <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+        </svg>
+        Call (801) 884-7236
+      </a>
+    </div>
+  </div>
+
+  <!-- hairline strip along the bottom of the hero (in flow, so it can never
+       ride over the buttons when the text wraps on a narrow screen) -->
+  <div class="relative border-t border-white/[.08] bg-ink-deep/70 backdrop-blur-sm">
+    <div class="mx-auto grid max-w-site grid-cols-2 divide-x divide-white/[.08] px-5 sm:px-8 md:grid-cols-4">
+      <div class="py-4 pr-4 md:py-5"><p class="text-[12.5px] font-medium text-chrome-dim">At your home or workplace</p></div>
+      <div class="py-4 pl-4 pr-4 md:py-5"><p class="text-[12.5px] font-medium text-chrome-dim">Interior &amp; exterior</p></div>
+      <div class="hidden py-5 pl-4 pr-4 md:block"><p class="text-[12.5px] font-medium text-chrome-dim">Cars, trucks &amp; SUVs</p></div>
+      <div class="hidden py-5 pl-4 md:block"><p class="text-[12.5px] font-medium text-chrome-dim">Free quotes by phone or form</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== QUICK VALUE ============================== -->
+<section class="border-b border-white/[.07] bg-ink py-16 sm:py-20">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid gap-px overflow-hidden bg-white/[.07] sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="reveal bg-ink p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs border border-brass/30 bg-brass/[.08] text-brass">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold text-white">We Come to You</h3>
+        <p class="mt-2.5 text-[14.5px] leading-relaxed text-chrome-dim">Convenient mobile detailing at your location.</p>
+      </div>
+
+      <div class="reveal bg-ink p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs border border-brass/30 bg-brass/[.08] text-brass">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/><path d="M8.6 11.2 10.4 13l4-4"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold text-white">Attention to Detail</h3>
+        <p class="mt-2.5 text-[14.5px] leading-relaxed text-chrome-dim">Focused on bringing out the best in your vehicle.</p>
+      </div>
+
+      <div class="reveal bg-ink p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs border border-brass/30 bg-brass/[.08] text-brass">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2 13.9 8l5.1.3-4 3.3 1.3 5-4.3-2.8L7.7 16.6l1.3-5-4-3.3L10.1 8Z"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold text-white">Professional Finish</h3>
+        <p class="mt-2.5 text-[14.5px] leading-relaxed text-chrome-dim">A clean, polished appearance inside and out.</p>
+      </div>
+
+      <div class="reveal bg-ink p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs border border-brass/30 bg-brass/[.08] text-brass">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4.5" width="16" height="16" rx="1.5"/><path d="M4 9.5h16M8.5 3v3M15.5 3v3"/><path d="m9.5 14.5 1.7 1.7 3.4-3.4"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-semibold text-white">Convenient Booking</h3>
+        <p class="mt-2.5 text-[14.5px] leading-relaxed text-chrome-dim">Request a detail by phone or in a couple of taps.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SERVICES ============================== -->
+<!-- ############################################################
+     SERVICES - EDIT HERE
+     Six common detailing categories, used as a starting point.
+     These have NOT been confirmed with the owner. Each card is a
+     self-contained <article> - copy one to add a service, delete
+     one to remove it. The grid reflows on its own.
+     Deliberately no pricing anywhere.
+     ############################################################ -->
+<section id="services" class="scroll-mt-20 border-b border-white/[.07] bg-ink-soft py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div class="max-w-2xl">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-brass">What we do</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.025em] text-white sm:text-[2.75rem]">
+          Detailing services, brought to your driveway
+        </h2>
+        <p class="mt-5 text-[16.5px] leading-relaxed text-chrome-dim">
+          Interior, exterior, or the full treatment &mdash; tell us what your vehicle needs
+          and we&rsquo;ll put together a quote.
+        </p>
+      </div>
+      <a href="#contact" class="hidden shrink-0 items-center gap-2 border-b border-brass/40 pb-1 text-[15px] font-semibold text-brass transition hover:border-brass md:inline-flex">
+        Request a quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- SERVICE 1 -->
+      <article class="card reveal group overflow-hidden rounded-xs border border-white/[.08] bg-panel p-8 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs border border-white/10 bg-white/[.04] text-brass transition group-hover:border-brass/40 group-hover:bg-brass/10">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="2.7"/><path d="M12 3.6v5.7M4.5 13.7l5-1.2M19.5 13.7l-5-1.2"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold text-white">Interior Detailing</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">
+          Vacuuming, wipe-down, and cleaning of the surfaces you touch every day.
+        </p>
+        <a href="#contact" class="mt-4 inline-flex items-center gap-2 py-3 text-[14px] font-semibold text-brass transition group-hover:gap-3">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <!-- SERVICE 2 -->
+      <article class="card reveal group overflow-hidden rounded-xs border border-white/[.08] bg-panel p-8 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs border border-white/10 bg-white/[.04] text-brass transition group-hover:border-brass/40 group-hover:bg-brass/10">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2c2.9 3.2 5.4 6.1 5.4 9.1a5.4 5.4 0 0 1-10.8 0c0-3 2.5-5.9 5.4-9.1Z"/><path d="M9.4 13.6a2.7 2.7 0 0 0 2.1 2.8"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold text-white">Exterior Detailing</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">
+          A careful hand wash and finish work that leaves the paint looking sharp.
+        </p>
+        <a href="#contact" class="mt-4 inline-flex items-center gap-2 py-3 text-[14px] font-semibold text-brass transition group-hover:gap-3">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <!-- SERVICE 3 -->
+      <article class="card reveal group overflow-hidden rounded-xs border border-white/[.08] bg-panel p-8 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs border border-white/10 bg-white/[.04] text-brass transition group-hover:border-brass/40 group-hover:bg-brass/10">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13.8h18M5.2 13.8 6.8 9.3A2 2 0 0 1 8.7 7.9h6.6a2 2 0 0 1 1.9 1.4l1.6 4.5"/><path d="M3 13.8v3.4h18v-3.4"/><circle cx="7.6" cy="17.2" r="1.5"/><circle cx="16.4" cy="17.2" r="1.5"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold text-white">Full Vehicle Detail</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">
+          Inside and out in one visit, for a vehicle that feels new again.
+        </p>
+        <a href="#contact" class="mt-4 inline-flex items-center gap-2 py-3 text-[14px] font-semibold text-brass transition group-hover:gap-3">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <!-- SERVICE 4 -->
+      <article class="card reveal group overflow-hidden rounded-xs border border-white/[.08] bg-panel p-8 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs border border-white/10 bg-white/[.04] text-brass transition group-hover:border-brass/40 group-hover:bg-brass/10">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.6h10a1.5 1.5 0 0 1 1.5 1.5v3.1H3v-3.1a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M5.6 17.2v3M9.5 17.2v3M13.4 17.2v3"/><path d="M16 14.2V6.6a2 2 0 0 1 2-2h2.6"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold text-white">Deep Interior Cleaning</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">
+          Extra time spent on carpets, upholstery, and the spots that get missed.
+        </p>
+        <a href="#contact" class="mt-4 inline-flex items-center gap-2 py-3 text-[14px] font-semibold text-brass transition group-hover:gap-3">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <!-- SERVICE 5 -->
+      <article class="card reveal group overflow-hidden rounded-xs border border-white/[.08] bg-panel p-8 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs border border-white/10 bg-white/[.04] text-brass transition group-hover:border-brass/40 group-hover:bg-brass/10">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 16.6c4.6-6.9 13-6.9 17.6 0"/><path d="M8 11.3 6.9 8.9M12 9.9V7.3M16 11.3l1.1-2.4"/><path d="M3 19.6h18"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold text-white">Paint Enhancement</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">
+          Work aimed at improving gloss and evening out the look of the finish.
+        </p>
+        <a href="#contact" class="mt-4 inline-flex items-center gap-2 py-3 text-[14px] font-semibold text-brass transition group-hover:gap-3">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+      <!-- SERVICE 6 -->
+      <article class="card reveal group overflow-hidden rounded-xs border border-white/[.08] bg-panel p-8 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs border border-white/10 bg-white/[.04] text-brass transition group-hover:border-brass/40 group-hover:bg-brass/10">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v6c0 4.2 2.9 7.6 7 9 4.1-1.4 7-4.8 7-9V6Z"/><path d="m9.3 12 1.9 1.9 3.6-3.7"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-semibold text-white">Protective Coatings</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">
+          Protection options to help keep that just-detailed look for longer.
+        </p>
+        <a href="#contact" class="mt-4 inline-flex items-center gap-2 py-3 text-[14px] font-semibold text-brass transition group-hover:gap-3">
+          Request a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </article>
+
+    </div>
+
+    <p class="reveal mt-10 text-[14.5px] text-chrome-mid">
+      Not sure which one you need? Call
+      <a href="tel:+18018847236" class="font-semibold text-brass hover:underline">(801)&nbsp;884-7236</a>
+      and we&rsquo;ll help you sort it out.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== OUR WORK ============================== -->
+<section id="work" class="scroll-mt-20 border-b border-white/[.07] bg-ink py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-brass">Our work</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.08] tracking-[-.025em] text-white sm:text-[2.75rem]">
+        The difference a detail makes
+      </h2>
+      <p class="mt-5 text-[16.5px] leading-relaxed text-chrome-dim">
+        Drag the slider to see a before and after.
+      </p>
+    </div>
+
+    <!-- ############################################################
+         BEFORE / AFTER
+         DEMO NOTE: both panes currently use the SAME stock photo. The
+         left one carries class="is-demo-before", a CSS filter that fakes
+         a dull "before". To use real photos:
+           1. put the real before photo in the first <img> src
+           2. put the real after photo in the second <img> src
+           3. delete class="is-demo-before"
+         ############################################################ -->
+    <figure class="reveal mt-12">
+      <div class="ba aspect-[16/11] w-full overflow-hidden rounded-xs border border-white/10 sm:aspect-[16/9]" style="--pos:50%">
+        <!-- REPLACE: AFTER photo (the clean one) -->
+        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1800&q=80"
+             onerror="imgFallback(this)" alt="Vehicle after detailing" />
+        <!-- REPLACE: BEFORE photo (the dirty one) - then delete is-demo-before -->
+        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1800&q=80"
+             onerror="imgFallback(this)" alt="Vehicle before detailing"
+             class="ba-before is-demo-before" />
+
+        <span class="ba-line"></span>
+        <span class="ba-grip">
+          <svg class="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6-5 6 5 6M15 6l5 6-5 6"/></svg>
+        </span>
+
+        <span class="pointer-events-none absolute left-4 top-4 rounded-xs bg-ink-deep/75 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[.2em] text-white backdrop-blur-sm">Before</span>
+        <span class="pointer-events-none absolute right-4 top-4 rounded-xs bg-brass px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[.2em] text-ink">After</span>
+
+        <input id="baRange" class="ba-range" type="range" min="0" max="100" value="50" step="0.1"
+               aria-label="Drag to compare before and after" />
+      </div>
+      <figcaption class="mt-3 text-[12.5px] text-chrome-mid">
+        Demo images &mdash; to be replaced with Classy Mobile Detailing&rsquo;s own before &amp; after photos.
+      </figcaption>
+    </figure>
+
+    <!-- ############################################################
+         GALLERY - all placeholders. Swap each src for a real photo.
+         Add a tile by copying one <figure>; the grid handles the rest.
+         ############################################################ -->
+    <div class="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 lg:grid-cols-3">
+
+      <figure class="photo reveal group relative overflow-hidden rounded-xs border border-white/10 bg-panel sm:col-span-2">
+        <!-- REPLACE: exterior transformation -->
+        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80"
+             onerror="imgFallback(this)" alt="Exterior of a detailed vehicle"
+             class="h-[260px] w-full object-cover sm:h-[340px]" loading="lazy" />
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep/95 to-transparent p-6">
+          <span class="eyebrow text-[10px] font-semibold uppercase text-brass">Placeholder</span>
+          <p class="mt-1.5 font-display text-[1.1rem] font-semibold text-white">Exterior transformation</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal group relative overflow-hidden rounded-xs border border-white/10 bg-panel">
+        <!-- REPLACE: clean wheels -->
+        <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Cleaned wheel and tire"
+             class="h-[260px] w-full object-cover sm:h-[340px]" loading="lazy" />
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep/95 to-transparent p-6">
+          <span class="eyebrow text-[10px] font-semibold uppercase text-brass">Placeholder</span>
+          <p class="mt-1.5 font-display text-[1.1rem] font-semibold text-white">Wheels &amp; tires</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal group relative overflow-hidden rounded-xs border border-white/10 bg-panel">
+        <!-- REPLACE: interior transformation -->
+        <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Detailed vehicle interior"
+             class="h-[260px] w-full object-cover sm:h-[300px]" loading="lazy" />
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep/95 to-transparent p-6">
+          <span class="eyebrow text-[10px] font-semibold uppercase text-brass">Placeholder</span>
+          <p class="mt-1.5 font-display text-[1.1rem] font-semibold text-white">Interior transformation</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal group relative overflow-hidden rounded-xs border border-white/10 bg-panel">
+        <!-- REPLACE: paint / polishing work -->
+        <img src="https://images.unsplash.com/photo-1607860108855-64acf2078ed9?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Paint being polished"
+             class="h-[260px] w-full object-cover sm:h-[300px]" loading="lazy" />
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep/95 to-transparent p-6">
+          <span class="eyebrow text-[10px] font-semibold uppercase text-brass">Placeholder</span>
+          <p class="mt-1.5 font-display text-[1.1rem] font-semibold text-white">Paint &amp; finish work</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal group relative overflow-hidden rounded-xs border border-white/10 bg-panel">
+        <!-- REPLACE: detailed interior close-up -->
+        <img src="https://images.unsplash.com/photo-1552930294-6b595f4c2974?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Close-up of a detailed interior"
+             class="h-[260px] w-full object-cover sm:h-[300px]" loading="lazy" />
+        <figcaption class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink-deep/95 to-transparent p-6">
+          <span class="eyebrow text-[10px] font-semibold uppercase text-brass">Placeholder</span>
+          <p class="mt-1.5 font-display text-[1.1rem] font-semibold text-white">Detailed interiors</p>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== MOBILE DETAILING ============================== -->
+<section class="relative overflow-hidden border-b border-white/[.07] bg-ink-soft py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-6">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-brass">Mobile detailing</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.06] tracking-[-.025em] text-white sm:text-[2.75rem]">
+          Your Car Doesn&rsquo;t Need to Leave the Driveway.
+        </h2>
+        <p class="mt-6 text-[16.5px] leading-relaxed text-chrome-dim">
+          Mobile detailing means the work comes to you. Instead of dropping your vehicle
+          off and arranging a ride, we set up wherever it&rsquo;s parked &mdash; at home,
+          at the office, or anywhere convenient in the St.&nbsp;George area.
+        </p>
+        <p class="mt-4 text-[16.5px] leading-relaxed text-chrome-dim">
+          You carry on with your day. We handle the vehicle.
+        </p>
+
+        <a href="#contact" class="mt-9 inline-flex items-center justify-center gap-2 rounded-xs bg-brass px-8 py-4 text-[15px] font-semibold text-ink transition hover:bg-brass-light">
+          Get a Quote
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <div class="reveal lg:col-span-6">
+        <div class="photo relative overflow-hidden rounded-xs border border-white/10 bg-panel">
+          <!-- REPLACE: detailer working on a vehicle in a customer's driveway -->
+          <img src="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?auto=format&fit=crop&w=1400&q=80"
+               onerror="imgFallback(this)" alt="A detailer working on a vehicle at a customer's home"
+               class="h-[340px] w-full object-cover sm:h-[460px]" loading="lazy" />
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-deep/70 via-transparent to-transparent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3-step process -->
+    <div class="mt-16 grid gap-px overflow-hidden border border-white/[.08] bg-white/[.08] sm:mt-20 md:grid-cols-3">
+
+      <div class="reveal bg-ink-soft p-8 sm:p-10">
+        <span class="font-display text-[2.4rem] font-semibold leading-none text-brass/35">01</span>
+        <h3 class="mt-5 font-display text-[1.25rem] font-semibold text-white">Request a Quote</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">Tell us what your vehicle needs.</p>
+      </div>
+
+      <div class="reveal bg-ink-soft p-8 sm:p-10">
+        <span class="font-display text-[2.4rem] font-semibold leading-none text-brass/35">02</span>
+        <h3 class="mt-5 font-display text-[1.25rem] font-semibold text-white">Choose a Convenient Location</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">We come to you.</p>
+      </div>
+
+      <div class="reveal bg-ink-soft p-8 sm:p-10">
+        <span class="font-display text-[2.4rem] font-semibold leading-none text-brass/35">03</span>
+        <h3 class="mt-5 font-display text-[1.25rem] font-semibold text-white">Enjoy the Results</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-chrome-dim">Get back to a cleaner, refreshed vehicle.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== WHY US ============================== -->
+<section id="why" class="scroll-mt-20 border-b border-white/[.07] bg-ink py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-5">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-brass">Why us</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.06] tracking-[-.025em] text-white sm:text-[2.75rem]">
+          Why Classy Mobile Detailing
+        </h2>
+        <p class="mt-6 text-[16.5px] leading-relaxed text-chrome-dim">
+          A detailing service built around two things: careful work on the vehicle,
+          and as little disruption as possible to your day.
+        </p>
+
+        <div class="mt-10 hidden overflow-hidden rounded-xs border border-white/10 bg-panel lg:block">
+          <div class="photo">
+            <!-- REPLACE: a detail shot - polished paint, badge, or trim -->
+            <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1000&q=80"
+                 onerror="imgFallback(this)" alt="Close detail of a clean vehicle surface"
+                 class="h-[300px] w-full object-cover" loading="lazy" />
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7">
+        <dl class="grid gap-x-10 sm:grid-cols-2">
+
+          <div class="reveal border-t border-white/10 py-7">
+            <dt class="font-display text-[1.15rem] font-semibold text-white">Convenience First</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-chrome-dim">
+              No drop-off, no waiting room, no rearranging your afternoon. We come to your location.
+            </dd>
+          </div>
+
+          <div class="reveal border-t border-white/10 py-7">
+            <dt class="font-display text-[1.15rem] font-semibold text-white">Attention to Detail</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-chrome-dim">
+              Time spent on the areas that get overlooked, not just the ones that are easy to reach.
+            </dd>
+          </div>
+
+          <div class="reveal border-t border-white/10 py-7">
+            <dt class="font-display text-[1.15rem] font-semibold text-white">Professional Appearance</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-chrome-dim">
+              A finish that presents well &mdash; whether the vehicle is a daily driver or something special.
+            </dd>
+          </div>
+
+          <div class="reveal border-t border-white/10 py-7">
+            <dt class="font-display text-[1.15rem] font-semibold text-white">Personalized Service</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-chrome-dim">
+              You talk to the person doing the work. Tell us what matters to you and we&rsquo;ll focus there.
+            </dd>
+          </div>
+
+          <div class="reveal border-y border-white/10 py-7 sm:col-span-2">
+            <dt class="font-display text-[1.15rem] font-semibold text-white">Local to Southern Utah</dt>
+            <dd class="mt-2.5 max-w-2xl text-[15px] leading-relaxed text-chrome-dim">
+              Based in St.&nbsp;George and serving the surrounding area. Dust, sun, and desert roads
+              are hard on a vehicle out here &mdash; regular detailing keeps it looking its best.
+            </dd>
+          </div>
+
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BIG CTA ============================== -->
+<section class="relative isolate overflow-hidden bg-ink-deep py-24 sm:py-32">
+  <div class="absolute inset-0 -z-10">
+    <!-- REPLACE: wide, dark hero-style photo for the CTA band -->
+    <img src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=2000&q=80"
+         onerror="imgFallback(this)" alt=""
+         class="h-full w-full object-cover opacity-[.28]" loading="lazy" />
+    <div class="absolute inset-0 bg-gradient-to-b from-ink-deep/85 via-ink-deep/75 to-ink-deep/95"></div>
+    <div class="absolute left-1/2 top-1/2 h-[420px] w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brass/[.12] blur-[130px]"></div>
+  </div>
+
+  <div class="reveal mx-auto max-w-3xl px-5 text-center sm:px-8">
+    <p class="eyebrow text-[11px] font-semibold uppercase text-brass">Ready when you are</p>
+    <h2 class="mt-5 font-display text-[2.2rem] font-semibold leading-[1.05] tracking-[-.03em] text-white sm:text-[3.2rem]">
+      Ready to Make Your Car Look Classy Again?
+    </h2>
+    <p class="mx-auto mt-6 max-w-xl text-[17px] leading-relaxed text-chrome-dim">
+      Request a quote and let&rsquo;s get your vehicle looking its best.
+    </p>
+    <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xs bg-brass px-9 py-4 text-[15px] font-semibold text-ink shadow-glow transition hover:bg-brass-light">
+        Get a Quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="tel:+18018847236" class="inline-flex items-center justify-center gap-2.5 rounded-xs border border-white/25 px-9 py-4 text-[15px] font-semibold text-white transition hover:border-white/60 hover:bg-white/10">
+        <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+        </svg>
+        Call (801) 884-7236
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CONTACT ============================== -->
+<section id="contact" class="scroll-mt-20 border-t border-white/[.07] bg-ink-soft py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-5">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-brass">Get in touch</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-semibold leading-[1.06] tracking-[-.025em] text-white sm:text-[2.6rem]">
+          Request a Quote
+        </h2>
+        <p class="mt-6 text-[16.5px] leading-relaxed text-chrome-dim">
+          Send over a few details about your vehicle and where you&rsquo;d like the work done,
+          and we&rsquo;ll get back to you with a quote.
+        </p>
+
+        <div class="mt-10 space-y-px overflow-hidden border border-white/[.08] bg-white/[.08]">
+          <div class="bg-panel p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-chrome-mid">Call or text</p>
+            <a href="tel:+18018847236" class="mt-2 block font-display text-[1.6rem] font-semibold text-white transition hover:text-brass">(801)&nbsp;884-7236</a>
+          </div>
+          <div class="bg-panel p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-chrome-mid">Service area</p>
+            <p class="mt-2 text-[16px] text-white">St.&nbsp;George, Utah &amp; surrounding Southern&nbsp;Utah</p>
+          </div>
+          <div class="bg-panel p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-chrome-mid">Business</p>
+            <p class="mt-2 text-[16px] text-white">Classy Mobile Detailing</p>
+            <p class="mt-1 text-[14.5px] text-chrome-dim">Mobile service &mdash; we come to your location</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal lg:col-span-7">
+        <!-- DEMO FORM: no backend. Submitting shows a thank-you and sends nothing. -->
+        <form id="quoteForm" class="rounded-xs border border-white/[.08] bg-panel p-7 sm:p-9">
+          <div class="grid gap-5 sm:grid-cols-2">
+
+            <div>
+              <label for="name" class="block text-[13px] font-semibold text-chrome">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required class="field mt-2" placeholder="Your name" />
+            </div>
+
+            <div>
+              <label for="phone" class="block text-[13px] font-semibold text-chrome">Phone</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required class="field mt-2" placeholder="(801) 000-0000" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="email" class="block text-[13px] font-semibold text-chrome">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" class="field mt-2" placeholder="you@example.com" />
+            </div>
+
+            <div>
+              <label for="vehicle" class="block text-[13px] font-semibold text-chrome">Vehicle</label>
+              <input id="vehicle" name="vehicle" type="text" class="field mt-2" placeholder="Year, make and model" />
+            </div>
+
+            <div>
+              <label for="service" class="block text-[13px] font-semibold text-chrome">Service Needed</label>
+              <!-- Keep these options matched to the SERVICES section above. -->
+              <select id="service" name="service" class="field mt-2">
+                <option>Interior detailing</option>
+                <option>Exterior detailing</option>
+                <option>Full vehicle detail</option>
+                <option>Deep interior cleaning</option>
+                <option>Paint enhancement</option>
+                <option>Protective coatings</option>
+                <option>Not sure &mdash; need a recommendation</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="location" class="block text-[13px] font-semibold text-chrome">Preferred Location</label>
+              <input id="location" name="location" type="text" class="field mt-2" placeholder="Home, work, or an address in the St. George area" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="message" class="block text-[13px] font-semibold text-chrome">Message</label>
+              <textarea id="message" name="message" rows="5" class="field mt-2" placeholder="Anything you'd like us to know about the vehicle."></textarea>
+            </div>
+          </div>
+
+          <button id="submitBtn" type="submit"
+                  class="mt-8 w-full rounded-xs bg-brass px-8 py-4 text-[15px] font-semibold text-ink transition hover:bg-brass-light sm:w-auto">
+            Request a Quote
+          </button>
+
+          <p id="formNote" class="mt-4 text-[13.5px] text-chrome-mid">
+            Prefer to talk? Call
+            <a href="tel:+18018847236" class="font-semibold text-brass hover:underline">(801)&nbsp;884-7236</a>.
+          </p>
+
+          <div id="formSuccess" class="mt-6 hidden rounded-xs border border-brass/30 bg-brass/[.07] p-6">
+            <p class="font-display text-[1.2rem] font-semibold text-white">Thanks &mdash; your request is in.</p>
+            <p class="mt-1.5 text-[15px] text-chrome-dim">We&rsquo;ll be in touch shortly about your vehicle.</p>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="border-t border-white/[.07] bg-ink-deep text-chrome-dim">
+  <div class="mx-auto max-w-site px-5 py-14 sm:px-8 sm:py-16">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-xs border border-brass/40 bg-brass/10 text-brass">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 13.5h18M5 13.5l1.7-4.6A2 2 0 0 1 8.6 7.5h6.8a2 2 0 0 1 1.9 1.4l1.7 4.6"/>
+              <path d="M3 13.5V17h18v-3.5"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/>
+            </svg>
+          </span>
+          <span class="font-display text-[17px] font-semibold text-white">Classy Mobile Detailing</span>
+        </div>
+        <p class="mt-5 max-w-sm text-[15px] leading-relaxed">
+          Mobile auto detailing in St.&nbsp;George, Utah and the surrounding area.
+          We bring the detail to you.
+        </p>
+
+        <!-- SOCIAL LINKS - placeholders. Drop the real profile URLs into href="#". -->
+        <div class="mt-7 flex items-center gap-3">
+          <a href="#" aria-label="Instagram" class="grid h-11 w-11 place-items-center rounded-xs border border-white/10 text-chrome-dim transition hover:border-brass/50 hover:text-brass">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+          </a>
+          <a href="#" aria-label="Facebook" class="grid h-11 w-11 place-items-center rounded-xs border border-white/10 text-chrome-dim transition hover:border-brass/50 hover:text-brass">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 8.5V6.8c0-.8.5-1.3 1.3-1.3H17V2.5h-2.3c-2.4 0-3.7 1.4-3.7 3.8v2.2H9V11.5h2v10h3.5v-10H17l.5-3H14.5Z"/></svg>
+          </a>
+          <a href="#" aria-label="TikTok" class="grid h-11 w-11 place-items-center rounded-xs border border-white/10 text-chrome-dim transition hover:border-brass/50 hover:text-brass">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3.5v11.2a3.6 3.6 0 1 1-3-3.55"/><path d="M14 6.2A4.8 4.8 0 0 0 18.8 9"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p class="eyebrow text-[10px] font-semibold uppercase text-white">Explore</p>
+        <ul class="mt-3 space-y-0.5 text-[15px]">
+          <li><a href="#services" class="inline-block py-1.5 transition hover:text-brass">Services</a></li>
+          <li><a href="#work" class="inline-block py-1.5 transition hover:text-brass">Our Work</a></li>
+          <li><a href="#why" class="inline-block py-1.5 transition hover:text-brass">Why Us</a></li>
+          <li><a href="#contact" class="inline-block py-1.5 transition hover:text-brass">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="eyebrow text-[10px] font-semibold uppercase text-white">Contact</p>
+        <ul class="mt-3 space-y-0.5 text-[15px]">
+          <li><a href="tel:+18018847236" class="inline-block py-1.5 font-semibold text-white transition hover:text-brass">(801)&nbsp;884-7236</a></li>
+          <li class="py-1.5">St. George, Utah</li>
+          <li class="py-1.5">Southern Utah &mdash; mobile service</li>
+          <li><a href="#contact" class="inline-block py-1.5 transition hover:text-brass">Request a quote</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="mt-12 flex flex-col justify-between gap-3 border-t border-white/[.08] pt-6 text-[13px] text-chrome-mid sm:flex-row">
+      <p>&copy; <span id="year">2026</span> Classy Mobile Detailing</p>
+      <p>St. George, Utah &middot; (801) 884-7236</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================== MOBILE STICKY BAR ============================== -->
+<div class="safe-b fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink-deep/95 backdrop-blur-md md:hidden">
+  <div class="grid grid-cols-2 gap-2 p-3">
+    <a href="tel:+18018847236" class="inline-flex items-center justify-center gap-2 rounded-xs border border-white/20 px-4 py-3.5 text-[15px] font-semibold text-white">
+      <svg class="h-[16px] w-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>
+      </svg>
+      Call Now
+    </a>
+    <a href="#contact" class="inline-flex items-center justify-center rounded-xs bg-brass px-4 py-3.5 text-[15px] font-semibold text-ink">
+      Get a Quote
+    </a>
+  </div>
+</div>
+
+<script>
+  // ---- Mobile menu ----
+  var toggle = document.getElementById('navToggle');
+  var mobileNav = document.getElementById('mobileNav');
+  var iconOpen = document.getElementById('iconOpen');
+  var iconClose = document.getElementById('iconClose');
+
+  function setMenu(open) {
+    mobileNav.classList.toggle('hidden', !open);
+    iconOpen.classList.toggle('hidden', open);
+    iconClose.classList.toggle('hidden', !open);
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+  toggle.addEventListener('click', function () {
+    setMenu(mobileNav.classList.contains('hidden'));
+  });
+  mobileNav.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+
+  // ---- Nav goes solid once you scroll off the hero ----
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('is-solid', window.scrollY > 40);
+    nav.classList.toggle('shadow-lift', window.scrollY > 40);
+  }, { passive: true });
+
+  // ---- Scroll reveal ----
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry, i) {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i * 80) + 'ms';
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  } else {
+    items.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  // ---- Before / after slider ----
+  // A full-size transparent range input handles mouse, touch and keyboard.
+  var baRange = document.getElementById('baRange');
+  if (baRange) {
+    var ba = baRange.closest('.ba');
+    baRange.addEventListener('input', function () {
+      ba.style.setProperty('--pos', baRange.value + '%');
+    });
+  }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ---- Demo form (no backend - nothing is sent anywhere) ----
+  var form = document.getElementById('quoteForm');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('submitBtn').classList.add('hidden');
+    document.getElementById('formNote').classList.add('hidden');
+    var ok = document.getElementById('formSuccess');
+    ok.classList.remove('hidden');
+    ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+</body>
+</html>
