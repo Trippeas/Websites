@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Window Works Window Cleaning St. George | Residential Window Cleaning in St. George, Utah</title>
+<meta name="description" content="Residential window cleaning in St. George, Utah and Southern Utah. Interior and exterior glass, screens, tracks and sills. Request a quote." />
+<meta name="theme-color" content="#FFFFFF" />
+
+<!-- =====================================================================
+     WINDOW WORKS WINDOW CLEANING ST. GEORGE - single-page site (SALES DEMO)
+     ---------------------------------------------------------------------
+     One file. No build step, no backend. Open it directly, email it,
+     or drop it on any host.
+
+     >>> CONFIRM WITH THE OWNER BEFORE THIS GOES LIVE:
+         1. PHONE NUMBER - shown throughout as the placeholder
+                           (435) XXX-XXXX. Search for XXX-XXXX.
+                           It is deliberately PLAIN TEXT, not a tel: link,
+                           so nobody taps a dead number. Once the real
+                           number is known, replace the text AND wrap it:
+                             <a href="tel:+1435NNNNNNN">(435) NNN-NNNN</a>
+                           so nobody copies an example number by mistake.
+         2. "FREE" QUOTE - every button reads "Request a Quote" because a
+                           free quote is an offer we can't confirm. If the
+                           owner does offer free quotes, search for
+                           "Request a Quote" and swap in "Get a Free Quote".
+         3. SERVICES     - search "SERVICES - CONFIRM". These are common
+                           window-cleaning services, presented as a
+                           starting point, not a confirmed service list.
+         4. SERVICE AREA - search "SERVICE AREA - CONFIRM". The town list
+                           is a guess for the St. George area.
+         5. PHOTOS       - every <img> is marked "REPLACE:". All are stock
+                           placeholders and are NOT presented as Window
+                           Works jobs. Gallery tiles carry an "Example
+                           photo" badge; delete it once photos are real.
+         6. BEFORE/AFTER - search "BEFORE / AFTER". Both panes use the same
+                           stock photo; the left one carries a filter that
+                           fakes the dirty "before". Drop in a real pair
+                           and delete class="is-demo-before".
+         7. SOCIAL       - footer icons link to "#". Search "SOCIAL LINKS".
+
+     NOT CLAIMED ANYWHERE (by design): reviews, testimonials, pricing,
+     awards, certifications, licenses, years of experience, guarantees,
+     customer counts, or named commercial clients.
+
+     QUICK EDITS:
+       - Colors: the tailwind.config block below (mist / charcoal / sky)
+       - The quote form is a demo - it shows a thank-you and sends nothing.
+     ===================================================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // If a photo fails to load, drop in a soft glass-toned panel rather than
+  // a broken-image icon, so every placeholder degrades to something
+  // presentable.
+  function imgFallback(el) {
+    el.onerror = null;
+    el.classList.add('is-fallback');
+    el.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23eef3f7'/%3E%3Cstop offset='.5' stop-color='%23dde6ee'/%3E%3Cstop offset='1' stop-color='%23f2f6f9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%232b7fb8' stroke-opacity='.10'%3E%3Cpath d='M-100 700 L700 -100'/%3E%3Cpath d='M100 900 L900 100'/%3E%3Cpath d='M300 900 L1100 100'/%3E%3C/g%3E%3Ctext x='600' y='395' text-anchor='middle' font-family='Inter,Helvetica,sans-serif' font-size='24' letter-spacing='7' fill='%232b7fb8' fill-opacity='.9'%3EPHOTO PLACEHOLDER%3C/text%3E%3Ctext x='600' y='432' text-anchor='middle' font-family='Inter,Helvetica,sans-serif' font-size='16' letter-spacing='2' fill='%23262c33' fill-opacity='.45'%3Eyour photo goes here%3C/text%3E%3C/svg%3E";
+  }
+
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif']
+        },
+        colors: {
+          mist:     { DEFAULT: '#F4F6F8', deep: '#E8ECF0', line: '#E2E7EC' },
+          charcoal: { DEFAULT: '#262C33', deep: '#161A1F', soft: '#39424B' },
+          slate:    { DEFAULT: '#667380', light: '#8B959F' },
+          sky:      { DEFAULT: '#2B7FB8', dark: '#1F6494', light: '#5AA7D8', pale: '#E6F1F9' }
+        },
+        borderRadius: { xs: '2px', sm2: '4px' },
+        boxShadow: {
+          card: '0 1px 2px rgba(22,26,31,.05)',
+          lift: '0 20px 44px -22px rgba(22,26,31,.32)',
+          deep: '0 30px 64px -30px rgba(22,26,31,.5)'
+        },
+        maxWidth: { site: '1200px' }
+      }
+    }
+  }
+</script>
+
+<style>
+  /* On <html> only: it propagates to the viewport and clips sideways
+     overflow. Putting it on <body> too would make body its own scroll
+     box, which is what breaks position:sticky on iOS. */
+  html { overflow-x: hidden; }
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  ::selection { background: #2B7FB8; color: #fff; }
+
+  .eyebrow { letter-spacing: .22em; }
+
+  /* Scroll reveal - one quiet move, nothing bouncy */
+  .reveal { opacity: 0; transform: translateY(18px); }
+  .reveal.is-visible {
+    opacity: 1; transform: none;
+    transition: opacity .7s cubic-bezier(.22,.61,.36,1), transform .7s cubic-bezier(.22,.61,.36,1);
+  }
+
+  /* Slow photo push on hover */
+  .photo img { transition: transform 1.2s cubic-bezier(.22,.61,.36,1); }
+  .photo:hover img { transform: scale(1.05); }
+
+  /* Accent rule that draws itself across a card on hover */
+  .card { position: relative; }
+  .card::after {
+    content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+    background: #2B7FB8; transition: width .45s cubic-bezier(.22,.61,.36,1);
+  }
+  .card:hover::after { width: 100%; }
+
+  /* Gallery captions sit on white text over photography that is meant to
+     be bright, so the scrim above does the heavy lifting and this shadow
+     is the backstop. */
+  .cap p { text-shadow: 0 1px 3px rgba(22,26,31,.55); }
+
+  /* Editorial masonry - CSS columns, so tiles keep their own heights */
+  .masonry { column-gap: 1rem; }
+  .masonry > * { break-inside: avoid; margin-bottom: 1rem; }
+
+  /* ---- BEFORE / AFTER SLIDER ---- */
+  .ba { position: relative; overflow: hidden; background: #E8ECF0; }
+  .ba img { position: absolute; inset: 0; height: 100%; width: 100%; object-fit: cover; }
+  .ba .ba-before { clip-path: inset(0 calc(100% - var(--pos, 50%)) 0 0); }
+  /* DEMO ONLY: fakes a dirty, cloudy "before" from the same photo.
+     Delete this class once a real before photo is dropped in. */
+  .is-demo-before { filter: saturate(.45) brightness(.82) contrast(.8) sepia(.18) blur(1.1px); }
+  .ba-line {
+    position: absolute; top: 0; bottom: 0; left: var(--pos, 50%);
+    width: 2px; background: #fff; transform: translateX(-1px); pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(22,26,31,.15);
+  }
+  .ba-grip {
+    position: absolute; top: 50%; left: var(--pos, 50%);
+    transform: translate(-50%, -50%); pointer-events: none;
+    height: 52px; width: 52px; display: grid; place-items: center;
+    border-radius: 9999px; background: #fff; color: #262C33;
+    box-shadow: 0 6px 20px -6px rgba(22,26,31,.45);
+  }
+  .ba-range {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; opacity: 0; cursor: ew-resize; -webkit-appearance: none; appearance: none;
+    background: transparent; touch-action: pan-y;
+  }
+  .ba-range::-webkit-slider-thumb { -webkit-appearance: none; width: 56px; height: 400px; }
+  .ba-range::-moz-range-thumb { border: 0; width: 56px; height: 400px; }
+
+  /* Form fields */
+  .field {
+    box-sizing: border-box; width: 100%; background: #fff;
+    border: 1px solid #E2E7EC; border-radius: 2px; padding: 13px 15px;
+    font-size: 16px; color: #262C33; outline: none;
+    transition: border-color .22s, box-shadow .22s;
+  }
+  .field::placeholder { color: #9BA5AF; }
+  .field:focus { border-color: #2B7FB8; box-shadow: 0 0 0 3px rgba(43,127,184,.13); }
+  select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23667380' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 42px; }
+  /* Safari renders date inputs a bit short without this */
+  input[type="date"].field { min-height: 49px; }
+
+  /* Mobile sticky bar sits above the home indicator on iPhone */
+  .safe-b { padding-bottom: env(safe-area-inset-bottom); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .photo img, .photo:hover img { transition: none; transform: none; }
+  }
+</style>
+</head>
+
+<body class="bg-white font-sans text-charcoal pb-[76px] md:pb-0">
+
+<!-- ============================== NAV ============================== -->
+<header id="nav" class="sticky top-0 z-50 border-b border-mist-line bg-white/95 backdrop-blur transition-shadow">
+  <div class="mx-auto flex h-[74px] max-w-site items-center justify-between gap-6 px-5 sm:px-8">
+
+    <a href="#top" class="flex items-center gap-3">
+      <span class="grid h-10 w-10 place-items-center rounded-xs bg-sky text-white">
+        <!-- mark: a window pane with a squeegee sweep -->
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/>
+          <path d="M12 3.5v17M3.5 12h17"/>
+          <path d="M6.6 17.4 17.4 6.6" stroke-opacity=".55"/>
+        </svg>
+      </span>
+      <span class="leading-none">
+        <span class="block font-display text-[16.5px] font-bold tracking-tight">Window Works</span>
+        <span class="eyebrow mt-[5px] block text-[9px] font-semibold uppercase text-slate">Window Cleaning</span>
+      </span>
+    </a>
+
+    <nav class="hidden items-center gap-9 text-[15px] text-charcoal-soft lg:flex">
+      <a href="#services" class="transition hover:text-sky">Services</a>
+      <a href="#work" class="transition hover:text-sky">Our Work</a>
+      <a href="#why" class="transition hover:text-sky">Why Us</a>
+      <a href="#contact" class="transition hover:text-sky">Contact</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <!-- "Get a Free Quote" until the owner confirms free quotes -> see header note -->
+      <a href="#contact" class="hidden rounded-xs bg-sky px-5 py-2.5 text-[14px] font-semibold text-white transition hover:bg-sky-dark sm:inline-block">Request a Quote</a>
+      <button id="navToggle" type="button" aria-expanded="false" aria-controls="mobileNav"
+              class="grid h-11 w-11 place-items-center rounded-xs border border-mist-line text-charcoal lg:hidden">
+        <span class="sr-only">Menu</span>
+        <svg id="iconOpen" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg id="iconClose" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobileNav" class="hidden border-t border-mist-line bg-white lg:hidden">
+    <nav class="mx-auto grid max-w-site gap-1 px-5 py-4 text-[16px]">
+      <a href="#services" class="rounded-xs px-3 py-3.5 transition hover:bg-mist">Services</a>
+      <a href="#work" class="rounded-xs px-3 py-3.5 transition hover:bg-mist">Our Work</a>
+      <a href="#why" class="rounded-xs px-3 py-3.5 transition hover:bg-mist">Why Us</a>
+      <a href="#contact" class="rounded-xs px-3 py-3.5 transition hover:bg-mist">Contact</a>
+      <a href="#contact" class="mt-2 rounded-xs bg-sky px-3 py-3.5 text-center font-semibold text-white">Request a Quote</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================== HERO ============================== -->
+<section id="top" class="relative isolate flex min-h-[86svh] flex-col justify-end overflow-hidden bg-mist">
+
+  <div class="absolute inset-0 -z-10">
+    <!-- REPLACE: hero photo - sparkling residential windows, or a cleaner
+         working on a large home. Bright and airy works best here. -->
+    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=80"
+         onerror="imgFallback(this)" alt="Bright home interior with large, freshly cleaned windows"
+         class="h-full w-full object-cover object-center" />
+    <!-- Light scrim: keeps the charcoal headline readable over any photo,
+         and still looks intentional if the photo never loads. -->
+    <div class="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-white/25 sm:to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-white/70 via-transparent to-white/40"></div>
+  </div>
+
+  <div class="mx-auto w-full max-w-site px-5 pb-14 pt-28 sm:px-8 sm:pb-20 sm:pt-36 lg:pb-24">
+
+    <!-- subtle indicator -->
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-[12.5px] font-semibold text-slate">
+      <span class="inline-flex items-center gap-2 rounded-full border border-mist-line bg-white/80 px-3.5 py-1.5 backdrop-blur-sm">
+        <span class="h-[6px] w-[6px] rounded-full bg-sky"></span> Residential
+      </span>
+      <span class="inline-flex items-center rounded-full border border-mist-line bg-white/80 px-3.5 py-1.5 backdrop-blur-sm">Local</span>
+      <span class="inline-flex items-center rounded-full border border-mist-line bg-white/80 px-3.5 py-1.5 backdrop-blur-sm">Professional</span>
+    </div>
+
+    <h1 class="mt-7 max-w-3xl font-display text-[2.35rem] font-bold leading-[1.05] tracking-[-.03em] sm:text-[3.4rem] lg:text-[4.1rem]">
+      See Your Home in a<br class="hidden sm:block" />
+      <span class="text-sky">Whole New Light.</span>
+    </h1>
+
+    <p class="mt-6 max-w-lg text-[16.5px] leading-relaxed text-slate sm:text-[18px]">
+      Professional window cleaning that brings more light, clarity, and shine to your home.
+    </p>
+
+    <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+      <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xs bg-sky px-8 py-4 text-[15px] font-semibold text-white shadow-card transition hover:bg-sky-dark">
+        Request a Quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="#contact" class="inline-flex items-center justify-center rounded-xs border border-charcoal/20 bg-white/70 px-8 py-4 text-[15px] font-semibold text-charcoal backdrop-blur-sm transition hover:border-charcoal hover:bg-charcoal hover:text-white">
+        Contact Us
+      </a>
+    </div>
+  </div>
+
+  <!-- hairline strip. In flow, so it can never ride over the buttons
+       when the text wraps on a narrow screen. -->
+  <div class="relative border-t border-mist-line bg-white/80 backdrop-blur-sm">
+    <div class="mx-auto grid max-w-site grid-cols-2 divide-x divide-mist-line px-5 sm:px-8 md:grid-cols-4">
+      <div class="py-4 pr-4 md:py-5"><p class="text-[12.5px] font-medium text-slate">Interior &amp; exterior glass</p></div>
+      <div class="py-4 pl-4 pr-4 md:py-5"><p class="text-[12.5px] font-medium text-slate">Screens, tracks &amp; sills</p></div>
+      <div class="hidden py-5 pl-4 pr-4 md:block"><p class="text-[12.5px] font-medium text-slate">St. George &amp; Southern Utah</p></div>
+      <div class="hidden py-5 pl-4 md:block"><p class="text-[12.5px] font-medium text-slate">Quotes by phone or form</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== QUICK VALUE ============================== -->
+<section class="border-b border-mist-line bg-white py-16 sm:py-20">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid gap-px overflow-hidden bg-mist-line sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="reveal bg-white p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-sky-pale text-sky">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.4v3.2M12 17.4v3.2M3.4 12h3.2M17.4 12h3.2M6.2 6.2l2.2 2.2M15.6 15.6l2.2 2.2M17.8 6.2l-2.2 2.2M8.4 15.6l-2.2 2.2"/><circle cx="12" cy="12" r="3.2"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-bold">Crystal-Clear Results</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-slate">Give your windows a cleaner, brighter appearance.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-sky-pale text-sky">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4.6" width="16" height="15.8" rx="1.5"/><path d="M4 9.4h16M8.6 3v3.2M15.4 3v3.2"/><path d="m9.4 14.4 1.8 1.8 3.4-3.4"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-bold">Convenient Service</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-slate">Make window cleaning one less thing on your to-do list.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-sky-pale text-sky">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/><path d="m8.4 11.2 1.8 1.8 3.5-3.5"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-bold">Detail-Focused</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-slate">Pay attention to the glass and the details around it.</p>
+      </div>
+
+      <div class="reveal bg-white p-8 lg:p-9">
+        <span class="grid h-11 w-11 place-items-center rounded-xs bg-sky-pale text-sky">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
+        </span>
+        <h3 class="mt-6 font-display text-[1.15rem] font-bold">Local Service</h3>
+        <p class="mt-2.5 text-[15px] leading-relaxed text-slate">Serving customers in the St. George area.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SERVICES ============================== -->
+<!-- ############################################################
+     SERVICES - CONFIRM
+     Common window-cleaning services, presented as a starting point.
+     These have NOT been confirmed with the owner. Each card is a
+     self-contained <article> - copy one to add a service, delete one
+     to remove it; the grid reflows on its own. No pricing by design.
+     ############################################################ -->
+<section id="services" class="scroll-mt-24 border-b border-mist-line bg-mist py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-sky">What we do</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-.025em] sm:text-[2.7rem]">
+        Window cleaning, inside and out
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-slate">
+        The glass, the screens, and the tracks and sills around them &mdash;
+        so the whole window looks finished, not just the pane.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+      <!-- SERVICE 1 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-mist-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-mist text-sky">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.6 9.2V20h12.8V9.2"/><rect x="9.2" y="12.4" width="5.6" height="5.2" rx=".5"/><path d="M12 12.4v5.2M9.2 15h5.6"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-bold">Residential Window Cleaning</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">
+          Professional cleaning for residential windows.
+        </p>
+      </article>
+
+      <!-- SERVICE 2 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-mist-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-mist text-sky">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M12 3.5v17M3.5 12h17"/><path d="M6.4 9.2 9.2 6.4M6.4 13.6l3.4-3.4" stroke-opacity=".5"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-bold">Interior Window Cleaning</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">
+          Help bring clarity and brightness to interior glass.
+        </p>
+      </article>
+
+      <!-- SERVICE 3 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-mist-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-mist text-sky">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.4" y="11.4" width="13.2" height="3.6" rx=".8"/><path d="M5.4 15v4.4h9.2V15"/><path d="M16.6 13.2h1.6a1.6 1.6 0 0 0 1.6-1.6V4.4"/><path d="M17.4 4.4h4.2" stroke-opacity=".55"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-bold">Exterior Window Cleaning</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">
+          Remove dirt and buildup from exterior windows.
+        </p>
+      </article>
+
+      <!-- SERVICE 4 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-mist-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-mist text-sky">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M8.4 4v16M13.6 4v16M4 8.4h16M4 13.6h16" stroke-opacity=".55"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-bold">Screen Cleaning</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">
+          Clean window screens to complement freshly cleaned glass.
+        </p>
+      </article>
+
+      <!-- SERVICE 5 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-mist-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-mist text-sky">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.4v9.2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5.4"/><path d="M3 16.6h18v2.8H3z"/><path d="M7.6 12.2h8.8" stroke-opacity=".55"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-bold">Track &amp; Sill Cleaning</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">
+          Detail the areas around the window that are often overlooked.
+        </p>
+      </article>
+
+      <!-- SERVICE 6 -->
+      <article class="card reveal overflow-hidden rounded-xs border border-mist-line bg-white p-8 shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+        <span class="grid h-12 w-12 place-items-center rounded-xs bg-mist text-sky">
+          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3.4" width="18" height="17.2" rx="1.5"/><path d="M12 3.4v17.2" stroke-opacity=".55"/><path d="M6.6 7.4v9.2M17.4 7.4v9.2" stroke-opacity=".3"/></svg>
+        </span>
+        <h3 class="mt-7 font-display text-[1.3rem] font-bold">Large / Specialty Windows</h3>
+        <p class="mt-3 text-[15px] leading-relaxed text-slate">
+          Cleaning for larger windows and other specialty glass where applicable.
+        </p>
+      </article>
+
+    </div>
+
+    <div class="reveal mt-12 flex flex-col items-start justify-between gap-5 border-t border-mist-line pt-10 sm:flex-row sm:items-center">
+      <div>
+        <p class="font-display text-[1.5rem] font-bold">Not sure what you need?</p>
+        <p class="mt-1.5 text-[15.5px] text-slate">Tell us about your home and we&rsquo;ll put together a quote.</p>
+      </div>
+      <a href="#contact" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xs bg-charcoal px-7 py-3.5 text-[15px] font-semibold text-white transition hover:bg-sky">
+        Request a Quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BEFORE / AFTER ============================== -->
+<!-- ############################################################
+     BEFORE / AFTER
+     DEMO NOTE: both panes currently use the SAME stock photo. The left
+     one carries class="is-demo-before", a CSS filter that fakes a dirty,
+     cloudy pane. To use real photos:
+       1. put the real before photo in the first <img> src
+       2. put the real after photo in the second <img> src
+       3. delete class="is-demo-before"
+     ############################################################ -->
+<section class="border-b border-mist-line bg-white py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-sky">Before &amp; after</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-.025em] sm:text-[2.7rem]">
+        The difference is the view
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-slate">
+        Drag the slider to compare a dirty pane with a freshly cleaned one.
+      </p>
+    </div>
+
+    <figure class="reveal mt-12">
+      <div class="ba aspect-[16/11] w-full overflow-hidden rounded-xs border border-mist-line shadow-card sm:aspect-[16/9]" style="--pos:50%">
+        <!-- REPLACE: AFTER photo (the clean window) -->
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80"
+             onerror="imgFallback(this)" alt="Window after cleaning" />
+        <!-- REPLACE: BEFORE photo (the dirty window) - then delete is-demo-before -->
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=80"
+             onerror="imgFallback(this)" alt="Window before cleaning"
+             class="ba-before is-demo-before" />
+
+        <span class="ba-line"></span>
+        <span class="ba-grip">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6-5 6 5 6M15 6l5 6-5 6"/></svg>
+        </span>
+
+        <span class="eyebrow pointer-events-none absolute left-4 top-4 rounded-xs bg-charcoal-deep/75 px-3 py-1.5 text-[10px] font-semibold uppercase text-white backdrop-blur-sm">Before</span>
+        <span class="eyebrow pointer-events-none absolute right-4 top-4 rounded-xs bg-sky px-3 py-1.5 text-[10px] font-semibold uppercase text-white">After</span>
+
+        <input id="baRange" class="ba-range" type="range" min="0" max="100" value="50" step="0.1"
+               aria-label="Drag to compare before and after" />
+      </div>
+      <figcaption class="mt-3 text-[13px] text-slate-light">
+        Demo images &mdash; to be replaced with a real before &amp; after pair.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================== OUR WORK / GALLERY ============================== -->
+<!-- ############################################################
+     GALLERY - editorial masonry (CSS columns, so tiles keep their own
+     heights). All stock placeholders, badged as such so nothing here
+     reads as a Window Works job. Swap each src for a real photo, update
+     the caption, and delete the "Example photo" badge.
+     ############################################################ -->
+<section id="work" class="scroll-mt-24 border-b border-mist-line bg-mist py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+
+    <div class="reveal max-w-2xl">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-sky">Our work</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-.025em] sm:text-[2.7rem]">
+        Clean glass, clear views
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-slate">
+        A look at the kind of results professional window cleaning delivers.
+      </p>
+    </div>
+
+    <div class="masonry mt-12 columns-1 sm:columns-2 lg:columns-3">
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-mist-line bg-mist-deep">
+        <!-- REPLACE: residential windows -->
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Residential windows in a bright living space"
+             class="block h-[300px] w-full object-cover sm:h-[360px]" loading="lazy" />
+        <span class="eyebrow absolute left-3.5 top-3.5 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 via-charcoal-deep/45 to-transparent px-5 pb-5 pt-14">
+          <p class="font-display text-[1.05rem] font-bold text-white">Residential windows</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-mist-line bg-mist-deep">
+        <!-- REPLACE: exterior window cleaning in progress -->
+        <img src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Exterior window being cleaned"
+             class="block h-[240px] w-full object-cover sm:h-[270px]" loading="lazy" />
+        <span class="eyebrow absolute left-3.5 top-3.5 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 via-charcoal-deep/45 to-transparent px-5 pb-5 pt-14">
+          <p class="font-display text-[1.05rem] font-bold text-white">Exterior cleaning</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-mist-line bg-mist-deep">
+        <!-- REPLACE: large glass doors -->
+        <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Large sliding glass doors"
+             class="block h-[380px] w-full object-cover sm:h-[430px]" loading="lazy" />
+        <span class="eyebrow absolute left-3.5 top-3.5 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 via-charcoal-deep/45 to-transparent px-5 pb-5 pt-14">
+          <p class="font-display text-[1.05rem] font-bold text-white">Large glass doors</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-mist-line bg-mist-deep">
+        <!-- REPLACE: interior window cleaning -->
+        <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Interior glass being cleaned"
+             class="block h-[300px] w-full object-cover sm:h-[340px]" loading="lazy" />
+        <span class="eyebrow absolute left-3.5 top-3.5 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 via-charcoal-deep/45 to-transparent px-5 pb-5 pt-14">
+          <p class="font-display text-[1.05rem] font-bold text-white">Interior cleaning</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-mist-line bg-mist-deep">
+        <!-- REPLACE: close-up of clean glass -->
+        <img src="https://images.unsplash.com/photo-1449247709967-d4461a6a6103?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Close-up of clean glass"
+             class="block h-[240px] w-full object-cover sm:h-[280px]" loading="lazy" />
+        <span class="eyebrow absolute left-3.5 top-3.5 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 via-charcoal-deep/45 to-transparent px-5 pb-5 pt-14">
+          <p class="font-display text-[1.05rem] font-bold text-white">Close-up clean glass</p>
+        </figcaption>
+      </figure>
+
+      <figure class="photo reveal relative overflow-hidden rounded-xs border border-mist-line bg-mist-deep">
+        <!-- REPLACE: finished home exterior -->
+        <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1000&q=80"
+             onerror="imgFallback(this)" alt="Home exterior with clean windows"
+             class="block h-[320px] w-full object-cover sm:h-[360px]" loading="lazy" />
+        <span class="eyebrow absolute left-3.5 top-3.5 rounded-xs bg-white/90 px-2.5 py-1 text-[9px] font-semibold uppercase text-charcoal">Example photo</span>
+        <figcaption class="cap absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-deep/90 via-charcoal-deep/45 to-transparent px-5 pb-5 pt-14">
+          <p class="font-display text-[1.05rem] font-bold text-white">Finished home exterior</p>
+        </figcaption>
+      </figure>
+
+    </div>
+
+    <p class="reveal mt-2 text-[13px] text-slate-light">
+      Stock photography, shown as examples of the work described. To be replaced with
+      Window Works&rsquo; own photos.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== WHY US ============================== -->
+<section id="why" class="scroll-mt-24 border-b border-mist-line bg-white py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-5">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-sky">Why us</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-bold leading-[1.06] tracking-[-.025em] sm:text-[2.7rem]">
+          Why Window Works
+        </h2>
+        <p class="mt-6 text-[17px] leading-relaxed text-slate">
+          Clean windows change how a room feels. The work is straightforward &mdash;
+          doing it thoroughly is what makes the difference.
+        </p>
+
+        <div class="mt-10 hidden overflow-hidden rounded-xs border border-mist-line lg:block">
+          <div class="photo">
+            <!-- REPLACE: bright room with big windows and a view out -->
+            <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=80"
+                 onerror="imgFallback(this)" alt="Bright room with large windows looking out"
+                 class="h-[300px] w-full object-cover" loading="lazy" />
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7">
+        <dl class="grid gap-x-10 sm:grid-cols-2">
+
+          <div class="reveal border-t border-mist-line py-7">
+            <dt class="font-display text-[1.15rem] font-bold">A Brighter Home</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-slate">
+              Clean windows can make a space feel brighter and more inviting.
+            </dd>
+          </div>
+
+          <div class="reveal border-t border-mist-line py-7">
+            <dt class="font-display text-[1.15rem] font-bold">Attention to Detail</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-slate">
+              Don&rsquo;t stop at the glass &mdash; show attention to the surrounding details.
+            </dd>
+          </div>
+
+          <div class="reveal border-t border-mist-line py-7">
+            <dt class="font-display text-[1.15rem] font-bold">Convenient Service</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-slate">
+              Make professional window cleaning easy for homeowners.
+            </dd>
+          </div>
+
+          <div class="reveal border-t border-mist-line py-7">
+            <dt class="font-display text-[1.15rem] font-bold">Local Service</dt>
+            <dd class="mt-2.5 text-[15px] leading-relaxed text-slate">
+              Focused on serving the St.&nbsp;George community and surrounding Southern&nbsp;Utah.
+            </dd>
+          </div>
+
+        </dl>
+
+        <!-- HOW IT WORKS -->
+        <div class="reveal mt-6 border-t border-mist-line pt-10">
+          <p class="eyebrow text-[11px] font-semibold uppercase text-sky">How it works</p>
+          <div class="mt-7 grid gap-px overflow-hidden border border-mist-line bg-mist-line sm:grid-cols-3">
+            <div class="bg-white p-6">
+              <span class="font-display text-[1.9rem] font-bold leading-none text-sky/30">01</span>
+              <h3 class="mt-4 font-display text-[1.05rem] font-bold">Request a Quote</h3>
+              <p class="mt-2 text-[14.5px] leading-relaxed text-slate">Tell us about your home and what you need cleaned.</p>
+            </div>
+            <div class="bg-white p-6">
+              <span class="font-display text-[1.9rem] font-bold leading-none text-sky/30">02</span>
+              <h3 class="mt-4 font-display text-[1.05rem] font-bold">Schedule Your Service</h3>
+              <p class="mt-2 text-[14.5px] leading-relaxed text-slate">Choose a convenient time.</p>
+            </div>
+            <div class="bg-white p-6">
+              <span class="font-display text-[1.9rem] font-bold leading-none text-sky/30">03</span>
+              <h3 class="mt-4 font-display text-[1.05rem] font-bold">Enjoy the View</h3>
+              <p class="mt-2 text-[14.5px] leading-relaxed text-slate">Enjoy cleaner, brighter windows.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SOUTHERN UTAH ============================== -->
+<!-- ############################################################
+     SERVICE AREA - CONFIRM
+     Nearby communities in the St. George area, listed as a starting
+     point. NOT a confirmed coverage area - check with the owner and
+     edit the list. No map is drawn, real or otherwise.
+     ############################################################ -->
+<section id="areas" class="scroll-mt-24 relative isolate overflow-hidden border-b border-mist-line py-20 sm:py-28">
+  <div class="absolute inset-0 -z-10">
+    <!-- REPLACE: Southern Utah landscape (red rock / desert horizon) -->
+    <img src="https://images.unsplash.com/photo-1533587851505-d119e13fa0d7?auto=format&fit=crop&w=2000&q=80"
+         onerror="imgFallback(this)" alt=""
+         class="h-full w-full object-cover" loading="lazy" />
+    <div class="absolute inset-0 bg-white/90"></div>
+  </div>
+
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="reveal mx-auto max-w-3xl text-center">
+      <p class="eyebrow text-[11px] font-semibold uppercase text-sky">Service area</p>
+      <h2 class="mt-4 font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-.025em] sm:text-[2.7rem]">
+        Proudly Serving St. George &amp; Southern Utah
+      </h2>
+      <p class="mt-5 text-[17px] leading-relaxed text-slate">
+        Based in St.&nbsp;George and working with homeowners across the surrounding area.
+      </p>
+
+      <ul class="mt-9 flex flex-wrap justify-center gap-2.5">
+        <li class="rounded-xs border border-sky/25 bg-sky-pale px-4 py-2 text-[14.5px] font-semibold text-sky-dark">St. George</li>
+        <li class="rounded-xs border border-mist-line bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Washington</li>
+        <li class="rounded-xs border border-mist-line bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Santa Clara</li>
+        <li class="rounded-xs border border-mist-line bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Ivins</li>
+        <li class="rounded-xs border border-mist-line bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Hurricane</li>
+        <li class="rounded-xs border border-mist-line bg-white px-4 py-2 text-[14.5px] text-charcoal-soft">Bloomington</li>
+      </ul>
+
+      <p class="mt-6 text-[13px] text-slate-light">
+        Areas listed as examples &mdash; the exact service area is to be confirmed before launch.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LARGE CTA ============================== -->
+<section class="relative isolate overflow-hidden bg-charcoal-deep py-20 sm:py-28">
+  <div class="absolute inset-0 -z-10">
+    <!-- REPLACE: bright home / big windows for the CTA band -->
+    <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=2000&q=80"
+         onerror="imgFallback(this)" alt=""
+         class="h-full w-full object-cover opacity-30" loading="lazy" />
+    <div class="absolute inset-0 bg-charcoal-deep/80"></div>
+  </div>
+
+  <div class="reveal mx-auto max-w-3xl px-5 text-center sm:px-8">
+    <h2 class="font-display text-[2.1rem] font-bold leading-[1.06] tracking-[-.03em] text-white sm:text-[3rem]">
+      Ready for a Clearer View?
+    </h2>
+    <p class="mx-auto mt-5 max-w-xl text-[17px] leading-relaxed text-white/70">
+      Request a quote and see what a difference professionally cleaned windows can make.
+    </p>
+    <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="#contact" class="inline-flex items-center justify-center gap-2 rounded-xs bg-sky px-8 py-4 text-[15px] font-semibold text-white transition hover:bg-sky-light">
+        Request a Quote
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="#contact" class="inline-flex items-center justify-center rounded-xs border border-white/25 px-8 py-4 text-[15px] font-semibold text-white transition hover:border-white/60 hover:bg-white/10">
+        Contact Us
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== CONTACT ============================== -->
+<section id="contact" class="scroll-mt-24 border-b border-mist-line bg-mist py-20 sm:py-28">
+  <div class="mx-auto max-w-site px-5 sm:px-8">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+
+      <div class="reveal lg:col-span-5">
+        <p class="eyebrow text-[11px] font-semibold uppercase text-sky">Get in touch</p>
+        <h2 class="mt-4 font-display text-[2.1rem] font-bold leading-[1.08] tracking-[-.025em] sm:text-[2.6rem]">
+          Request a Quote
+        </h2>
+        <p class="mt-6 text-[17px] leading-relaxed text-slate">
+          Send a few details about your home and the windows you&rsquo;d like cleaned,
+          and we&rsquo;ll get back to you.
+        </p>
+
+        <div class="mt-10 space-y-px overflow-hidden border border-mist-line bg-mist-line">
+          <!-- PLACEHOLDER PHONE. Deliberately NOT a tel: link - there is no
+               real number yet, and a dead dial button is worse than none.
+               Once the number is known, replace the text and wrap it in
+               <a href="tel:+1435...">. -->
+          <div class="bg-white p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-slate-light">Phone</p>
+            <p class="mt-2 font-display text-[1.55rem] font-bold text-charcoal">(435)&nbsp;XXX-XXXX</p>
+            <p class="mt-1 text-[13px] text-slate-light">Placeholder &mdash; add the real number before launch.</p>
+          </div>
+          <div class="bg-white p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-slate-light">Business</p>
+            <p class="mt-2 text-[16px] font-semibold text-charcoal">Window Works Window Cleaning St. George</p>
+            <p class="mt-1 text-[15px] text-slate">St. George, Utah</p>
+          </div>
+          <div class="bg-white p-6">
+            <p class="eyebrow text-[10px] font-semibold uppercase text-slate-light">Service area</p>
+            <p class="mt-2 text-[16px] text-charcoal">St.&nbsp;George and the surrounding Southern&nbsp;Utah area</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal lg:col-span-7">
+        <!-- DEMO FORM: no backend. Submitting shows a thank-you and sends nothing. -->
+        <form id="quoteForm" class="rounded-xs border border-mist-line bg-white p-7 shadow-card sm:p-9">
+          <div class="grid gap-5 sm:grid-cols-2">
+
+            <div>
+              <label for="name" class="block text-[13px] font-semibold text-charcoal">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required class="field mt-2" placeholder="Your name" />
+            </div>
+
+            <div>
+              <label for="phone" class="block text-[13px] font-semibold text-charcoal">Phone</label>
+              <input id="phone" name="phone" type="tel" autocomplete="tel" required class="field mt-2" placeholder="(435) 000-0000" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="email" class="block text-[13px] font-semibold text-charcoal">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" class="field mt-2" placeholder="you@example.com" />
+            </div>
+
+            <div>
+              <label for="propertyType" class="block text-[13px] font-semibold text-charcoal">Property Type</label>
+              <select id="propertyType" name="propertyType" class="field mt-2">
+                <option>House &mdash; single story</option>
+                <option>House &mdash; two story</option>
+                <option>Townhome or condo</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="projectSize" class="block text-[13px] font-semibold text-charcoal">Number of Windows / Project Size</label>
+              <input id="projectSize" name="projectSize" type="text" class="field mt-2" placeholder="e.g. about 20 windows" />
+            </div>
+
+            <div>
+              <label for="service" class="block text-[13px] font-semibold text-charcoal">Service Needed</label>
+              <!-- Keep these options matched to the SERVICES section above. -->
+              <select id="service" name="service" class="field mt-2">
+                <option>Interior &amp; exterior</option>
+                <option>Interior only</option>
+                <option>Exterior only</option>
+                <option>Screens</option>
+                <option>Tracks &amp; sills</option>
+                <option>Large / specialty windows</option>
+                <option>Not sure &mdash; need a recommendation</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="preferredDate" class="block text-[13px] font-semibold text-charcoal">Preferred Date</label>
+              <input id="preferredDate" name="preferredDate" type="date" class="field mt-2" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="message" class="block text-[13px] font-semibold text-charcoal">Message</label>
+              <textarea id="message" name="message" rows="5" class="field mt-2" placeholder="Anything you'd like us to know — hard-to-reach windows, gates, pets, timing."></textarea>
+            </div>
+          </div>
+
+          <button id="submitBtn" type="submit"
+                  class="mt-8 w-full rounded-xs bg-sky px-8 py-4 text-[15px] font-semibold text-white transition hover:bg-sky-dark sm:w-auto">
+            Request a Quote
+          </button>
+
+          <p id="formNote" class="mt-4 text-[13.5px] text-slate">
+            This is a demo form &mdash; it doesn&rsquo;t send anything yet.
+          </p>
+
+          <div id="formSuccess" class="mt-6 hidden rounded-xs border border-sky/25 bg-sky-pale p-6">
+            <p class="font-display text-[1.2rem] font-bold text-charcoal">Thanks &mdash; your request is in.</p>
+            <p class="mt-1.5 text-[15px] text-slate">We&rsquo;ll be in touch about your windows.</p>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="bg-charcoal-deep text-white/65">
+  <div class="mx-auto max-w-site px-5 py-14 sm:px-8 sm:py-16">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 place-items-center rounded-xs bg-sky text-white">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M12 3.5v17M3.5 12h17"/><path d="M6.6 17.4 17.4 6.6" stroke-opacity=".55"/>
+            </svg>
+          </span>
+          <span class="font-display text-[16.5px] font-bold text-white">Window Works Window Cleaning St. George</span>
+        </div>
+        <p class="mt-5 max-w-sm text-[15px] leading-relaxed">
+          Residential window cleaning &mdash; interior and exterior glass, screens,
+          tracks and sills &mdash; in St.&nbsp;George, Utah and the surrounding area.
+        </p>
+
+        <!-- SOCIAL LINKS - placeholders. Drop the real profile URLs into href="#",
+             or delete any the business doesn't use. -->
+        <div class="mt-7 flex items-center gap-3">
+          <a href="#" aria-label="Facebook" class="grid h-11 w-11 place-items-center rounded-xs border border-white/15 text-white/70 transition hover:border-sky-light hover:text-white">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 8.5V6.8c0-.8.5-1.3 1.3-1.3H17V2.5h-2.3c-2.4 0-3.7 1.4-3.7 3.8v2.2H9V11.5h2v10h3.5v-10H17l.5-3H14.5Z"/></svg>
+          </a>
+          <a href="#" aria-label="Instagram" class="grid h-11 w-11 place-items-center rounded-xs border border-white/15 text-white/70 transition hover:border-sky-light hover:text-white">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <p class="eyebrow text-[10px] font-semibold uppercase text-white">Explore</p>
+        <ul class="mt-3 space-y-0.5 text-[15px]">
+          <li><a href="#services" class="inline-block py-1.5 transition hover:text-white">Services</a></li>
+          <li><a href="#work" class="inline-block py-1.5 transition hover:text-white">Our Work</a></li>
+          <li><a href="#why" class="inline-block py-1.5 transition hover:text-white">Why Us</a></li>
+          <li><a href="#contact" class="inline-block py-1.5 transition hover:text-white">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <p class="eyebrow text-[10px] font-semibold uppercase text-white">Contact</p>
+        <ul class="mt-3 space-y-0.5 text-[15px]">
+          <!-- PLACEHOLDER PHONE - see the note in the contact section. -->
+          <li class="py-1.5 font-semibold text-white">(435)&nbsp;XXX-XXXX</li>
+          <li class="py-1.5">St. George, Utah</li>
+          <li><a href="#contact" class="inline-block py-1.5 transition hover:text-white">Request a quote</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="mt-12 flex flex-col justify-between gap-3 border-t border-white/10 pt-6 text-[13px] text-white/45 sm:flex-row">
+      <p>&copy; <span id="year">2026</span> Window Works Window Cleaning St. George</p>
+      <p>St. George, Utah</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================== MOBILE STICKY BAR ============================== -->
+<div class="safe-b fixed inset-x-0 bottom-0 z-50 border-t border-mist-line bg-white/95 backdrop-blur md:hidden">
+  <div class="grid grid-cols-2 gap-2 p-3">
+    <a href="#contact" class="inline-flex items-center justify-center rounded-xs bg-sky px-4 py-3.5 text-[15px] font-semibold text-white">
+      Request a Quote
+    </a>
+    <a href="#contact" class="inline-flex items-center justify-center rounded-xs border border-charcoal/25 px-4 py-3.5 text-[15px] font-semibold text-charcoal">
+      Contact
+    </a>
+  </div>
+</div>
+
+<script>
+  // ---- Mobile menu ----
+  var toggle = document.getElementById('navToggle');
+  var mobileNav = document.getElementById('mobileNav');
+  var iconOpen = document.getElementById('iconOpen');
+  var iconClose = document.getElementById('iconClose');
+
+  function setMenu(open) {
+    mobileNav.classList.toggle('hidden', !open);
+    iconOpen.classList.toggle('hidden', open);
+    iconClose.classList.toggle('hidden', !open);
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+  toggle.addEventListener('click', function () {
+    setMenu(mobileNav.classList.contains('hidden'));
+  });
+  mobileNav.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+
+  // ---- Subtle shadow on the nav once you scroll ----
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('shadow-card', window.scrollY > 8);
+  }, { passive: true });
+
+  // ---- Scroll reveal ----
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry, i) {
+        if (entry.isIntersecting) {
+          entry.target.style.transitionDelay = (i * 70) + 'ms';
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -45px 0px' });
+    items.forEach(function (el) { io.observe(el); });
+  } else {
+    items.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  // ---- Before / after slider ----
+  // A full-size transparent range input handles mouse, touch and keyboard.
+  var baRange = document.getElementById('baRange');
+  if (baRange) {
+    var ba = baRange.closest('.ba');
+    baRange.addEventListener('input', function () {
+      ba.style.setProperty('--pos', baRange.value + '%');
+    });
+  }
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ---- Demo form (no backend - nothing is sent anywhere) ----
+  var form = document.getElementById('quoteForm');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    document.getElementById('submitBtn').classList.add('hidden');
+    document.getElementById('formNote').classList.add('hidden');
+    var ok = document.getElementById('formSuccess');
+    ok.classList.remove('hidden');
+    ok.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+</body>
+</html>
