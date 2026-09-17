@@ -504,6 +504,8 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
+var APP_BUILD = 5;
+var APP_DATE = "17 Sep 2026";
 var KEY = "liftledger.v1";
 var S = null;
 
@@ -1336,7 +1338,11 @@ function viewSettings(){
        '<button class="btn btn-sm" data-action="load-data">Load from box</button>' +
        '<button class="btn btn-sm btn-ghost btn-danger pull-right" data-action="wipe">Erase everything</button></div></div>';
 
-  h += '<p class="sub" style="font-size:13px;text-align:center">Lift Ledger &middot; ' + S.sessions.length + ' session' + (S.sessions.length === 1 ? "" : "s") + ' on file</p>';
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">This copy</p>' +
+       '<div class="kv"><span class="k">Build</span><span class="v">' + APP_BUILD + ' &middot; ' + APP_DATE + '</span></div>' +
+       '<div class="kv"><span class="k">Sessions on file</span><span class="v">' + S.sessions.length + '</span></div>' +
+       '<div style="height:10px"></div>' +
+       '<button class="btn btn-sm btn-block" data-action="force-update">Check for an update</button></div>';
   h += '</div>';
   return h;
 }
@@ -2495,6 +2501,19 @@ document.addEventListener("click", function(ev){
       break;
     }
 
+    case "force-update": {
+      toast("Checking for a newer build...");
+      var reload = function(){ location.reload(); };
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+          navigator.serviceWorker.getRegistration().then(function(r){
+            if (r && r.update) { r.update().then(reload, reload); } else { reload(); }
+          }, reload);
+        } else { reload(); }
+      } catch (e) { reload(); }
+      break;
+    }
+
     case "close-sheet": closeSheet(); break;
   }
 });
@@ -2563,6 +2582,13 @@ document.addEventListener("keydown", function(ev){
 document.addEventListener("visibilitychange", function(){
   if (!document.hidden) { tick(); if (T.running) requestWakeLock(); }
 });
+
+/* On a real site, keep a copy on the phone so it opens without signal,
+   and still take a new build whenever one is up. No-op on file:// and in
+   sandboxed previews. */
+if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+  try { navigator.serviceWorker.register("sw.js").catch(function(){}); } catch (e) {}
+}
 
 /* ------------------------------- boot ------------------------------- */
 S = load();
