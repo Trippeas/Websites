@@ -523,7 +523,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 6;
+var APP_BUILD = 7;
 var APP_DATE = "17 Sep 2026";
 var KEY = "liftledger.v1";
 var S = null;
@@ -948,9 +948,12 @@ function trainPicker(){
   var last = finishedSessions()[0];
   var h = '<div class="stack">';
   h += '<div><p class="eyebrow">Train</p><h1 class="view-title">Pick today\'s session</h1>' +
-       '<p class="sub">' + (last
-          ? 'Last session: ' + esc(last.name) + ', ' + ago(last.start) + '.'
-          : 'Nothing logged yet. Start with a routine or an empty session.') +
+       '<p class="sub">' +
+         (trainedToday()
+           ? 'Today is done - ' + esc(last.name) + ' is in the log. Anything more is a bonus.'
+           : (last
+               ? 'Nothing logged today yet. Last session: ' + esc(last.name) + ', ' + ago(last.start) + '.'
+               : 'Nothing logged yet. Start with a routine or an empty session.')) +
        '</p></div>';
   h += '<div class="pick">';
   S.routines.forEach(function(r){
@@ -1352,6 +1355,18 @@ function viewSettings(){
     '<label class="switch"><input type="checkbox" data-sf="wake"' + (st.wake ? " checked" : "") + '>' +
       '<span class="txt">Keep the screen awake<small>While a timer is running, so the phone does not lock between sets.</small></span></label>' +
   '</div>';
+
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:8px">Reminders</p>' +
+       '<p class="sub" style="margin-bottom:12px">This app has no server behind it, so it cannot send you a notification on its own. ' +
+       'Your phone can, though - these two repeating events cover Monday through Saturday and skip Sunday.</p>' +
+       '<a class="btn btn-primary btn-block" href="gains-reminders.ics">Add both reminders to your calendar</a>' +
+       '<div style="height:8px"></div>' +
+       '<p class="sub" style="font-size:13px">7:00 am to weigh in, 3:00 pm to train. Open either event in Calendar afterwards to change the time, ' +
+       'or delete one if you only want the other.</p>' +
+       '<hr class="rule" style="margin:14px 0 12px">' +
+       '<p class="eyebrow" style="margin-bottom:6px">Or, to have it open this app</p>' +
+       '<p class="sub" style="font-size:13px">Shortcuts app &rarr; Automation &rarr; + &rarr; Time of Day &rarr; pick the time and the six days &rarr; ' +
+       'Open App or Open URL, pointed at this page. Set it to Run Immediately and it will not ask first.</p></div>';
 
   h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:8px">Data</p>' +
        '<p class="sub" style="margin-bottom:10px">Everything lives in this browser only. Copy the text below to back it up or to move your log to another device, then paste it into the box on that device and press Load.</p>' +
@@ -2101,6 +2116,11 @@ function body(){
   if (!S.body) S.body = { goalW:0, pTarget:150, w:{}, p:{}, c:{} };
   return S.body;
 }
+function trainedToday(){
+  var k = today(), hit = false;
+  S.sessions.forEach(function(s){ if (dayKey(s.start) === k) hit = true; });
+  return hit;
+}
 function proteinOn(k){
   var list = body().p[k] || [], t = 0;
   list.forEach(function(g){ t += num(g); });
@@ -2253,6 +2273,7 @@ function checkinCard(){
     : (lw ? 'last ' + fmt(lw.v) + ' ' + unit() : 'no weigh-in'));
   bits.push('<b>' + Math.round(pg) + '</b>' + (pt > 0 ? ' / ' + Math.round(pt) : "") + ' g');
   bits.push(b.c[k] ? 'creatine &#10003;' : 'no creatine');
+  bits.push(trainedToday() ? 'trained &#10003;' : 'not trained');
 
   return '<button class="pick-item" data-action="open-body">' +
            '<span class="bar" style="background:var(--' + (wToday != null && pt > 0 && pg >= pt ? "green" : "amber") + ')"></span>' +
