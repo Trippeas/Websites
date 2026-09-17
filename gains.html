@@ -271,7 +271,7 @@ tr.done .check{background:var(--green);border-color:var(--green);color:#fff}
 }
 .tstrip-btn:hover{background:rgba(255,255,255,.14)}
 .tabbar{
-  display:grid;grid-template-columns:repeat(4,1fr);
+  display:grid;grid-template-columns:repeat(5,1fr);
   background:var(--surface);border:1px solid var(--line);
   border-radius:var(--r-l) var(--r-l) 0 0;border-bottom:0;
   box-shadow:var(--shadow-2);
@@ -280,9 +280,9 @@ tr.done .check{background:var(--green);border-color:var(--green);color:#fff}
 .tab{
   display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;
   background:transparent;border:0;border-radius:var(--r-m);color:var(--ink-3);
-  font-family:var(--display);font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  font-family:var(--display);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
 }
-.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tab[aria-current="page"]{color:var(--ink);background:var(--surface-2)}
 .tab .dot{width:5px;height:5px;border-radius:50%;background:var(--red);position:absolute;margin:-6px 0 0 20px}
 
@@ -378,6 +378,30 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
   padding:5px 10px;border-radius:var(--r-s);font-family:var(--mono);font-size:13px;font-weight:600;
   color:#fff;background:var(--ink-2);
 }
+/* ---------- records, milestones, goals ---------- */
+.bar-track{height:9px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .3s ease}
+.bar-fill.done{background:var(--green)}
+.ms{display:grid;gap:8px;padding:13px 14px}
+.ms-top{display:flex;align-items:baseline;gap:10px}
+.ms-top .n{font-family:var(--display);font-size:16.5px;line-height:1.2}
+.ms-top .v{
+  margin-left:auto;flex:none;font-family:var(--mono);font-size:13.5px;font-weight:500;
+  font-variant-numeric:tabular-nums;
+}
+.ms-note{font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.rec{
+  display:block;width:100%;text-align:left;background:transparent;
+  border:0;border-top:1px solid var(--line);padding:11px 14px;
+}
+.card > .rec:first-child{border-top:0}
+.rec:hover{background:var(--surface-2)}
+.btn-link{
+  background:none;border:0;padding:0;color:var(--blue);
+  font-family:inherit;font-size:12.5px;text-decoration:underline;
+}
+@media (prefers-reduced-motion:reduce){ .bar-fill{transition:none} }
+
 /* ---------- form guide ---------- */
 .demo{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-m);padding:4px}
 .demo svg{width:100%;height:auto;display:block}
@@ -454,6 +478,10 @@ a.btn{text-decoration:none}
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16M4 12h16M4 18.5h10"></path></svg>
         Log
       </button>
+      <button class="tab" data-action="tab" data-view="prs">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21.5V3M6 3.8h11.5l-2.4 3.9 2.4 3.9H6"></path></svg>
+        PRs
+      </button>
       <button class="tab" data-action="tab" data-view="plan">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"></rect><path d="M8 9h8M8 12.5h8M8 16h4"></path></svg>
         Plan
@@ -487,6 +515,7 @@ function defaults(){
     settings: { unit:"lb", bar:45, rest:120, sound:true, vibrate:true, wake:true, theme:"system" },
     routines: seedRoutines(),
     sessions: [],
+    goals: [],
     active: null
   };
 }
@@ -534,6 +563,7 @@ function load(){
       p.settings = Object.assign(d.settings, p.settings || {});
       if (!Array.isArray(p.routines)) p.routines = d.routines;
       if (!Array.isArray(p.sessions)) p.sessions = [];
+      if (!Array.isArray(p.goals)) p.goals = [];
       if (!p.active) p.active = null;
       if (isUntouchedOldSeed(p)) p.routines = d.routines;
       return p;
@@ -865,6 +895,7 @@ function render(){
   if (V.view === "train") html = viewTrain();
   else if (V.view === "timer") html = viewTimer();
   else if (V.view === "log") html = viewLog();
+  else if (V.view === "prs") html = viewPRs();
   else if (V.view === "plan") html = viewPlan();
   else if (V.view === "settings") html = viewSettings();
   m.innerHTML = html;
@@ -1299,7 +1330,7 @@ function viewSettings(){
 
   h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:8px">Data</p>' +
        '<p class="sub" style="margin-bottom:10px">Everything lives in this browser only. Copy the text below to back it up or to move your log to another device, then paste it into the box on that device and press Load.</p>' +
-       '<textarea class="control" id="dataBox" rows="5" spellcheck="false" aria-label="Backup data">' + esc(JSON.stringify({ settings: S.settings, routines: S.routines, sessions: S.sessions })) + '</textarea>' +
+       '<textarea class="control" id="dataBox" rows="5" spellcheck="false" aria-label="Backup data">' + esc(JSON.stringify({ settings: S.settings, routines: S.routines, sessions: S.sessions, goals: S.goals })) + '</textarea>' +
        '<div style="height:10px"></div>' +
        '<div class="row"><button class="btn btn-sm" data-action="copy-data">Copy</button>' +
        '<button class="btn btn-sm" data-action="load-data">Load from box</button>' +
@@ -1714,6 +1745,312 @@ function formSheet(name){
   }
 }
 
+/* =====================================================================
+   RECORDS, MILESTONES AND GOALS
+   Nothing here is stored except the goals you set - every record and
+   streak is recomputed from the session log, so deleting a session
+   correctly takes its PR with it.
+   ===================================================================== */
+
+/* Standard barbell milestones. The plate names are the ones people
+   actually use: 135 lb and 60 kg are both "one plate" a side. */
+var MILESTONES = [
+  { label:"Bench Press",    match:["bench press","bench"], avoid:["incline"], lb:[95,135,185,225,275,315], kg:[40,60,80,100,120,140] },
+  { label:"Back Squat",     match:["squat"], avoid:["split","bulgarian","lunge"], lb:[135,185,225,275,315,405], kg:[60,80,100,120,140,180] },
+  { label:"Deadlift",       match:["deadlift"], avoid:["romanian","rdl","stiff","dumbbell","db ","single leg"], lb:[135,225,315,405,495], kg:[60,100,140,180,220] },
+  { label:"Overhead Press", match:["overhead press","military","shoulder press"], lb:[75,95,115,135,155,185], kg:[30,40,50,60,70,80] },
+  { label:"Barbell Row",    match:["barbell row","bent over row","pendlay"], lb:[95,135,185,225,275], kg:[40,60,80,100,120] },
+  { label:"Lat Pulldown",   match:["pulldown","lat pull"], lb:[100,130,160,190,220], kg:[45,60,75,85,100] }
+];
+var PLATE_LB = { 135:"one plate", 225:"two plates", 315:"three plates", 405:"four plates", 495:"five plates" };
+var PLATE_KG = { 60:"one plate", 100:"two plates", 140:"three plates", 180:"four plates", 220:"five plates" };
+function plateName(w){
+  var t = unit() === "kg" ? PLATE_KG : PLATE_LB;
+  return t[w] || "";
+}
+
+/* Every completed set in the log, flattened. */
+function allSets(){
+  var out = [];
+  finishedSessions().forEach(function(s){
+    (s.entries || []).forEach(function(e){
+      doneSets(e).forEach(function(x){
+        out.push({ name:e.name, key:norm(e.name), w:num(x.w), r:num(x.r), ts:x.ts || s.start, pr:!!x.pr });
+      });
+    });
+  });
+  return out;
+}
+function nameMatches(key, m){
+  var n = " " + key.replace(/[^a-z0-9]+/g, " ") + " ", i;
+  if (m.avoid) for (i = 0; i < m.avoid.length; i++) if (n.indexOf(m.avoid[i]) >= 0) return false;
+  for (i = 0; i < m.match.length; i++) if (n.indexOf(m.match[i]) >= 0) return true;
+  return false;
+}
+
+/* One row per lift: heaviest set, best estimated 1RM, and when. */
+function recordRows(){
+  var map = {};
+  allSets().forEach(function(x){
+    var m = map[x.key];
+    if (!m) m = map[x.key] = { name:x.name, bestW:0, bestWr:0, bestWts:0, bestE:0, bestEset:null, sets:0, last:0 };
+    m.sets++;
+    m.last = Math.max(m.last, x.ts);
+    if (x.w > m.bestW) { m.bestW = x.w; m.bestWr = x.r; m.bestWts = x.ts; }
+    var e = e1rm(x.w, x.r);
+    if (e > m.bestE) { m.bestE = e; m.bestEset = x; }
+  });
+  return Object.keys(map).map(function(k){ return map[k]; })
+    .sort(function(a, b){ return b.last - a.last; });
+}
+
+/* Heaviest single set for a milestone group. A milestone is about what
+   you actually put on the bar, so this is real weight, not an estimate. */
+function bestForMilestone(m){
+  var best = { w:0, r:0, ts:0 };
+  allSets().forEach(function(x){
+    if (!nameMatches(x.key, m)) return;
+    if (x.w > best.w) best = { w:x.w, r:x.r, ts:x.ts };
+  });
+  return best;
+}
+function inPlan(m){
+  var hit = false;
+  S.routines.forEach(function(r){
+    r.exercises.forEach(function(e){ if (nameMatches(norm(e.name), m)) hit = true; });
+  });
+  return hit;
+}
+
+/* Heaviest weight moved for at least the goal's reps. */
+function goalBest(g){
+  var best = 0, ts = 0;
+  allSets().forEach(function(x){
+    if (x.key !== norm(g.name)) return;
+    if (x.r < num(g.r)) return;
+    if (x.w > best) { best = x.w; ts = x.ts; }
+  });
+  return { w:best, ts:ts };
+}
+/* Mark anything already earned, so goals added after the fact are honest. */
+function syncGoals(){
+  var changed = false;
+  (S.goals || []).forEach(function(g){
+    var b = goalBest(g);
+    if (!g.done && b.w >= num(g.w)) { g.done = b.ts || Date.now(); changed = true; }
+    if (g.done && b.w < num(g.w)) { g.done = 0; changed = true; }
+  });
+  if (changed) save();
+}
+
+/* ------------------------------ streaks ----------------------------- */
+function weekStart(ts){
+  var d = new Date(ts);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));   /* weeks run Monday to Sunday */
+  return d.getTime();
+}
+function weekCounts(n){
+  var thisWeek = weekStart(Date.now()), out = [], i;
+  for (i = n - 1; i >= 0; i--) out.push({ start: thisWeek - i * 604800000, n: 0 });
+  S.sessions.forEach(function(s){
+    var w = weekStart(s.start);
+    out.forEach(function(b){ if (b.start === w) b.n++; });
+  });
+  return out;
+}
+function lastNDays(days){
+  var cut = Date.now() - days * 86400000, n = 0;
+  S.sessions.forEach(function(s){ if (s.start >= cut) n++; });
+  return n;
+}
+function totalVolume(){
+  var v = 0;
+  S.sessions.forEach(function(s){ v += sessionVolume(s); });
+  return v;
+}
+
+/* Sessions per week, twelve weeks back. This week is picked out in red. */
+function weeksChart(){
+  var bars = weekCounts(12);
+  var W = 640, H = 170, L = 34, R = 14, TP = 16, B = 30;
+  var max = Math.max(3, bars.reduce(function(a, b){ return Math.max(a, b.n); }, 0));
+  var iw = (W - L - R) / bars.length;
+  var s = "";
+  for (var k = 0; k <= max; k += Math.ceil(max / 3)) {
+    var y = TP + (H - TP - B) * (1 - k / max);
+    s += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W - R) + '" y2="' + y.toFixed(1) +
+         '" stroke="currentColor" stroke-width="1" opacity="0.16"></line>' +
+         '<text x="' + (L - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="12" ' +
+         'font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">' + k + '</text>';
+  }
+  bars.forEach(function(b, i){
+    var h = (H - TP - B) * (b.n / max);
+    var x = L + i * iw + iw * 0.18, w = iw * 0.64;
+    var y = TP + (H - TP - B) - h;
+    var live = i === bars.length - 1;
+    if (b.n > 0) {
+      s += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) +
+           '" height="' + Math.max(2, h).toFixed(1) + '" rx="2.5" fill="' + (live ? "var(--red)" : "var(--blue)") + '"></rect>';
+    } else {
+      s += '<rect x="' + x.toFixed(1) + '" y="' + (TP + H - TP - B - 3).toFixed(1) + '" width="' + w.toFixed(1) +
+           '" height="3" rx="1.5" fill="currentColor" opacity="0.2"></rect>';
+    }
+  });
+  s += '<text x="' + L + '" y="' + (H - 8) + '" font-size="12" font-family="IBM Plex Mono, monospace" ' +
+       'fill="currentColor" opacity="0.6">' + dayLabel(bars[0].start) + '</text>' +
+       '<text x="' + (W - R) + '" y="' + (H - 8) + '" text-anchor="end" font-size="12" ' +
+       'font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">this week</text>';
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+         'aria-label="Sessions per week over the last twelve weeks" style="color:var(--ink-2)">' + s + '</svg>';
+}
+
+function progressBar(pct, done){
+  return '<div class="bar-track"><div class="bar-fill' + (done ? " done" : "") + '" style="width:' +
+         Math.max(0, Math.min(100, pct)).toFixed(1) + '%"></div></div>';
+}
+
+/* ------------------------------- view ------------------------------- */
+function viewPRs(){
+  syncGoals();
+  var sets = allSets();
+  var h = '<div class="stack">';
+  h += '<div><p class="eyebrow">Records</p><h1 class="view-title">What you are chasing</h1></div>';
+
+  h += '<div class="stats">' +
+         '<div class="stat"><div class="k">Last 7 days</div><div class="v">' + lastNDays(7) + '<small>sessions</small></div></div>' +
+         '<div class="stat"><div class="k">All time</div><div class="v">' + S.sessions.length + '<small>sessions</small></div></div>' +
+         '<div class="stat"><div class="k">Moved</div><div class="v">' + Math.round(totalVolume() / 1000) + '<small>k ' + unit() + '</small></div></div>' +
+       '</div>';
+
+  /* ---- plate milestones ---- */
+  /* Closest to falling first - that is the one worth looking at today. */
+  var groups = MILESTONES.filter(function(m){ return inPlan(m) || bestForMilestone(m).w > 0; })
+    .map(function(m){
+      var best = bestForMilestone(m);
+      var ladder = unit() === "kg" ? m.kg : m.lb;
+      var next = null;
+      for (var i = 0; i < ladder.length; i++) { if (ladder[i] > best.w) { next = ladder[i]; break; } }
+      var target = next === null ? ladder[ladder.length - 1] : next;
+      return { m:m, best:best, next:next, target:target, pct: next === null ? 100 : (best.w / target) * 100 };
+    })
+    .sort(function(a, b){ return b.pct - a.pct; });
+  if (groups.length) {
+    h += '<div><p class="eyebrow" style="margin-bottom:8px">Next on the bar</p><div class="stack" style="gap:8px">';
+    groups.forEach(function(row){
+      var m = row.m, best = row.best, next = row.next, target = row.target, pct = row.pct;
+      var pn = plateName(target);
+      h += '<div class="card ms">' +
+             '<div class="ms-top"><span class="n">' + esc(m.label) + '</span>' +
+               '<span class="v">' + fmt(best.w) + ' / ' + fmt(target) + ' ' + unit() + '</span></div>' +
+             progressBar(pct, next === null) +
+             '<div class="ms-note">' +
+               (next === null
+                 ? "Every milestone cleared. Best set " + fmt(best.w) + " x " + fmt(best.r) + "."
+                 : (best.w > 0
+                     ? fmt(target - best.w) + " " + unit() + " to go" + (pn ? " - " + pn : "") + "."
+                     : "Log a set and this starts tracking" + (pn ? ". First target: " + pn : "") + ".")) +
+             '</div>' +
+             (next === null ? "" :
+               '<div><button class="btn btn-ghost btn-sm" data-action="goal-from" data-name="' + esc(m.label) +
+               '" data-w="' + target + '">Make this a goal</button></div>') +
+           '</div>';
+    });
+    h += '</div></div>';
+  }
+
+  /* ---- your own goals ---- */
+  var goals = S.goals || [];
+  var open = goals.filter(function(g){ return !g.done; });
+  var won = goals.filter(function(g){ return g.done; }).sort(function(a, b){ return b.done - a.done; });
+
+  h += '<div><div class="row" style="margin-bottom:8px"><p class="eyebrow">Your goals</p>' +
+       '<button class="btn btn-ghost btn-sm pull-right" data-action="goal-sheet">+ Add a goal</button></div>';
+  if (!open.length && !won.length) {
+    h += '<div class="card empty"><h3>Nothing set yet</h3>' +
+         '<p>Pick a lift and a number - "Bench 225 for 5" - and it fills in as you get closer.</p></div>';
+  }
+  h += '<div class="stack" style="gap:8px">';
+  open.forEach(function(g){
+    var b = goalBest(g);
+    h += '<div class="card ms">' +
+           '<div class="ms-top"><span class="n">' + esc(g.name) + '</span>' +
+             '<span class="v">' + fmt(b.w) + ' / ' + fmt(g.w) + ' ' + unit() + ' x ' + fmt(g.r) + '</span></div>' +
+           progressBar((b.w / num(g.w)) * 100) +
+           '<div class="ms-note">' +
+             (b.w > 0 ? fmt(num(g.w) - b.w) + " " + unit() + " to go at " + fmt(g.r) + " reps."
+                      : "No set at " + fmt(g.r) + " reps yet.") +
+             ' <button class="btn-link" data-action="del-goal" data-id="' + g.id + '">Remove</button>' +
+           '</div>' +
+         '</div>';
+  });
+  won.forEach(function(g){
+    h += '<div class="card ms">' +
+           '<div class="ms-top"><span class="n">' + esc(g.name) + '</span>' +
+             '<span class="v" style="color:var(--green)">' + fmt(g.w) + ' x ' + fmt(g.r) + '</span></div>' +
+           progressBar(100, true) +
+           '<div class="ms-note">Hit on ' + dayLabel(g.done) + '. ' +
+             '<button class="btn-link" data-action="del-goal" data-id="' + g.id + '">Remove</button></div>' +
+         '</div>';
+  });
+  h += '</div></div>';
+
+  /* ---- consistency ---- */
+  h += '<div><p class="eyebrow" style="margin-bottom:8px">Sessions per week</p>' +
+       '<div class="card card-pad"><div class="chart-box">' + weeksChart() + '</div></div></div>';
+
+  /* ---- personal records ---- */
+  var rows = recordRows();
+  h += '<div><p class="eyebrow" style="margin-bottom:8px">Personal records</p>';
+  if (!rows.length) {
+    h += '<div class="card empty"><h3>No records yet</h3>' +
+         '<p>Finish a session and every lift in it gets a line here: your heaviest set and your best estimated one-rep max.</p></div>';
+  } else {
+    h += '<div class="card">';
+    rows.forEach(function(r){
+      h += '<button class="rec" data-action="open-exercise" data-name="' + esc(r.name) + '">' +
+             '<div class="ms-top"><span class="n">' + esc(r.name) + '</span>' +
+               '<span class="v">' + fmt(r.bestW) + ' x ' + fmt(r.bestWr) + '</span></div>' +
+             '<div class="ms-note">Best e1RM ' + fmt(Math.round(r.bestE)) + ' ' + unit() +
+               ' &middot; ' + r.sets + ' sets &middot; heaviest on ' + dayLabel(r.bestWts) + '</div>' +
+           '</button>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+
+  /* ---- the PR feed ---- */
+  var prs = sets.filter(function(x){ return x.pr; }).sort(function(a, b){ return b.ts - a.ts; }).slice(0, 12);
+  if (prs.length) {
+    h += '<div><p class="eyebrow" style="margin-bottom:8px">Recently broken</p><div class="card">';
+    prs.forEach(function(x){
+      h += '<div class="rec"><div class="ms-top"><span class="n">' + esc(x.name) + '</span>' +
+           '<span class="v">' + fmt(x.w) + ' x ' + fmt(x.r) + '</span></div>' +
+           '<div class="ms-note">' + dayLabel(x.ts) + '</div></div>';
+    });
+    h += '</div></div>';
+  }
+
+  h += '</div>';
+  return h;
+}
+
+function goalSheet(name, w){
+  openSheet("Add a goal",
+    '<div class="field"><label for="glName">Lift</label>' +
+      '<input class="control" id="glName" list="exerciseNames" value="' + esc(name || "") + '" placeholder="Barbell Bench Press" autocomplete="off"></div>' +
+    '<div style="height:10px"></div>' +
+    '<div class="grid-2">' +
+      '<div class="field"><label for="glW">Weight (' + unit() + ')</label><input class="control" id="glW" inputmode="decimal" value="' + (w || "") + '" placeholder="225"></div>' +
+      '<div class="field"><label for="glR">For reps</label><input class="control" id="glR" inputmode="numeric" value="5"></div>' +
+    '</div><div style="height:6px"></div>' +
+    '<p class="sub" style="font-size:13px">It fills in from your heaviest set at that rep count or better, and marks itself done the moment you hit it.</p>' +
+    '<div style="height:12px"></div>' +
+    '<div class="row"><button class="btn btn-ghost" style="flex:1" data-action="close-sheet">Cancel</button>' +
+    '<button class="btn btn-primary" style="flex:1" data-action="do-add-goal">Set it</button></div>');
+  setTimeout(function(){ var f = $("#glName"); if (f && !f.value) f.focus(); }, 40);
+}
+
 /* ------------------------------ painting ---------------------------- */
 function paintTimer(){
   var strip = $("#timerStrip");
@@ -1840,10 +2177,18 @@ function logSet(exId, i){
   var next = e.sets[i + 1];
   if (next && !next.done && (next.w === "" || next.w == null)) next.w = s.w;
 
+  /* Did that set finish anything you were chasing? */
+  var landed = null;
+  (S.goals || []).forEach(function(g){
+    if (g.done || norm(g.name) !== norm(e.name)) return;
+    if (num(s.w) >= num(g.w) && num(s.r) >= num(g.r)) { g.done = Date.now(); landed = g; }
+  });
+
   save();
   startRest(num(e.rest) || num(S.settings.rest), "Rest");
   render();
-  if (s.pr) toast("New best on " + e.name + ": " + fmt(s.w) + " x " + fmt(s.r) + ".");
+  if (landed) toast("Goal hit: " + landed.name + " " + fmt(landed.w) + " x " + fmt(landed.r) + ".");
+  else if (s.pr) toast("New best on " + e.name + ": " + fmt(s.w) + " x " + fmt(s.r) + ".");
 }
 function finishSession(){
   var a = S.active;
@@ -1947,6 +2292,7 @@ function loadData(){
   S.settings = Object.assign(defaults().settings, p.settings || {});
   S.routines = p.routines;
   S.sessions = p.sessions;
+  S.goals = Array.isArray(p.goals) ? p.goals : [];
   S.active = null;
   save();
   applyTheme();
@@ -2080,7 +2426,7 @@ document.addEventListener("click", function(ev){
 
     case "log-tab": V.logTab = btn.getAttribute("data-tab"); render(); break;
     case "open-session": V.sessionId = id; render(); window.scrollTo(0, 0); break;
-    case "open-exercise": V.exName = btn.getAttribute("data-name"); render(); window.scrollTo(0, 0); break;
+    case "open-exercise": V.view = "log"; V.exName = btn.getAttribute("data-name"); render(); window.scrollTo(0, 0); break;
     case "back-log": V.sessionId = null; V.exName = null; render(); window.scrollTo(0, 0); break;
     case "delete-session": askSheet("Delete this session?", "It is removed from your history and from every trend line.", "Delete", "delete-session-confirm", id); break;
     case "delete-session-confirm": {
@@ -2120,6 +2466,22 @@ document.addEventListener("click", function(ev){
     case "del-routine-confirm": {
       S.routines = S.routines.filter(function(x){ return x.id !== id; });
       V.routineId = null; save(); closeSheet(); render();
+      break;
+    }
+
+    case "goal-sheet": goalSheet("", ""); break;
+    case "goal-from": goalSheet(btn.getAttribute("data-name"), btn.getAttribute("data-w")); break;
+    case "do-add-goal": {
+      var gn = $("#glName").value.trim(), gw = num($("#glW").value), gr = num($("#glR").value);
+      if (!gn) { toast("Which lift is the goal for?"); break; }
+      if (gw <= 0 || gr <= 0) { toast("Give it a weight and a rep count."); break; }
+      S.goals.push({ id:uid(), name:gn, w:gw, r:gr, created:Date.now(), done:0 });
+      save(); closeSheet(); V.view = "prs"; render();
+      break;
+    }
+    case "del-goal": {
+      S.goals = S.goals.filter(function(x){ return x.id !== id; });
+      save(); render();
       break;
     }
 
