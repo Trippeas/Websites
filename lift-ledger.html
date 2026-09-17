@@ -204,8 +204,8 @@ main{padding-block:18px 8px}
 }
 .pick-item:hover{border-color:var(--ink-3)}
 .pick-item .bar{width:4px;align-self:stretch;border-radius:2px;background:var(--red);flex:none}
-.pick-item .t{font-family:var(--display);font-size:17px;line-height:1.2}
-.pick-item .m{font-size:13px;color:var(--ink-2);margin-top:2px}
+.pick-item .t{display:block;font-family:var(--display);font-size:17px;line-height:1.2}
+.pick-item .m{display:block;font-size:13px;color:var(--ink-2);margin-top:2px}
 .pick-item .go{margin-left:auto;color:var(--ink-3);font-family:var(--display);font-size:13px;letter-spacing:.08em;white-space:nowrap}
 
 /* ---------- exercise card ---------- */
@@ -342,10 +342,10 @@ textarea.control{font-family:var(--mono);font-size:12px;line-height:1.5;resize:v
   flex:none;width:44px;text-align:center;font-family:var(--display);line-height:1.05;
   padding-right:12px;border-right:1px solid var(--line);
 }
-.sess .date .d{font-size:21px}
-.sess .date .mo{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
-.sess .t{font-family:var(--display);font-size:16px}
-.sess .m{font-size:12.5px;color:var(--ink-2);font-family:var(--mono);margin-top:1px}
+.sess .date .d{display:block;font-size:21px}
+.sess .date .mo{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.sess .t{display:block;font-family:var(--display);font-size:16px}
+.sess .m{display:block;font-size:12.5px;color:var(--ink-2);font-family:var(--mono);margin-top:1px}
 .kv{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
 .kv:first-child{border-top:0}
 .kv .k{color:var(--ink-2)}
@@ -479,41 +479,35 @@ function defaults(){
 function seedRoutines(){
   function ex(name, sets, reps, rest){ return { id:uid(), name:name, sets:sets, reps:reps, rest:rest }; }
   return [
-    { id:uid(), name:"Upper A - Press & Pull", color:"red", exercises:[
-      ex("Barbell Bench Press", 4, "5", 180),
-      ex("Barbell Row", 4, "6", 150),
-      ex("Overhead Press", 3, "8", 120),
-      ex("Chin-Up", 3, "AMRAP", 120),
-      ex("Incline Dumbbell Press", 3, "10", 90),
-      ex("Face Pull", 3, "15", 60),
-      ex("EZ-Bar Curl", 3, "12", 60)
+    { id:uid(), name:"Push - Mon & Thu", color:"red", exercises:[
+      ex("Barbell Bench Press", 4, "6-8", 180),
+      ex("Overhead Press", 3, "8-10", 150),
+      ex("Incline Dumbbell Press", 3, "10", 120),
+      ex("Cable Triceps Pushdown", 3, "12", 60),
+      ex("Lateral Raise", 3, "15", 45)
     ]},
-    { id:uid(), name:"Lower A - Squat", color:"blue", exercises:[
-      ex("Back Squat", 4, "5", 210),
-      ex("Romanian Deadlift", 3, "8", 150),
-      ex("Bulgarian Split Squat", 3, "10", 120),
-      ex("Lying Leg Curl", 3, "12", 90),
-      ex("Standing Calf Raise", 4, "12", 60),
-      ex("Hanging Leg Raise", 3, "12", 60)
+    { id:uid(), name:"Pull - Tue & Fri", color:"blue", exercises:[
+      ex("Cable Lat Pulldown", 4, "8-10", 120),
+      ex("Barbell Row", 3, "8-10", 150),
+      ex("Seated Cable Row", 3, "10", 120),
+      ex("Dumbbell Curl", 3, "12", 60),
+      ex("Face Pull", 3, "15", 45)
     ]},
-    { id:uid(), name:"Upper B - Volume", color:"green", exercises:[
-      ex("Overhead Press", 4, "6", 180),
-      ex("Weighted Pull-Up", 4, "6", 180),
-      ex("Incline Bench Press", 3, "10", 120),
-      ex("Chest-Supported Row", 3, "12", 90),
-      ex("Lateral Raise", 4, "15", 45),
-      ex("Triceps Pushdown", 3, "12", 60),
-      ex("Hammer Curl", 3, "12", 60)
-    ]},
-    { id:uid(), name:"Lower B - Deadlift", color:"amber", exercises:[
-      ex("Deadlift", 3, "3", 240),
-      ex("Front Squat", 3, "6", 180),
-      ex("Hip Thrust", 3, "10", 120),
-      ex("Walking Lunge", 3, "12", 90),
-      ex("Leg Extension", 3, "15", 60),
-      ex("Seated Calf Raise", 4, "15", 45)
+    { id:uid(), name:"Legs - Wed & Sat", color:"green", exercises:[
+      ex("Barbell Squat", 3, "8", 180),
+      ex("Dumbbell Romanian Deadlift", 2, "10", 150),
+      ex("Leg Curl or Glute Bridge", 2, "12", 90)
     ]}
   ];
+}
+
+/* Names of the very first seed, so an untouched copy of it can be
+   swapped for the current one without ever clobbering real edits. */
+var OLD_SEED = ["upper a - press & pull", "lower a - squat", "upper b - volume", "lower b - deadlift"];
+function isUntouchedOldSeed(p){
+  if (p.sessions.length || p.active) return false;
+  if (p.routines.length !== OLD_SEED.length) return false;
+  return p.routines.every(function(r){ return OLD_SEED.indexOf(norm(r.name)) !== -1; });
 }
 
 function load(){
@@ -526,6 +520,7 @@ function load(){
       if (!Array.isArray(p.routines)) p.routines = d.routines;
       if (!Array.isArray(p.sessions)) p.sessions = [];
       if (!p.active) p.active = null;
+      if (isUntouchedOldSeed(p)) p.routines = d.routines;
       return p;
     }
   } catch (e) {}
@@ -1446,7 +1441,8 @@ function finishSession(){
   V.view = "log"; V.logTab = "sessions"; V.sessionId = a.id;
   render();
   window.scrollTo(0, 0);
-  toast("Saved: " + sessionSetCount(a) + " sets, " + fmt(Math.round(sessionVolume(a))) + " " + unit() + ".");
+  var n = sessionSetCount(a);
+  toast("Saved: " + n + (n === 1 ? " set, " : " sets, ") + fmt(Math.round(sessionVolume(a))) + " " + unit() + ".");
 }
 
 /* ------------------------------ sheets: content --------------------- */
