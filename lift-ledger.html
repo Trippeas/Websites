@@ -378,6 +378,21 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
   padding:5px 10px;border-radius:var(--r-s);font-family:var(--mono);font-size:13px;font-weight:600;
   color:#fff;background:var(--ink-2);
 }
+/* ---------- form guide ---------- */
+.demo{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-m);padding:4px}
+.demo svg{width:100%;height:auto;display:block}
+.cues{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:9px}
+.cues li{display:flex;gap:10px;font-size:14.5px;line-height:1.45}
+.cues li::before{
+  content:"";flex:none;width:7px;height:7px;border-radius:50%;
+  background:var(--green);margin-top:7px;
+}
+.miss{margin-top:14px;padding:11px 13px;border-radius:var(--r-m);background:var(--red-wash);font-size:14px;line-height:1.45}
+.miss b{
+  display:block;margin-bottom:3px;color:var(--red);
+  font-family:var(--display);font-size:10.5px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;
+}
+a.btn{text-decoration:none}
 .toast{
   position:fixed;left:50%;transform:translateX(-50%);bottom:calc(152px + env(safe-area-inset-bottom,0px));
   z-index:70;background:var(--ink);color:var(--paper);
@@ -964,6 +979,7 @@ function exerciseCard(e){
   h += '</tbody></table>';
   h += '<div class="ex-actions">' +
          '<button class="btn btn-ghost btn-sm" data-action="add-set" data-ex="' + e.id + '">+ Set</button>' +
+         '<button class="btn btn-ghost btn-sm" data-action="form-sheet" data-name="' + esc(e.name) + '">Form</button>' +
          '<button class="btn btn-ghost btn-sm" data-action="plate-sheet" data-ex="' + e.id + '">Plates</button>' +
          '<button class="btn btn-ghost btn-sm" data-action="rest-now" data-ex="' + e.id + '">Rest ' + clock(num(e.rest)) + '</button>' +
        '</div>';
@@ -1294,6 +1310,410 @@ function viewSettings(){
   return h;
 }
 
+/* =====================================================================
+   FORM GUIDES
+   A side-on stick figure rigged from two poses per lift. Every joint is
+   interpolated between pose a and pose b and looped, so you see the
+   movement path and the range of motion rather than a static picture.
+   Pose b only lists the joints that actually move.
+   Coordinate space is 240 x 200, floor at y=186.
+   ===================================================================== */
+
+var STAND = { head:[102,78], sho:[100,92], elb:[102,112], han:[104,132], hip:[100,122], kne:[100,152], ank:[100,182] };
+function pose(over){
+  var p = {}, k;
+  for (k in STAND) p[k] = STAND[k];
+  for (k in over) p[k] = over[k];
+  return p;
+}
+
+var GUIDES = [
+  {
+    key:"incline", title:"Incline Dumbbell Press", view:"side", load:"db",
+    match:["incline"],
+    props:{ floor:true, incline:true },
+    a:{ head:[88,110], sho:[98,120], elb:[88,106], han:[110,108], hip:[128,150], kne:[150,160], ank:[158,184] },
+    b:{ elb:[112,106], han:[128,92] },
+    cues:[
+      "Set the bench at 30 to 45 degrees. Steeper than that and it turns into a shoulder press.",
+      "Start with the dumbbells just outside the chest, wrists stacked over the elbows.",
+      "Press up and slightly together, then lower under control until you feel the chest stretch."
+    ],
+    miss:"Dropping the elbows below the line of the bench, which loads the shoulder joint instead of the chest."
+  },
+  {
+    key:"bench", title:"Barbell Bench Press", view:"side", load:"plate",
+    match:["bench press","bench"], avoid:["incline"],
+    props:{ floor:true, bench:true },
+    a:{ head:[72,120], sho:[94,128], elb:[112,134], han:[98,114], hip:[144,130], kne:[166,152], ank:[170,184] },
+    b:{ elb:[96,108], han:[96,86] },
+    cues:[
+      "Shoulder blades pinned back and down, small arch, ribs stay down.",
+      "Touch mid-chest with the elbows about 45 degrees from your sides, not flared to 90.",
+      "Drive your feet into the floor and press the bar back over the shoulder joint."
+    ],
+    miss:"Bouncing the bar off the chest - it hides where your sticking point actually is."
+  },
+  {
+    key:"ohp", title:"Overhead Press", view:"side", load:"plate",
+    match:["overhead press","shoulder press","military","ohp","strict press"],
+    props:{ floor:true },
+    a:pose({ elb:[102,112], han:[114,98] }),
+    b:pose({ elb:[102,74], han:[104,55] }),
+    cues:[
+      "Bar rests on the front of the shoulders, elbows just in front of the bar.",
+      "Squeeze the glutes and brace so the press does not become a lean-back.",
+      "Push your head through at the top so the bar finishes stacked over mid-foot."
+    ],
+    miss:"Pressing around the head instead of moving the head back - the bar drifts forward and lockout stalls."
+  },
+  {
+    key:"pushdown", title:"Cable Triceps Pushdown", view:"side", load:"cable",
+    match:["pushdown","push down","tricep","triceps"],
+    props:{ floor:true, column:160 },
+    a:pose({ elb:[106,112], han:[118,96] }),
+    b:pose({ elb:[106,112], han:[114,132] }),
+    cues:[
+      "Elbows pinned to your ribs. Only the forearm moves.",
+      "Push down and slightly back, squeezing the triceps at full extension.",
+      "Control the way up and stop when the forearm is just past parallel."
+    ],
+    miss:"Leaning over the bar and pressing with the shoulders once the weight gets heavy."
+  },
+  {
+    key:"lateral", title:"Lateral Raise", view:"front", load:"db",
+    match:["lateral raise","side raise","lateral"],
+    props:{ floor:true }, mirror:true, cx:110,
+    a:{ head:[110,66], sho:[126,84], elb:[130,104], han:[132,124], hip:[110,132], kne:[122,158], ank:[122,184] },
+    b:{ elb:[148,84], han:[168,84] },
+    cues:[
+      "Soft bend in the elbow, thumbs level with the knuckles or a touch lower.",
+      "Lead with the elbow and stop at shoulder height.",
+      "Lower slowly - the way down is where the side delt does most of the work."
+    ],
+    miss:"Swinging the weight up with the hips. If the traps take over, drop the weight."
+  },
+  {
+    key:"pulldown", title:"Cable Lat Pulldown", view:"side", load:"cablebar",
+    match:["pulldown","pull down","lat pull"],
+    props:{ floor:true, column:150, seat:true },
+    a:{ head:[100,98], sho:[98,112], elb:[108,94], han:[118,76], hip:[100,148], kne:[124,150], ank:[128,180] },
+    b:{ elb:[116,122], han:[118,104] },
+    cues:[
+      "Grip just outside shoulder width, chest tall, slight lean back.",
+      "Pull the bar to the top of the chest by driving the elbows down, not by bending the arms.",
+      "Let the shoulder blades rise at the top for a full stretch before the next rep."
+    ],
+    miss:"Rocking the torso to yank the bar down, which hands the work to the biceps and lower back."
+  },
+  {
+    key:"row-bb", title:"Barbell Row", view:"side", load:"plate",
+    match:["barbell row","bent over row","bent-over row","pendlay"],
+    props:{ floor:true },
+    a:{ head:[144,102], sho:[132,110], elb:[134,130], han:[136,150], hip:[100,128], kne:[98,154], ank:[100,182] },
+    b:{ elb:[114,124], han:[136,126] },
+    cues:[
+      "Hinge to roughly 45 degrees, back flat, bar hanging under the shoulders.",
+      "Pull to the belly button with the elbows tracking back, not out to the sides.",
+      "Lower under control instead of letting the bar drop."
+    ],
+    miss:"Standing up a little on every rep, which turns the row into a shrug and a half-deadlift."
+  },
+  {
+    key:"row-cable", title:"Seated Cable Row", view:"side", load:"cable",
+    match:["cable row","seated row","machine row","chest supported","chest-supported","row"],
+    props:{ floor:true, lowPulley:[164,168], footPlate:true, seatLine:true },
+    a:{ head:[92,94], sho:[92,108], elb:[112,116], han:[132,124], hip:[92,144], kne:[140,146], ank:[158,158] },
+    b:{ elb:[76,120], han:[98,114] },
+    cues:[
+      "Sit tall with a slight knee bend. The torso stays still through the whole rep.",
+      "Pull the handle to the bottom of the ribs and squeeze the shoulder blades together.",
+      "Let the arms extend fully at the front and feel the lats stretch."
+    ],
+    miss:"Rowing with the lower back - rocking forward and back to move the stack."
+  },
+  {
+    key:"facepull", title:"Face Pull", view:"side", load:"cable",
+    match:["face pull","facepull"],
+    props:{ floor:true, column:170, pulleyY:60 },
+    a:pose({ elb:[118,88], han:[136,80] }),
+    b:pose({ elb:[118,80], han:[98,66] }),
+    cues:[
+      "Rope set at about eye height, arms straight to start.",
+      "Pull toward your forehead so the hands finish wide, beside your ears.",
+      "Rotate at the end - knuckles back, thumbs pointing behind you."
+    ],
+    miss:"Pulling to the chin with low elbows, which makes it a row instead of a rear-delt movement."
+  },
+  {
+    key:"legcurl", title:"Lying Leg Curl", view:"side", load:"roller",
+    match:["leg curl","hamstring curl","lying curl"],
+    props:{ pad:true },
+    a:{ head:[66,140], sho:[84,146], elb:[76,162], han:[66,168], hip:[130,148], kne:[154,150], ank:[184,152] },
+    b:{ ank:[146,122] },
+    cues:[
+      "Hips flat on the pad. The knee is the only joint that moves.",
+      "Curl until the heels are close to the glutes, then pause for a beat.",
+      "Lower slowly to a full stretch without letting the stack slam down."
+    ],
+    miss:"Lifting the hips off the pad to finish the rep - that is the lower back taking over."
+  },
+  {
+    key:"bridge", title:"Glute Bridge", view:"side", load:"none",
+    match:["glute bridge","hip thrust","bridge"],
+    props:{ floor:true },
+    a:{ head:[60,164], sho:[76,168], elb:[68,178], han:[56,182], hip:[116,170], kne:[140,142], ank:[150,182] },
+    b:{ hip:[116,144] },
+    cues:[
+      "Shoulder blades down, feet flat, shins close to vertical at the top.",
+      "Tuck the ribs down, then drive through the heels.",
+      "Squeeze the glutes hard at lockout and stop when the torso is level."
+    ],
+    miss:"Finishing the rep by arching the lower back instead of extending the hips."
+  },
+  {
+    key:"curl", title:"Dumbbell Curl", view:"side", load:"db",
+    match:["curl","bicep","biceps","hammer"], avoid:["leg curl","hamstring"],
+    props:{ floor:true },
+    a:pose({ elb:[104,112], han:[106,132] }),
+    b:pose({ elb:[104,112], han:[116,96] }),
+    cues:[
+      "Elbows stay at your sides. The upper arm does not travel forward.",
+      "Curl up and turn the palm so the pinky finishes high.",
+      "Lower the whole way down - the stretched position is where the growth is."
+    ],
+    miss:"Swinging the torso to start the rep, so the biceps never get loaded at the bottom."
+  },
+  {
+    key:"squat", title:"Barbell Squat", view:"side", load:"plate",
+    match:["squat"], avoid:["split","lunge","bulgarian"],
+    props:{ floor:true },
+    a:pose({ elb:[90,104], han:[92,94] }),
+    b:{ head:[114,110], sho:[106,124], elb:[96,134], han:[94,122], hip:[86,150], kne:[114,152], ank:[100,182] },
+    cues:[
+      "Bar on the upper back, feet about shoulder width, toes turned out slightly.",
+      "Brace, then break at the hips and knees together and sit between your heels.",
+      "Hit at least parallel, then drive the hips and chest up at the same rate."
+    ],
+    miss:"The hips shooting up first out of the bottom, leaving the chest folded over the bar."
+  },
+  {
+    key:"rdl", title:"Romanian Deadlift", view:"side", load:"db",
+    match:["romanian","rdl","stiff leg","stiff-leg","deadlift"],
+    props:{ floor:true },
+    a:pose({ elb:[102,112], han:[104,132] }),
+    b:{ head:[124,110], sho:[114,116], elb:[116,136], han:[118,156], hip:[88,128], kne:[98,154], ank:[100,182] },
+    cues:[
+      "Soft knees, then push the hips straight back. It is a hinge, not a squat.",
+      "The weights stay close, dragging down the front of the thigh.",
+      "Go as low as your hamstrings allow with a flat back, then squeeze the glutes to stand."
+    ],
+    miss:"Rounding the lower back to chase extra range of motion."
+  }
+];
+
+/* Each lift uses a different slice of the coordinate space - a squat is
+   tall, a bench press is wide and low - so the viewBox is fitted to the
+   drawing instead of leaving half the card empty. */
+function guideBox(g){
+  var xs = [], ys = [], p = g.props || {}, j;
+  ["a", "b"].forEach(function(k){
+    var P = g[k] || {};
+    for (j in P) { xs.push(P[j][0]); ys.push(P[j][1]); }
+  });
+  if (p.floor || p.bench || p.incline || p.pad || p.seat) ys.push(186);
+  if (p.bench) { xs.push(58, 188); }
+  if (p.pad) { xs.push(56, 178); }
+  if (p.incline) { xs.push(86, 168); }
+  if (p.seat) { xs.push(74, 128); }
+  if (p.seatLine) { xs.push(64, 132); }
+  if (p.footPlate) { xs.push(170); ys.push(182); }
+  if (p.column) { xs.push(p.column); ys.push(p.pulleyY || 36, 186); }
+  if (p.lowPulley) { xs.push(p.lowPulley[0]); ys.push(p.lowPulley[1]); }
+  if (g.mirror) {
+    var cx = g.cx || 110, n = xs.length;
+    for (j = 0; j < n; j++) xs.push(2 * cx - xs[j]);
+  }
+  var pad = 24;
+  var x0 = Math.min.apply(null, xs) - pad, x1 = Math.max.apply(null, xs) + pad;
+  var y0 = Math.min.apply(null, ys) - pad, y1 = Math.max.apply(null, ys) + pad;
+  var w = x1 - x0, h = y1 - y0;
+  var minW = h * 1.25;                 /* keep the card a comfortable landscape */
+  if (w < minW) { var d = (minW - w) / 2; x0 -= d; w = minW; }
+  return [Math.round(x0), Math.round(y0), Math.round(w), Math.round(h)].join(" ");
+}
+
+function matchGuide(name){
+  var n = " " + norm(name).replace(/[^a-z0-9]+/g, " ") + " ";
+  for (var i = 0; i < GUIDES.length; i++) {
+    var g = GUIDES[i], bad = false;
+    if (g.avoid) {
+      for (var k = 0; k < g.avoid.length; k++) if (n.indexOf(g.avoid[k]) >= 0) bad = true;
+    }
+    if (bad) continue;
+    for (var j = 0; j < g.match.length; j++) if (n.indexOf(g.match[j]) >= 0) return g;
+  }
+  return null;
+}
+
+/* ---------------------------- drawing ------------------------------- */
+function lerp(a, b, t){ return a + (b - a) * t; }
+function lerpPt(A, B, t){ return [lerp(A[0], B[0], t), lerp(A[1], B[1], t)]; }
+
+function seg(a, b, w, color, op){
+  return '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) +
+         '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) +
+         '" stroke="' + color + '" stroke-width="' + w + '" stroke-linecap="round"' +
+         (op ? ' opacity="' + op + '"' : "") + '></line>';
+}
+function propsMarkup(g){
+  var p = g.props || {}, s = "", edge = "var(--ink-3)";
+  if (p.floor) s += seg([12, 186], [228, 186], 3, "var(--line-2)");
+  if (p.bench) {
+    s += '<rect x="58" y="128" width="130" height="12" rx="5" fill="none" stroke="' + edge + '" stroke-width="3"></rect>';
+    s += seg([74, 140], [74, 186], 3, edge) + seg([172, 140], [172, 186], 3, edge);
+  }
+  if (p.incline) {
+    s += seg([136, 160], [86, 110], 11, "var(--surface)") + seg([136, 160], [86, 110], 3, edge);
+    s += seg([136, 160], [168, 160], 3, edge) + seg([140, 160], [140, 186], 3, edge);
+  }
+  if (p.pad) {
+    s += '<rect x="56" y="148" width="122" height="13" rx="6" fill="none" stroke="' + edge + '" stroke-width="3"></rect>';
+    s += seg([70, 161], [70, 186], 3, edge) + seg([164, 161], [164, 186], 3, edge);
+  }
+  if (p.seat) {
+    s += '<rect x="74" y="148" width="54" height="10" rx="4" fill="none" stroke="' + edge + '" stroke-width="3"></rect>';
+    s += seg([100, 158], [100, 186], 3, edge);
+  }
+  if (p.seatLine) s += seg([64, 150], [132, 150], 3, edge);
+  if (p.footPlate) s += '<rect x="158" y="146" width="12" height="36" rx="3" fill="none" stroke="' + edge + '" stroke-width="3"></rect>';
+  if (p.column) {
+    var y = p.pulleyY || 36;
+    s += seg([p.column, y], [p.column, 186], 3, edge);
+    s += '<circle cx="' + p.column + '" cy="' + y + '" r="6" fill="none" stroke="' + edge + '" stroke-width="3"></circle>';
+  }
+  if (p.lowPulley) {
+    s += '<circle cx="' + p.lowPulley[0] + '" cy="' + p.lowPulley[1] + '" r="5" fill="none" stroke="' + edge + '" stroke-width="3"></circle>';
+  }
+  return s;
+}
+function bodyMarkup(P, op){
+  var ink = "var(--ink)";
+  return seg(P.hip, P.kne, 6, ink, op) + seg(P.kne, P.ank, 6, ink, op) +
+         seg(P.sho, P.elb, 6, ink, op) + seg(P.elb, P.han, 6, ink, op);
+}
+function loadMarkup(g, P){
+  var h = P.han, red = "var(--red)", blue = "var(--blue)";
+  var p = g.props || {};
+  var src = p.column ? [p.column, p.pulleyY || 36] : (p.lowPulley || null);
+  var s = "";
+  if (g.load === "plate") {
+    s += '<circle cx="' + h[0].toFixed(1) + '" cy="' + h[1].toFixed(1) + '" r="13" fill="' + red + '"></circle>';
+    s += '<circle cx="' + h[0].toFixed(1) + '" cy="' + h[1].toFixed(1) + '" r="4" fill="var(--surface-2)"></circle>';
+  } else if (g.load === "db") {
+    if (g.view === "front") {
+      s += '<rect x="' + (h[0] - 12).toFixed(1) + '" y="' + (h[1] - 5).toFixed(1) + '" width="24" height="10" rx="3" fill="' + red + '"></rect>';
+    } else {
+      s += '<circle cx="' + h[0].toFixed(1) + '" cy="' + h[1].toFixed(1) + '" r="8" fill="' + red + '"></circle>';
+    }
+  } else if (g.load === "cable" || g.load === "cablebar") {
+    if (src) s += seg(src, h, 2.5, blue);
+    if (g.load === "cablebar") s += seg([h[0] - 22, h[1] - 3], [h[0] + 22, h[1] + 3], 5, red);
+    else s += '<circle cx="' + h[0].toFixed(1) + '" cy="' + h[1].toFixed(1) + '" r="6" fill="' + red + '"></circle>';
+  } else if (g.load === "roller") {
+    s += '<circle cx="' + h[0].toFixed(1) + '" cy="' + h[1].toFixed(1) + '" r="0" fill="none"></circle>';
+  }
+  return s;
+}
+function figureMarkup(g, t){
+  var keys = ["head","sho","elb","han","hip","kne","ank"], P = {}, i;
+  for (i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    P[k] = lerpPt(g.a[k], g.b[k] || g.a[k], t);
+  }
+  var s = propsMarkup(g);
+
+  /* the far-side arm and leg, faded, so a front view reads as a body */
+  if (g.mirror) {
+    var M = {}, cx = g.cx || 110;
+    for (i = 0; i < keys.length; i++) { var kk = keys[i]; M[kk] = [2 * cx - P[kk][0], P[kk][1]]; }
+    s += bodyMarkup(M, 0.4);
+    s += loadMarkup(g, M);
+  }
+  s += seg(P.sho, P.hip, 8, "var(--ink)");
+  s += bodyMarkup(P);
+  s += '<circle cx="' + P.head[0].toFixed(1) + '" cy="' + P.head[1].toFixed(1) +
+       '" r="9.5" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="5"></circle>';
+
+  /* the roller sits on the ankle, not the hand */
+  if (g.load === "roller") {
+    s += '<circle cx="' + P.ank[0].toFixed(1) + '" cy="' + P.ank[1].toFixed(1) + '" r="9" fill="var(--red)"></circle>';
+  } else {
+    s += loadMarkup(g, P);
+  }
+  return s;
+}
+
+/* ---------------------------- the sheet ----------------------------- */
+var demoRAF = 0, demoGuide = null, demoT0 = 0;
+
+function prefersReduced(){
+  try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  catch (e) { return false; }
+}
+function demoFrame(){
+  var el = document.getElementById("demoSvg");
+  if (!el || $("#scrim").hidden || !demoGuide) { demoRAF = 0; return; }
+  var period = 2400;
+  var ph = ((Date.now() - demoT0) % (period * 2)) / period;
+  var t = ph <= 1 ? ph : 2 - ph;
+  el.innerHTML = figureMarkup(demoGuide, 0.5 - 0.5 * Math.cos(Math.PI * t));
+  demoRAF = requestAnimationFrame(demoFrame);
+}
+function playDemo(){
+  if (!demoGuide) return;
+  demoT0 = Date.now();
+  cancelAnimationFrame(demoRAF);
+  demoRAF = requestAnimationFrame(demoFrame);
+}
+function stopDemo(){
+  cancelAnimationFrame(demoRAF);
+  demoRAF = 0;
+  demoGuide = null;
+}
+function formSheet(name){
+  var g = matchGuide(name);
+  demoGuide = g;
+  var search = "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " proper form");
+  var body = "";
+
+  if (g) {
+    body += '<div class="demo"><svg id="demoSvg" viewBox="' + guideBox(g) + '" role="img" ' +
+            'aria-label="Animated demonstration of the ' + esc(g.title) + '"></svg></div>';
+    if (prefersReduced()) {
+      body += '<button class="btn btn-sm btn-ghost btn-block" style="margin-top:8px" data-action="demo-play">Play the movement</button>';
+    }
+    body += '<ul class="cues">';
+    g.cues.forEach(function(c){ body += '<li><span>' + esc(c) + '</span></li>'; });
+    body += '</ul>';
+    body += '<div class="miss"><b>Most common miss</b>' + esc(g.miss) + '</div>';
+  } else {
+    body += '<p class="sub">No built-in demo for this one yet. The search below pulls up real video of it.</p>';
+  }
+
+  body += '<div style="height:12px"></div>' +
+          '<a class="btn btn-ghost btn-block" href="' + esc(search) + '" target="_blank" rel="noopener noreferrer">Watch it on YouTube</a>' +
+          '<div style="height:8px"></div>' +
+          '<button class="btn btn-ghost btn-block" data-action="close-sheet">Back to the set</button>';
+
+  openSheet(g ? g.title : name, body);
+  if (g && !prefersReduced()) playDemo();
+  else if (g) {
+    var el = document.getElementById("demoSvg");
+    if (el) el.innerHTML = figureMarkup(g, 0);
+  }
+}
+
 /* ------------------------------ painting ---------------------------- */
 function paintTimer(){
   var strip = $("#timerStrip");
@@ -1344,6 +1764,7 @@ function openSheet(title, body){
 function closeSheet(){
   $("#scrim").hidden = true;
   $("#sheet").innerHTML = "";
+  stopDemo();
 }
 function askSheet(title, message, label, action, id){
   openSheet(title,
@@ -1594,6 +2015,8 @@ document.addEventListener("click", function(ev){
     }
     case "log-set": logSet(exId, parseInt(btn.getAttribute("data-i"), 10)); break;
     case "plate-sheet": plateSheet(exId); break;
+    case "form-sheet": formSheet(btn.getAttribute("data-name")); break;
+    case "demo-play": playDemo(); break;
     case "do-plates": doPlates(); break;
     case "rest-now": {
       var e3 = findEntry(exId);
