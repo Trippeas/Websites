@@ -402,6 +402,25 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
 }
 @media (prefers-reduced-motion:reduce){ .bar-fill{transition:none} }
 
+/* ---------- daily check-in ---------- */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip-x{
+  display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:999px;
+  background:var(--surface-2);border:1px solid var(--line);color:var(--ink);
+  font-family:var(--mono);font-size:12.5px;
+}
+.chip-x:hover{border-color:var(--red);color:var(--red)}
+.chip-x b{font-weight:600}
+.chip-x span{font-size:15px;line-height:1;color:var(--ink-3)}
+.chip-x:hover span{color:var(--red)}
+.dots{display:flex;gap:4px}
+.dot14{
+  flex:1;height:16px;border-radius:4px;
+  background:var(--surface-2);border:1px solid var(--line);
+}
+.dot14.on{background:var(--green);border-color:var(--green)}
+
 /* ---------- form guide ---------- */
 .demo{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-m);padding:4px}
 .demo svg{width:100%;height:auto;display:block}
@@ -478,9 +497,9 @@ a.btn{text-decoration:none}
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16M4 12h16M4 18.5h10"></path></svg>
         Log
       </button>
-      <button class="tab" data-action="tab" data-view="prs">
+      <button class="tab" data-action="tab" data-view="goals">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21.5V3M6 3.8h11.5l-2.4 3.9 2.4 3.9H6"></path></svg>
-        PRs
+        Goals
       </button>
       <button class="tab" data-action="tab" data-view="plan">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2.5"></rect><path d="M8 9h8M8 12.5h8M8 16h4"></path></svg>
@@ -504,7 +523,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 5;
+var APP_BUILD = 6;
 var APP_DATE = "17 Sep 2026";
 var KEY = "liftledger.v1";
 var S = null;
@@ -518,6 +537,7 @@ function defaults(){
     routines: seedRoutines(),
     sessions: [],
     goals: [],
+    body: { goalW:0, pTarget:150, w:{}, p:{}, c:{} },
     active: null
   };
 }
@@ -566,6 +586,8 @@ function load(){
       if (!Array.isArray(p.routines)) p.routines = d.routines;
       if (!Array.isArray(p.sessions)) p.sessions = [];
       if (!Array.isArray(p.goals)) p.goals = [];
+      p.body = Object.assign(d.body, p.body || {});
+      ["w", "p", "c"].forEach(function(f){ if (!p.body[f] || typeof p.body[f] !== "object") p.body[f] = {}; });
       if (!p.active) p.active = null;
       if (isUntouchedOldSeed(p)) p.routines = d.routines;
       return p;
@@ -878,7 +900,7 @@ function tick(){
 }
 
 /* ------------------------------ ui state ---------------------------- */
-var V = { view:"train", logTab:"sessions", sessionId:null, exName:null, routineId:null };
+var V = { view:"train", logTab:"sessions", sessionId:null, exName:null, routineId:null, body:false };
 
 var ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>';
 
@@ -886,6 +908,7 @@ function go(view){
   V.view = view;
   if (view !== "log") { V.sessionId = null; V.exName = null; }
   if (view !== "plan") { V.routineId = null; }
+  if (view !== "goals") { V.body = false; }
   render();
   window.scrollTo(0, 0);
 }
@@ -897,7 +920,7 @@ function render(){
   if (V.view === "train") html = viewTrain();
   else if (V.view === "timer") html = viewTimer();
   else if (V.view === "log") html = viewLog();
-  else if (V.view === "prs") html = viewPRs();
+  else if (V.view === "goals") html = V.body ? viewBody() : viewGoals();
   else if (V.view === "plan") html = viewPlan();
   else if (V.view === "settings") html = viewSettings();
   m.innerHTML = html;
@@ -1332,7 +1355,7 @@ function viewSettings(){
 
   h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:8px">Data</p>' +
        '<p class="sub" style="margin-bottom:10px">Everything lives in this browser only. Copy the text below to back it up or to move your log to another device, then paste it into the box on that device and press Load.</p>' +
-       '<textarea class="control" id="dataBox" rows="5" spellcheck="false" aria-label="Backup data">' + esc(JSON.stringify({ settings: S.settings, routines: S.routines, sessions: S.sessions, goals: S.goals })) + '</textarea>' +
+       '<textarea class="control" id="dataBox" rows="5" spellcheck="false" aria-label="Backup data">' + esc(JSON.stringify({ settings: S.settings, routines: S.routines, sessions: S.sessions, goals: S.goals, body: S.body })) + '</textarea>' +
        '<div style="height:10px"></div>' +
        '<div class="row"><button class="btn btn-sm" data-action="copy-data">Copy</button>' +
        '<button class="btn btn-sm" data-action="load-data">Load from box</button>' +
@@ -1917,11 +1940,12 @@ function progressBar(pct, done){
 }
 
 /* ------------------------------- view ------------------------------- */
-function viewPRs(){
+function viewGoals(){
   syncGoals();
   var sets = allSets();
   var h = '<div class="stack">';
-  h += '<div><p class="eyebrow">Records</p><h1 class="view-title">What you are chasing</h1></div>';
+  h += '<div><p class="eyebrow">Goals</p><h1 class="view-title">What you are chasing</h1></div>';
+  h += checkinCard();
 
   h += '<div class="stats">' +
          '<div class="stat"><div class="k">Last 7 days</div><div class="v">' + lastNDays(7) + '<small>sessions</small></div></div>' +
@@ -2055,6 +2079,282 @@ function goalSheet(name, w){
     '<div class="row"><button class="btn btn-ghost" style="flex:1" data-action="close-sheet">Cancel</button>' +
     '<button class="btn btn-primary" style="flex:1" data-action="do-add-goal">Set it</button></div>');
   setTimeout(function(){ var f = $("#glName"); if (f && !f.value) f.focus(); }, 40);
+}
+
+/* =====================================================================
+   DAILY CHECK-IN - bodyweight, protein, creatine
+   All three are keyed by local calendar day, so logging twice in a day
+   corrects the day rather than adding a second one.
+   ===================================================================== */
+
+function p2(n){ return n < 10 ? "0" + n : "" + n; }
+function dayKey(ts){
+  var d = new Date(ts);
+  return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+}
+function keyTs(k){
+  var a = k.split("-");
+  return new Date(+a[0], +a[1] - 1, +a[2]).getTime();
+}
+function today(){ return dayKey(Date.now()); }
+function body(){
+  if (!S.body) S.body = { goalW:0, pTarget:150, w:{}, p:{}, c:{} };
+  return S.body;
+}
+function proteinOn(k){
+  var list = body().p[k] || [], t = 0;
+  list.forEach(function(g){ t += num(g); });
+  return t;
+}
+function latestWeight(){
+  var keys = Object.keys(body().w).sort();
+  if (!keys.length) return null;
+  var k = keys[keys.length - 1];
+  return { k:k, v:num(body().w[k]) };
+}
+function weightSeries(){
+  return Object.keys(body().w).sort().map(function(k){
+    return { t:keyTs(k), v:num(body().w[k]) };
+  });
+}
+/* A seven-day average is the only honest way to read a bathroom scale -
+   day to day it is mostly water, food and salt. */
+function movingAvg(series, days){
+  return series.map(function(p, i){
+    var lo = p.t - (days - 1) * 86400000, sum = 0, n = 0;
+    for (var j = i; j >= 0; j--) {
+      if (series[j].t < lo) break;
+      sum += series[j].v; n++;
+    }
+    return { t:p.t, v: n ? sum / n : p.v };
+  });
+}
+function weightStats(){
+  var s = weightSeries();
+  if (!s.length) return null;
+  var ma = movingAvg(s, 7);
+  var last = ma[ma.length - 1];
+  var target = last.t - 30 * 86400000, ref = ma[0];
+  for (var i = 0; i < ma.length; i++) { if (ma[i].t <= target) ref = ma[i]; }
+  return {
+    latest: s[s.length - 1].v,
+    latestTs: s[s.length - 1].t,
+    avg: last.v,
+    change: ma.length > 1 ? last.v - ref.v : 0,
+    spanDays: Math.round((last.t - ref.t) / 86400000)
+  };
+}
+function lastDays(n){
+  var out = [], t0 = keyTs(today());
+  for (var i = n - 1; i >= 0; i--) out.push(dayKey(t0 - i * 86400000));
+  return out;
+}
+function proteinHitRate(n){
+  var target = num(body().pTarget), hit = 0;
+  if (target <= 0) return null;
+  lastDays(n).forEach(function(k){ if (proteinOn(k) >= target) hit++; });
+  return hit;
+}
+function creatineStreak(){
+  var n = 0, t0 = keyTs(today());
+  for (var i = 0; i < 400; i++) {
+    var k = dayKey(t0 - i * 86400000);
+    if (body().c[k]) n++;
+    else if (i > 0) break;          /* today not logged yet does not break it */
+  }
+  return n;
+}
+
+/* ------------------------------ charts ------------------------------ */
+function weightChart(){
+  var s = weightSeries();
+  if (s.length < 2) {
+    return '<p class="sub" style="margin:8px 0">Two weigh-ins and the trend line starts. Same time of day is what makes it comparable.</p>';
+  }
+  var ma = movingAvg(s, 7);
+  var W = 640, H = 220, L = 52, R = 16, TP = 16, B = 30;
+  var vals = s.map(function(p){ return p.v; });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  if (hi === lo) { hi = lo + 1; lo = lo - 1; }
+  var pad = (hi - lo) * 0.2;
+  hi += pad; lo -= pad;
+  var t0 = s[0].t, t1 = s[s.length - 1].t;
+  function X(t){ return t1 === t0 ? L : L + (W - L - R) * ((t - t0) / (t1 - t0)); }
+  function Y(v){ return TP + (H - TP - B) * (1 - (v - lo) / (hi - lo)); }
+
+  var g = "";
+  for (var k = 0; k <= 3; k++) {
+    var v = lo + (hi - lo) * k / 3, y = Y(v);
+    g += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W - R) + '" y2="' + y.toFixed(1) +
+         '" stroke="currentColor" stroke-width="1" opacity="0.16"></line>' +
+         '<text x="' + (L - 9) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="12" ' +
+         'font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">' + (Math.round(v * 10) / 10) + '</text>';
+  }
+  var dots = s.map(function(p){
+    return '<circle cx="' + X(p.t).toFixed(1) + '" cy="' + Y(p.v).toFixed(1) +
+           '" r="2.6" fill="currentColor" opacity="0.4"></circle>';
+  }).join("");
+  var line = ma.map(function(p, i){ return (i ? "L" : "M") + X(p.t).toFixed(1) + " " + Y(p.v).toFixed(1); }).join(" ");
+  var end = ma[ma.length - 1];
+
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+         'aria-label="Bodyweight with a seven day average" style="color:var(--ink-2)">' + g + dots +
+         '<path d="' + line + '" fill="none" stroke="var(--blue)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"></path>' +
+         '<circle cx="' + X(end.t).toFixed(1) + '" cy="' + Y(end.v).toFixed(1) + '" r="5.5" fill="var(--red)" stroke="var(--surface)" stroke-width="2.5"></circle>' +
+         '<text x="' + L + '" y="' + (H - 8) + '" font-size="12" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">' + dayLabel(t0) + '</text>' +
+         '<text x="' + (W - R) + '" y="' + (H - 8) + '" text-anchor="end" font-size="12" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">' + dayLabel(t1) + '</text>' +
+         '</svg>';
+}
+
+function proteinChart(){
+  var days = lastDays(14), target = num(body().pTarget);
+  var W = 640, H = 180, L = 40, R = 14, TP = 16, B = 28;
+  var max = Math.max(target * 1.2, 10);
+  days.forEach(function(k){ max = Math.max(max, proteinOn(k) * 1.1); });
+  var iw = (W - L - R) / days.length;
+  var s = "";
+  function Y(v){ return TP + (H - TP - B) * (1 - v / max); }
+
+  s += '<line x1="' + L + '" y1="' + Y(0) + '" x2="' + (W - R) + '" y2="' + Y(0) +
+       '" stroke="currentColor" stroke-width="1" opacity="0.2"></line>';
+  days.forEach(function(k, i){
+    var v = proteinOn(k), h = (H - TP - B) * (v / max);
+    var x = L + i * iw + iw * 0.2, w = iw * 0.6;
+    if (v <= 0) {
+      s += '<rect x="' + x.toFixed(1) + '" y="' + (Y(0) - 3).toFixed(1) + '" width="' + w.toFixed(1) +
+           '" height="3" rx="1.5" fill="currentColor" opacity="0.18"></rect>';
+    } else {
+      s += '<rect x="' + x.toFixed(1) + '" y="' + Y(v).toFixed(1) + '" width="' + w.toFixed(1) +
+           '" height="' + Math.max(2, h).toFixed(1) + '" rx="2.5" fill="' +
+           (target > 0 && v >= target ? "var(--green)" : "var(--blue)") + '"></rect>';
+    }
+  });
+  if (target > 0) {
+    s += '<line x1="' + L + '" y1="' + Y(target).toFixed(1) + '" x2="' + (W - R) + '" y2="' + Y(target).toFixed(1) +
+         '" stroke="var(--red)" stroke-width="2" stroke-dasharray="6 5" opacity="0.9"></line>' +
+         '<text x="' + (L - 7) + '" y="' + (Y(target) + 4).toFixed(1) + '" text-anchor="end" font-size="12" ' +
+         'font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.7">' + Math.round(target) + '</text>';
+  }
+  s += '<text x="' + L + '" y="' + (H - 7) + '" font-size="12" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">' + dayLabel(keyTs(days[0])) + '</text>' +
+       '<text x="' + (W - R) + '" y="' + (H - 7) + '" text-anchor="end" font-size="12" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">today</text>';
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+         'aria-label="Protein per day for the last fourteen days" style="color:var(--ink-2)">' + s + '</svg>';
+}
+
+/* --------------------- the card on the Goals tab -------------------- */
+function checkinCard(){
+  var b = body(), k = today();
+  var lw = latestWeight();
+  var pg = proteinOn(k), pt = num(b.pTarget);
+  var wToday = b.w[k];
+  var bits = [];
+  bits.push(wToday != null
+    ? '<b>' + fmt(num(wToday)) + '</b> ' + unit()
+    : (lw ? 'last ' + fmt(lw.v) + ' ' + unit() : 'no weigh-in'));
+  bits.push('<b>' + Math.round(pg) + '</b>' + (pt > 0 ? ' / ' + Math.round(pt) : "") + ' g');
+  bits.push(b.c[k] ? 'creatine &#10003;' : 'no creatine');
+
+  return '<button class="pick-item" data-action="open-body">' +
+           '<span class="bar" style="background:var(--' + (wToday != null && pt > 0 && pg >= pt ? "green" : "amber") + ')"></span>' +
+           '<span style="min-width:0"><span class="t">Today &middot; ' + dayLabel(Date.now()) + '</span>' +
+           '<span class="m" style="font-family:var(--mono)">' + bits.join(" &middot; ") + '</span></span>' +
+           '<span class="go">Log &rarr;</span></button>';
+}
+
+/* ----------------------------- the page ----------------------------- */
+function viewBody(){
+  var b = body(), k = today();
+  var st = weightStats();
+  var pg = proteinOn(k), pt = num(b.pTarget);
+  var entries = b.p[k] || [];
+  var lw = latestWeight();
+
+  var h = '<div class="stack">';
+  h += '<button class="btn btn-ghost btn-sm" data-action="back-goals" style="align-self:flex-start">&larr; Goals</button>';
+  h += '<div><p class="eyebrow">Check-in</p><h1 class="view-title">' + dayLabel(Date.now()) + '</h1>' +
+       '<p class="sub">Weigh in first thing, before food and water, so the numbers compare.</p></div>';
+
+  /* ---- protein ---- */
+  h += '<div class="card ms">' +
+         '<div class="ms-top"><span class="n">Protein today</span>' +
+           '<span class="v">' + Math.round(pg) + (pt > 0 ? ' / ' + Math.round(pt) : "") + ' g</span></div>' +
+         progressBar(pt > 0 ? (pg / pt) * 100 : 0, pt > 0 && pg >= pt) +
+         '<div class="ms-note">' +
+           (pt <= 0 ? "Set a daily target below."
+             : pg >= pt ? "Target hit." : Math.round(pt - pg) + " g to go.") +
+         '</div>' +
+         '<div class="quick">' +
+           [20, 30, 40, 50].map(function(g){
+             return '<button class="preset" data-action="protein-add" data-g="' + g + '">+' + g + '<small>grams</small></button>';
+           }).join("") +
+         '</div>' +
+         '<div class="row"><input class="control" id="pCustom" inputmode="numeric" placeholder="other amount" style="flex:1">' +
+           '<button class="btn" data-action="protein-custom">Add</button></div>';
+  if (entries.length) {
+    h += '<div><p class="eyebrow" style="margin-bottom:6px">Logged today &middot; tap to remove</p><div class="chips">';
+    entries.forEach(function(g, i){
+      h += '<button class="chip-x" data-action="protein-undo" data-i="' + i + '"><b>' + Math.round(num(g)) + ' g</b><span>&times;</span></button>';
+    });
+    h += '</div></div>';
+  }
+  h += '<div class="field"><label for="pTarget">Daily target (g)</label>' +
+       '<div class="row"><input class="control" id="pTarget" inputmode="numeric" data-bf="pTarget" value="' + Math.round(pt) + '" style="flex:1">' +
+       (lw ? '<button class="btn btn-sm btn-ghost" data-action="protein-suggest">Use ' + Math.round(unit() === "kg" ? lw.v * 2 : lw.v) + ' g</button>' : "") +
+       '</div><p class="sub" style="font-size:12.5px;margin-top:4px">A gram per pound of bodyweight is the usual rule of thumb.</p></div>';
+  h += '</div>';
+
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Last 14 days</p>' +
+       '<div class="chart-box">' + proteinChart() + '</div>';
+  var hit = proteinHitRate(7);
+  if (hit !== null) h += '<p class="sub" style="font-size:13px;margin-top:6px">Target hit ' + hit + ' of the last 7 days.</p>';
+  h += '</div>';
+
+  /* ---- bodyweight ---- */
+  h += '<div class="card ms">' +
+         '<div class="ms-top"><span class="n">Bodyweight</span>' +
+           '<span class="v">' + (st ? fmt(Math.round(st.latest * 10) / 10) + " " + unit() : "-") + '</span></div>' +
+         '<div class="row"><input class="control" id="bwInput" inputmode="decimal" style="flex:1" ' +
+           'placeholder="' + (lw ? fmt(lw.v) : "weight in " + unit()) + '" value="' + (b.w[k] != null ? esc(b.w[k]) : "") + '">' +
+           '<button class="btn btn-primary" data-action="log-weight">' + (b.w[k] != null ? "Update" : "Save") + '</button></div>';
+  if (st) {
+    h += '<div class="ms-note">7-day average <b>' + (Math.round(st.avg * 10) / 10) + ' ' + unit() + '</b>' +
+         (st.spanDays > 2
+           ? ' &middot; ' + (st.change >= 0 ? "up " : "down ") + fmt(Math.abs(Math.round(st.change * 10) / 10)) +
+             ' ' + unit() + ' over ' + st.spanDays + ' days'
+           : "") + '</div>';
+  }
+  h += '</div>';
+
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Weight trend &middot; 7-day average</p>' +
+       '<div class="chart-box">' + weightChart() + '</div>';
+  h += '<div class="field" style="margin-top:12px"><label for="goalW">Goal weight (' + unit() + ', 0 for none)</label>' +
+       '<input class="control" id="goalW" inputmode="decimal" data-bf="goalW" value="' + num(b.goalW) + '"></div>';
+  if (num(b.goalW) > 0 && st) {
+    var diff = st.avg - num(b.goalW);
+    h += '<p class="sub" style="font-size:13.5px;margin-top:8px">' +
+         (Math.abs(diff) < 0.5 ? "You are there." :
+           fmt(Math.abs(Math.round(diff * 10) / 10)) + " " + unit() + (diff > 0 ? " above" : " below") + " goal, on the 7-day average.") +
+         '</p>';
+  }
+  h += '</div>';
+
+  /* ---- creatine ---- */
+  var streak = creatineStreak();
+  h += '<div class="card ms">' +
+         '<div class="ms-top"><span class="n">Creatine</span>' +
+           '<span class="v">' + (streak > 0 ? streak + " day" + (streak === 1 ? "" : "s") : "-") + '</span></div>' +
+         '<button class="btn ' + (b.c[k] ? "btn-ghost" : "btn-primary") + ' btn-block" data-action="creatine-toggle">' +
+           (b.c[k] ? "Taken today - tap to undo" : "Mark today's dose taken") + '</button>' +
+         '<div class="dots" aria-label="Creatine over the last fourteen days">' +
+           lastDays(14).map(function(d){
+             return '<span class="dot14' + (body().c[d] ? " on" : "") + '" title="' + d + '"></span>';
+           }).join("") +
+         '</div>' +
+         '<div class="ms-note">Creatine pulls water into the muscle, so expect a couple of pounds on the scale in the first weeks. That is not fat - it is why the 7-day average is the number to watch.</div>' +
+       '</div>';
+
+  h += '</div>';
+  return h;
 }
 
 /* ------------------------------ painting ---------------------------- */
@@ -2299,6 +2599,7 @@ function loadData(){
   S.routines = p.routines;
   S.sessions = p.sessions;
   S.goals = Array.isArray(p.goals) ? p.goals : [];
+  S.body = Object.assign(defaults().body, p.body || {});
   S.active = null;
   save();
   applyTheme();
@@ -2475,6 +2776,49 @@ document.addEventListener("click", function(ev){
       break;
     }
 
+    case "open-body": V.body = true; render(); window.scrollTo(0, 0); break;
+    case "back-goals": V.body = false; render(); window.scrollTo(0, 0); break;
+    case "log-weight": {
+      var wv = num($("#bwInput").value);
+      if (wv <= 0) { toast("Put a number in first."); break; }
+      body().w[today()] = wv;
+      save(); render();
+      toast("Logged " + fmt(wv) + " " + unit() + " for today.");
+      break;
+    }
+    case "protein-add": {
+      var k1 = today();
+      if (!body().p[k1]) body().p[k1] = [];
+      body().p[k1].push(num(btn.getAttribute("data-g")));
+      save(); render();
+      break;
+    }
+    case "protein-custom": {
+      var pc = num($("#pCustom").value);
+      if (pc <= 0) { toast("How many grams?"); break; }
+      var k2 = today();
+      if (!body().p[k2]) body().p[k2] = [];
+      body().p[k2].push(pc);
+      save(); render();
+      break;
+    }
+    case "protein-undo": {
+      var k3 = today(), idx = parseInt(btn.getAttribute("data-i"), 10);
+      if (body().p[k3]) { body().p[k3].splice(idx, 1); save(); render(); }
+      break;
+    }
+    case "protein-suggest": {
+      var lw2 = latestWeight();
+      if (lw2) { body().pTarget = Math.round(unit() === "kg" ? lw2.v * 2 : lw2.v); save(); render(); }
+      break;
+    }
+    case "creatine-toggle": {
+      var k4 = today();
+      if (body().c[k4]) delete body().c[k4]; else body().c[k4] = 1;
+      save(); render();
+      break;
+    }
+
     case "goal-sheet": goalSheet("", ""); break;
     case "goal-from": goalSheet(btn.getAttribute("data-name"), btn.getAttribute("data-w")); break;
     case "do-add-goal": {
@@ -2482,7 +2826,7 @@ document.addEventListener("click", function(ev){
       if (!gn) { toast("Which lift is the goal for?"); break; }
       if (gw <= 0 || gr <= 0) { toast("Give it a weight and a rep count."); break; }
       S.goals.push({ id:uid(), name:gn, w:gw, r:gr, created:Date.now(), done:0 });
-      save(); closeSheet(); V.view = "prs"; render();
+      save(); closeSheet(); V.view = "goals"; render();
       break;
     }
     case "del-goal": {
@@ -2552,6 +2896,13 @@ function onFieldChange(ev){
   if (t.id === "rName") {
     var r6 = currentRoutine();
     if (r6) { r6.name = t.value; saveSoon(); }
+    return;
+  }
+  var bf = t.getAttribute("data-bf");
+  if (bf) {
+    body()[bf] = num(t.value);
+    saveSoon();
+    if (ev.type === "change") render();
     return;
   }
   var sf = t.getAttribute("data-sf");
