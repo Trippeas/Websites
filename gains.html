@@ -402,6 +402,22 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
 }
 @media (prefers-reduced-motion:reduce){ .bar-fill{transition:none} }
 
+/* ---------- a ride, rather than a set ---------- */
+.ride{display:grid;gap:9px;padding:12px 14px;border-top:1px solid var(--line)}
+.ride.done{background:var(--surface-2)}
+.ride.done .check{background:var(--green);border-color:var(--green);color:#fff}
+.ride.done .inp,.ride.done .control{background:transparent;border-color:transparent;color:var(--ink-2)}
+.ride-row{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end}
+.ride-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ride-f span{
+  font-family:var(--display);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.ride-pace{
+  font-family:var(--mono);font-size:12.5px;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+
 /* ---------- daily check-in ---------- */
 .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -514,6 +530,7 @@ a.btn{text-decoration:none}
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <datalist id="exerciseNames"></datalist>
+<datalist id="trailNames"></datalist>
 <script>
 "use strict";
 /* =====================================================================
@@ -523,9 +540,11 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 8;
+var APP_BUILD = 9;
 var APP_DATE = "17 Sep 2026";
-var ABS_ROUTINE_NAME = "Abs + Forearms + Legs - Wed & Sat";
+var WED_NAME = "Abs + Forearms - Wed";
+var SAT_NAME = "Mountain Bike Ride - Sat";
+var RETIRED_ROUTINES = ["legs - wed & sat", "abs + forearms + legs - wed & sat"];
 var KEY = "liftledger.v1";
 var S = null;
 
@@ -538,7 +557,7 @@ function defaults(){
     routines: seedRoutines(),
     sessions: [],
     goals: [],
-    applied: ["abs-forearms-legs"],
+    applied: ["abs-forearms-legs", "wed-abs-sat-ride"],
     body: { goalW:0, pTarget:150, w:{}, p:{}, c:{} },
     active: null
   };
@@ -563,31 +582,30 @@ function seedRoutines(){
       ex("Dumbbell Curl", 3, "12", 60),
       ex("Face Pull", 3, "15", 45)
     ]},
-    { id:uid(), name:"Legs - Wed & Sat", color:"green", exercises:[
-      ex("Barbell Squat", 3, "8", 180),
-      ex("Dumbbell Romanian Deadlift", 2, "10", 150),
-      ex("Leg Curl or Glute Bridge", 2, "12", 90)
-    ]},
-    absRoutine()
+    wedRoutine(),
+    satRoutine()
   ];
 }
 
-/* Kept on its own so it can also be added to a log that already exists. */
-function absRoutine(){
+/* Kept on their own so they can also be dropped into a log that exists. */
+function wedRoutine(){
   function ex(name, sets, reps, rest){ return { id:uid(), name:name, sets:sets, reps:reps, rest:rest }; }
   function hold(name, sets, secs, rest){ return { id:uid(), name:name, sets:sets, reps:secs, rest:rest, mode:"time" }; }
-  return { id:uid(), name:ABS_ROUTINE_NAME, color:"amber", exercises:[
+  return { id:uid(), name:WED_NAME, color:"amber", exercises:[
     ex("Cable Crunch", 3, "15", 60),
     ex("Hanging Knee Raise", 3, "12", 60),
     ex("Cable Woodchopper", 3, "12 ea", 60),
     hold("Plank", 3, "30-45", 60),
     ex("Cable Pallof Press", 3, "10 ea", 60),
+    ex("Russian Twist", 3, "15 ea", 45),
     ex("Dumbbell Wrist Curl", 3, "15", 45),
     ex("Dumbbell Reverse Wrist Curl", 3, "15", 45),
-    hold("Farmer's Carry", 3, "30-40", 90),
-    ex("Smith or Bodyweight Squat", 2, "10", 90),
-    ex("Glute Bridge", 2, "12", 60),
-    ex("Standing Calf Raise", 3, "15", 60)
+    hold("Farmer's Carry", 3, "30-40", 90)
+  ]};
+}
+function satRoutine(){
+  return { id:uid(), name:SAT_NAME, color:"green", exercises:[
+    { id:uid(), name:"Mountain Bike Ride", sets:1, reps:"", rest:0, mode:"ride" }
   ]};
 }
 
@@ -615,14 +633,18 @@ function load(){
       if (!p.active) p.active = null;
       if (isUntouchedOldSeed(p)) p.routines = d.routines;
 
-      /* Added after the first routines shipped. Once only - deleting it
-         is a decision, so it does not come back. */
+      /* The Wednesday and Saturday days were reworked: abs and forearms
+         on Wednesday, a ride on Saturday. Runs once, so deleting either
+         of them afterwards makes it stick. */
       if (!Array.isArray(p.applied)) p.applied = [];
-      if (p.applied.indexOf("abs-forearms-legs") < 0) {
-        p.applied.push("abs-forearms-legs");
-        var has = false;
-        p.routines.forEach(function(r){ if (norm(r.name) === norm(ABS_ROUTINE_NAME)) has = true; });
-        if (!has) p.routines.push(absRoutine());
+      if (p.applied.indexOf("wed-abs-sat-ride") < 0) {
+        p.applied.push("wed-abs-sat-ride");
+        p.routines = p.routines.filter(function(r){
+          return RETIRED_ROUTINES.indexOf(norm(r.name)) < 0;
+        });
+        var names = p.routines.map(function(r){ return norm(r.name); });
+        if (names.indexOf(norm(WED_NAME)) < 0) p.routines.push(wedRoutine());
+        if (names.indexOf(norm(SAT_NAME)) < 0) p.routines.push(satRoutine());
       }
       return p;
     }
@@ -696,11 +718,47 @@ function e1rm(w, r){
 function doneSets(entry){
   return (entry.sets || []).filter(function(s){ return s.done; });
 }
-function isTimed(e){ return e && e.mode === "time"; }
+function isTimed(e){ return !!e && (e.mode === "time" || e.mode === "mins"); }
+function isRide(e){ return !!e && e.mode === "ride"; }
+/* Anything not measured in reps: held, carried or ridden. None of it is
+   tonnage and none of it has a meaningful one-rep max. */
+function isNonRep(e){ return isTimed(e) || isRide(e); }
+function timeUnit(e){ return e && e.mode === "mins" ? "min" : "s"; }
+function pace(mi, mins){
+  mi = num(mi); mins = num(mins);
+  if (mi <= 0 || mins <= 0) return 0;
+  return mi / (mins / 60);
+}
+/* The best ride on a trail is the longest one. */
+function bestRideFor(name){
+  var key = norm(name), best = null;
+  S.sessions.forEach(function(sess){
+    (sess.entries || []).forEach(function(e){
+      if (!isRide(e) || norm(e.name) !== key) return;
+      doneSets(e).forEach(function(s){
+        if (!best || num(s.w) > num(best.w)) best = s;
+      });
+    });
+  });
+  return best;
+}
+function trailNames(){
+  var seen = {}, out = [];
+  S.sessions.forEach(function(sess){
+    (sess.entries || []).forEach(function(e){
+      if (!isRide(e)) return;
+      (e.sets || []).forEach(function(s){
+        var t = String(s.trail || "").trim();
+        if (t && !seen[norm(t)]) { seen[norm(t)] = 1; out.push(t); }
+      });
+    });
+  });
+  return out.sort();
+}
 function sessionVolume(sess){
   var v = 0;
   (sess.entries || []).forEach(function(e){
-    if (isTimed(e)) return;                /* seconds are not tonnage */
+    if (isNonRep(e)) return;               /* seconds and miles are not tonnage */
     doneSets(e).forEach(function(s){ v += num(s.w) * num(s.r); });
   });
   return v;
@@ -729,7 +787,7 @@ function bestE1rm(name){
   var key = norm(name), best = 0;
   S.sessions.forEach(function(sess){
     (sess.entries || []).forEach(function(e){
-      if (norm(e.name) !== key || isTimed(e)) return;
+      if (norm(e.name) !== key || isNonRep(e)) return;
       doneSets(e).forEach(function(s){ best = Math.max(best, e1rm(s.w, s.r)); });
     });
   });
@@ -982,6 +1040,9 @@ function render(){
   $("#exerciseNames").innerHTML = exerciseNames().map(function(n){
     return '<option value="' + esc(n) + '"></option>';
   }).join("");
+  $("#trailNames").innerHTML = trailNames().map(function(n){
+    return '<option value="' + esc(n) + '"></option>';
+  }).join("");
   paintTimer();
   paintSessionClock();
 }
@@ -1053,8 +1114,58 @@ function holdTarget(e){
   return parseInt(m[m.length - 1], 10);
 }
 
+function rideCard(e){
+  var best = bestRideFor(e.name);
+  var prev = lastTime(e.name);
+  var d = doneSets(e);
+
+  var h = '<section class="ex' + (d.length ? ' complete' : '') + '" data-ex="' + e.id + '">';
+  h += '<div class="ex-head"><div style="min-width:0">' +
+         '<h3>' + esc(e.name) + '</h3>' +
+         '<div class="ex-meta">trail, distance and time' +
+         (best ? ' &middot; longest ' + fmt(best.w) + ' mi' : '') + '</div></div>' +
+         '<button class="icon-btn pull-right" data-action="ex-menu" data-ex="' + e.id + '" aria-label="Options for ' + esc(e.name) + '">' +
+           '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle></svg>' +
+         '</button></div>';
+
+  if (prev && prev.sets.length) {
+    h += '<div class="ex-last">' + dayLabel(prev.date) + ': ' +
+         prev.sets.map(function(s){
+           return (s.trail ? '<b>' + esc(s.trail) + '</b> ' : '') + fmt(s.w) + ' mi in ' + fmt(s.r) + ' min';
+         }).join(" &middot; ") + '</div>';
+  }
+
+  e.sets.forEach(function(s, i){
+    var mph = pace(s.w, s.r);
+    h += '<div class="ride' + (s.done ? ' done' : '') + '">' +
+           '<input class="control" list="trailNames" data-f="trail" data-ex="' + e.id + '" data-i="' + i + '" ' +
+             'placeholder="Which trail?" aria-label="Trail name" value="' + esc(s.trail == null ? "" : s.trail) + '">' +
+           '<div class="ride-row">' +
+             '<label class="ride-f"><span>Miles</span>' +
+               '<input class="inp" data-f="w" data-ex="' + e.id + '" data-i="' + i + '" inputmode="decimal" ' +
+               'value="' + esc(s.w === "" || s.w == null ? "" : s.w) + '" placeholder="0"></label>' +
+             '<label class="ride-f"><span>Minutes</span>' +
+               '<input class="inp" data-f="r" data-ex="' + e.id + '" data-i="' + i + '" inputmode="numeric" ' +
+               'value="' + esc(s.r === "" || s.r == null ? "" : s.r) + '" placeholder="0"></label>' +
+             '<button class="check" data-action="log-set" data-ex="' + e.id + '" data-i="' + i + '" ' +
+               'aria-label="' + (s.done ? "Undo ride" : "Log ride") + '">' + ICON_CHECK + '</button>' +
+           '</div>' +
+           (mph > 0 ? '<div class="ride-pace">' + fmt(Math.round(mph * 10) / 10) + ' mph average' +
+                      (s.pr ? ' <span class="pr">PR</span>' : '') + '</div>' : '') +
+         '</div>';
+  });
+
+  h += '<div class="ex-actions">' +
+         '<button class="btn btn-ghost btn-sm" data-action="add-set" data-ex="' + e.id + '">+ Another ride</button>' +
+       '</div></section>';
+  return h;
+}
+
 function exerciseCard(e){
+  if (isRide(e)) return rideCard(e);
   var timed = isTimed(e);
+  var tu = timeUnit(e);
+  var noW = !!e.noWeight;
   var best = timed ? bestSecondsFor(e.name) : bestE1rm(e.name);
   var prev = lastTime(e.name);
   var d = doneSets(e);
@@ -1063,9 +1174,9 @@ function exerciseCard(e){
   var h = '<section class="ex' + (complete ? ' complete' : '') + '" data-ex="' + e.id + '">';
   h += '<div class="ex-head"><div style="min-width:0">' +
          '<h3>' + esc(e.name) + '</h3>' +
-         '<div class="ex-meta">' + num(e.target) + ' x ' + esc(e.reps) + (timed ? ' s' : '') +
+         '<div class="ex-meta">' + num(e.target) + ' x ' + esc(e.reps) + (timed ? ' ' + tu : '') +
          ' &middot; rest ' + clock(num(e.rest)) +
-         (best > 0 ? (timed ? ' &middot; best ' + fmt(Math.round(best)) + 's'
+         (best > 0 ? (timed ? ' &middot; best ' + fmt(Math.round(best)) + tu
                             : ' &middot; best e1RM ' + fmt(Math.round(best)) + unit()) : '') +
          '</div></div>' +
          '<button class="icon-btn pull-right" data-action="ex-menu" data-ex="' + e.id + '" aria-label="Options for ' + esc(e.name) + '">' +
@@ -1076,23 +1187,26 @@ function exerciseCard(e){
     h += '<div class="ex-last">' + dayLabel(prev.date) + ': ' +
          prev.sets.map(function(s){
            return prev.timed
-             ? (num(s.w) > 0 ? fmt(s.w) + ' ' + unit() + ' ' : '') + '<b>' + fmt(s.r) + 's</b>'
+             ? (num(s.w) > 0 ? fmt(s.w) + ' ' + unit() + ' ' : '') + '<b>' + fmt(s.r) + tu + '</b>'
              : '<b>' + fmt(s.w) + '</b>x' + fmt(s.r);
          }).join(" &middot; ") +
          '</div>';
   }
 
-  h += '<table class="sets"><thead><tr><th>Set</th><th>' + unit() + '</th><th>' +
-       (timed ? 'Secs' : 'Reps') + '</th><th></th></tr></thead><tbody>';
+  var colLabel = timed ? (tu === "min" ? "Mins" : "Secs") : "Reps";
+  h += '<table class="sets"><thead><tr><th>Set</th>' +
+       (noW ? '' : '<th>' + unit() + '</th>') +
+       '<th>' + colLabel + '</th><th></th></tr></thead><tbody>';
   e.sets.forEach(function(s, i){
     var ph = prev && prev.sets[i] ? fmt(prev.sets[i].w) : (prev && prev.sets.length ? fmt(prev.sets[prev.sets.length - 1].w) : "");
     var phr = prev && prev.sets[i] ? fmt(prev.sets[i].r) : esc(e.reps);
     h += '<tr class="' + (s.done ? "done" : "") + '" data-ex="' + e.id + '" data-i="' + i + '">' +
            '<td class="setno">' + (i + 1) + (s.pr ? '<span class="pr">PR</span>' : '') + '</td>' +
-           '<td><input class="inp" data-f="w" data-ex="' + e.id + '" data-i="' + i + '" inputmode="decimal" ' +
-             'aria-label="Weight, set ' + (i + 1) + '" value="' + esc(s.w === "" || s.w == null ? "" : s.w) + '" placeholder="' + esc(ph) + '"></td>' +
+           (noW ? '' :
+             '<td><input class="inp" data-f="w" data-ex="' + e.id + '" data-i="' + i + '" inputmode="decimal" ' +
+             'aria-label="Weight, set ' + (i + 1) + '" value="' + esc(s.w === "" || s.w == null ? "" : s.w) + '" placeholder="' + esc(ph) + '"></td>') +
            '<td><input class="inp" data-f="r" data-ex="' + e.id + '" data-i="' + i + '" inputmode="numeric" ' +
-             'aria-label="' + (timed ? 'Seconds' : 'Reps') + ', set ' + (i + 1) + '" value="' + esc(s.r === "" || s.r == null ? "" : s.r) + '" placeholder="' + esc(phr) + '"></td>' +
+             'aria-label="' + (timed ? colLabel : 'Reps') + ', set ' + (i + 1) + '" value="' + esc(s.r === "" || s.r == null ? "" : s.r) + '" placeholder="' + esc(phr) + '"></td>' +
            '<td><button class="check" data-action="log-set" data-ex="' + e.id + '" data-i="' + i + '" ' +
              'aria-label="' + (s.done ? "Undo set " : "Log set ") + (i + 1) + '">' + ICON_CHECK + '</button></td>' +
          '</tr>';
@@ -1102,7 +1216,7 @@ function exerciseCard(e){
          '<button class="btn btn-ghost btn-sm" data-action="add-set" data-ex="' + e.id + '">+ Set</button>' +
          '<button class="btn btn-ghost btn-sm" data-action="form-sheet" data-name="' + esc(e.name) + '">Form</button>' +
          '<button class="btn btn-ghost btn-sm" data-action="plate-sheet" data-ex="' + e.id + '">Plates</button>' +
-         (timed
+         (e.mode === "time"
            ? '<button class="btn btn-ghost btn-sm" data-action="hold-now" data-ex="' + e.id +
              '" data-sec="' + holdTarget(e) + '">Hold ' + holdTarget(e) + 's</button>'
            : '') +
@@ -1253,10 +1367,14 @@ function sessionDetail(id){
     if (!d.length) return;
     h += '<div class="card card-pad"><h3 style="font-size:17px">' + esc(e.name) + '</h3>';
     d.forEach(function(x, i){
-      h += '<div class="kv"><span class="k">Set ' + (i + 1) + (x.pr ? ' <span class="pr">PR</span>' : '') + '</span>' +
-           '<span class="v">' + (isTimed(e)
-             ? (num(x.w) > 0 ? fmt(x.w) + ' ' + unit() + ' for ' : '') + fmt(x.r) + ' s'
-             : fmt(x.w) + ' ' + unit() + ' x ' + fmt(x.r)) + '</span></div>';
+      h += '<div class="kv"><span class="k">' +
+           (isRide(e) ? esc(x.trail || "Ride") : "Set " + (i + 1)) +
+           (x.pr ? ' <span class="pr">PR</span>' : '') + '</span>' +
+           '<span class="v">' + (isRide(e)
+             ? fmt(x.w) + ' mi in ' + fmt(x.r) + ' min'
+             : isTimed(e)
+               ? (num(x.w) > 0 ? fmt(x.w) + ' ' + unit() + ' for ' : '') + fmt(x.r) + ' ' + timeUnit(e)
+               : fmt(x.w) + ' ' + unit() + ' x ' + fmt(x.r)) + '</span></div>';
     });
     h += '</div>';
   });
@@ -1267,17 +1385,18 @@ function sessionDetail(id){
 }
 
 function exerciseDetail(name){
-  var key = norm(name), pts = [], best = 0, bestSet = null, totalSets = 0, timed = false;
+  var key = norm(name), pts = [], best = 0, bestSet = null, totalSets = 0, timed = false, tu = "s", ride = false;
   finishedSessions().slice().reverse().forEach(function(s){
     (s.entries || []).forEach(function(e){
       if (norm(e.name) !== key) return;
       var d = doneSets(e);
       if (!d.length) return;
-      if (isTimed(e)) timed = true;
+      if (isTimed(e)) { timed = true; tu = timeUnit(e); }
+      if (isRide(e)) { ride = true; }
       totalSets += d.length;
       var top = 0, topSet = null;
       d.forEach(function(x){
-        var v = isTimed(e) ? num(x.r) : e1rm(x.w, x.r);
+        var v = isRide(e) ? num(x.w) : isTimed(e) ? num(x.r) : e1rm(x.w, x.r);
         if (v > top) { top = v; topSet = x; }
         if (v > best) { best = v; bestSet = x; }
       });
@@ -1288,22 +1407,30 @@ function exerciseDetail(name){
   var h = '<div class="stack">';
   h += '<button class="btn btn-ghost btn-sm" data-action="back-log" style="align-self:flex-start">&larr; All lifts</button>';
   h += '<div><p class="eyebrow">Lift</p><h1 class="view-title">' + esc(name) + '</h1>' +
-       '<p class="sub">' + (timed
-         ? 'Your longest set each session.'
-         : 'Estimated one-rep max per session, using the Epley formula on your best set of the day.') + '</p></div>';
+       '<p class="sub">' + (ride
+         ? 'Distance per ride.'
+         : timed
+           ? 'Your longest set each session.'
+           : 'Estimated one-rep max per session, using the Epley formula on your best set of the day.') + '</p></div>';
   h += '<div class="stats">' +
-         '<div class="stat"><div class="k">' + (timed ? 'Longest' : 'Best e1RM') + '</div><div class="v">' +
-           fmt(Math.round(best)) + '<small>' + (timed ? 's' : unit()) + '</small></div></div>' +
-         '<div class="stat"><div class="k">From</div><div class="v" style="font-size:16px">' +
-           (bestSet ? (timed ? (num(bestSet.w) > 0 ? fmt(bestSet.w) + unit() : "bodyweight") : fmt(bestSet.w) + "x" + fmt(bestSet.r)) : "-") + '</div></div>' +
-         '<div class="stat"><div class="k">Sets</div><div class="v">' + totalSets + '</div></div>' +
+         '<div class="stat"><div class="k">' + (ride ? 'Longest' : timed ? 'Longest' : 'Best e1RM') + '</div><div class="v">' +
+           (ride ? fmt(best) : fmt(Math.round(best))) + '<small>' + (ride ? 'mi' : timed ? tu : unit()) + '</small></div></div>' +
+         '<div class="stat"><div class="k">' + (ride ? 'In' : 'From') + '</div><div class="v" style="font-size:16px">' +
+           (bestSet
+             ? (ride ? fmt(bestSet.r) + ' min'
+               : timed ? (num(bestSet.w) > 0 ? fmt(bestSet.w) + unit() : "bodyweight")
+               : fmt(bestSet.w) + "x" + fmt(bestSet.r))
+             : "-") + '</div></div>' +
+         '<div class="stat"><div class="k">' + (ride ? 'Rides' : 'Sets') + '</div><div class="v">' + totalSets + '</div></div>' +
        '</div>';
   h += '<div class="card card-pad"><div class="chart-box">' + buildChart(pts) + '</div></div>';
   h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Session by session</p>';
   pts.slice().reverse().forEach(function(p){
-    h += '<div class="kv"><span class="k">' + dayLabel(p.t) + '</span>' +
-         '<span class="v">' + (timed
-           ? (num(p.set.w) > 0 ? fmt(p.set.w) + ' ' + unit() + ' for ' : '') + fmt(p.set.r) + ' s'
+    h += '<div class="kv"><span class="k">' + dayLabel(p.t) + (ride && p.set.trail ? ' &middot; ' + esc(p.set.trail) : '') + '</span>' +
+         '<span class="v">' + (ride
+           ? fmt(p.set.w) + ' mi in ' + fmt(p.set.r) + ' min'
+           : timed
+           ? (num(p.set.w) > 0 ? fmt(p.set.w) + ' ' + unit() + ' for ' : '') + fmt(p.set.r) + ' ' + tu
            : fmt(p.set.w) + ' x ' + fmt(p.set.r) + '  <span style="color:var(--ink-3)">= ' + fmt(Math.round(p.v)) + '</span>') +
          '</span></div>';
   });
@@ -1966,7 +2093,7 @@ function allSets(){
     (s.entries || []).forEach(function(e){
       doneSets(e).forEach(function(x){
         out.push({ name:e.name, key:norm(e.name), w:num(x.w), r:num(x.r), ts:x.ts || s.start,
-                   pr:!!x.pr, timed:isTimed(e) });
+                   pr:!!x.pr, timed:isTimed(e), tu:timeUnit(e), ride:isRide(e), trail:x.trail || "" });
       });
     });
   });
@@ -1985,11 +2112,18 @@ function recordRows(){
   allSets().forEach(function(x){
     var m = map[x.key];
     if (!m) m = map[x.key] = { name:x.name, bestW:0, bestWr:0, bestWts:0, bestE:0, bestEset:null,
-                               sets:0, last:0, timed:x.timed, bestS:0, bestSw:0, bestSts:0 };
+                               sets:0, last:0, timed:x.timed, tu:x.tu, bestS:0, bestSw:0, bestSts:0,
+                               ride:x.ride, miles:0, bestMi:0, bestMin:0, bestTrail:"", bestMits:0 };
     m.sets++;
     m.last = Math.max(m.last, x.ts);
+    if (x.ride) {
+      m.ride = true;
+      m.miles += x.w;
+      if (x.w > m.bestMi) { m.bestMi = x.w; m.bestMin = x.r; m.bestTrail = x.trail; m.bestMits = x.ts; }
+      return;
+    }
     if (x.timed) {
-      m.timed = true;
+      m.timed = true; m.tu = x.tu;
       if (x.r > m.bestS) { m.bestS = x.r; m.bestSw = x.w; m.bestSts = x.ts; }
       return;
     }
@@ -2006,7 +2140,7 @@ function recordRows(){
 function bestForMilestone(m){
   var best = { w:0, r:0, ts:0 };
   allSets().forEach(function(x){
-    if (x.timed || !nameMatches(x.key, m)) return;
+    if (x.timed || x.ride || !nameMatches(x.key, m)) return;
     if (x.w > best.w) best = { w:x.w, r:x.r, ts:x.ts };
   });
   return best;
@@ -2208,13 +2342,18 @@ function viewGoals(){
     rows.forEach(function(r){
       h += '<button class="rec" data-action="open-exercise" data-name="' + esc(r.name) + '">' +
              '<div class="ms-top"><span class="n">' + esc(r.name) + '</span>' +
-               '<span class="v">' + (r.timed
-                 ? fmt(r.bestS) + ' s' + (r.bestSw > 0 ? ' @ ' + fmt(r.bestSw) : '')
-                 : fmt(r.bestW) + ' x ' + fmt(r.bestWr)) + '</span></div>' +
-             '<div class="ms-note">' + (r.timed
-               ? 'Longest set &middot; ' + r.sets + ' sets &middot; set on ' + dayLabel(r.bestSts)
-               : 'Best e1RM ' + fmt(Math.round(r.bestE)) + ' ' + unit() +
-                 ' &middot; ' + r.sets + ' sets &middot; heaviest on ' + dayLabel(r.bestWts)) + '</div>' +
+               '<span class="v">' + (r.ride
+                 ? fmt(r.bestMi) + ' mi'
+                 : r.timed
+                   ? fmt(r.bestS) + ' ' + (r.tu || 's') + (r.bestSw > 0 ? ' @ ' + fmt(r.bestSw) : '')
+                   : fmt(r.bestW) + ' x ' + fmt(r.bestWr)) + '</span></div>' +
+             '<div class="ms-note">' + (r.ride
+               ? 'Longest ride' + (r.bestTrail ? ' &middot; ' + esc(r.bestTrail) : '') +
+                 ' &middot; ' + fmt(Math.round(r.miles * 10) / 10) + ' mi over ' + r.sets + ' rides'
+               : r.timed
+                 ? 'Longest set &middot; ' + r.sets + ' sets &middot; set on ' + dayLabel(r.bestSts)
+                 : 'Best e1RM ' + fmt(Math.round(r.bestE)) + ' ' + unit() +
+                   ' &middot; ' + r.sets + ' sets &middot; heaviest on ' + dayLabel(r.bestWts)) + '</div>' +
            '</button>';
     });
     h += '</div>';
@@ -2227,8 +2366,10 @@ function viewGoals(){
     h += '<div><p class="eyebrow" style="margin-bottom:8px">Recently broken</p><div class="card">';
     prs.forEach(function(x){
       h += '<div class="rec"><div class="ms-top"><span class="n">' + esc(x.name) + '</span>' +
-           '<span class="v">' + (x.timed ? fmt(x.r) + ' s' : fmt(x.w) + ' x ' + fmt(x.r)) + '</span></div>' +
-           '<div class="ms-note">' + dayLabel(x.ts) + '</div></div>';
+           '<span class="v">' + (x.ride ? fmt(x.w) + ' mi'
+             : x.timed ? fmt(x.r) + ' ' + (x.tu || 's')
+             : fmt(x.w) + ' x ' + fmt(x.r)) + '</span></div>' +
+           '<div class="ms-note">' + dayLabel(x.ts) + (x.ride && x.trail ? ' &middot; ' + esc(x.trail) : '') + '</div></div>';
     });
     h += '</div></div>';
   }
@@ -2600,12 +2741,15 @@ function findEntry(id){
   if (S.active) S.active.entries.forEach(function(e){ if (e.id === id) out = e; });
   return out;
 }
-function newEntry(name, target, reps, rest, mode){
+function newEntry(name, target, reps, rest, mode, noWeight){
   var n = Math.max(1, Math.round(num(target) || 3));
   var sets = [];
-  for (var i = 0; i < n; i++) sets.push({ w:"", r:"", done:false });
+  for (var i = 0; i < n; i++) {
+    sets.push(mode === "ride" ? { trail:"", w:"", r:"", done:false } : { w:"", r:"", done:false });
+  }
   var e = { id:uid(), name:name, target:n, reps:String(reps || ""), rest:num(rest) || num(S.settings.rest), sets:sets };
-  if (mode === "time") e.mode = "time";
+  if (mode === "time" || mode === "mins" || mode === "ride") e.mode = mode;
+  if (noWeight) e.noWeight = true;
   return e;
 }
 function startRoutine(id){
@@ -2617,7 +2761,7 @@ function startRoutine(id){
   }
   S.active = {
     id: uid(), routineId: r.id, name: r.name, start: Date.now(), end: 0,
-    entries: r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode); })
+    entries: r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode, e.noWeight); })
   };
   save();
   V.routineId = null;
@@ -2652,11 +2796,20 @@ function logSet(exId, i){
 
   if (s.done) { s.done = false; s.pr = false; save(); render(); return; }
 
-  if (num(s.r) <= 0) { toast(isTimed(e) ? "How many seconds?" : "Put the reps in first."); return; }
+  if (isRide(e)) {
+    if (num(s.w) <= 0 && num(s.r) <= 0) { toast("Add the miles or the time first."); return; }
+  } else if (num(s.r) <= 0) {
+    toast(isTimed(e) ? (timeUnit(e) === "min" ? "How many minutes?" : "How many seconds?")
+                     : "Put the reps in first.");
+    return;
+  }
 
   s.done = true;
   s.ts = Date.now();
-  if (isTimed(e)) {
+  if (isRide(e)) {
+    var priorRide = bestRideFor(e.name);
+    s.pr = !!priorRide && num(s.w) > num(priorRide.w);
+  } else if (isTimed(e)) {
     var priorS = bestSecondsFor(e.name);
     e.sets.forEach(function(x, j){
       if (x.done && j !== i) priorS = Math.max(priorS, num(x.r));
@@ -2679,11 +2832,13 @@ function logSet(exId, i){
   });
 
   save();
-  startRest(num(e.rest) || num(S.settings.rest), "Rest");
+  if (!isRide(e)) startRest(num(e.rest) || num(S.settings.rest), "Rest");
   render();
   if (landed) toast("Goal hit: " + landed.name + " " + fmt(landed.w) + " x " + fmt(landed.r) + ".");
   else if (s.pr) toast("New best on " + e.name + ": " +
-    (isTimed(e) ? fmt(s.r) + " seconds." : fmt(s.w) + " x " + fmt(s.r) + "."));
+    (isRide(e) ? fmt(s.w) + " miles."
+     : isTimed(e) ? fmt(s.r) + (timeUnit(e) === "min" ? " minutes." : " seconds.")
+     : fmt(s.w) + " x " + fmt(s.r) + "."));
 }
 function finishSession(){
   var a = S.active;
@@ -2695,7 +2850,8 @@ function finishSession(){
   a.entries = a.entries.filter(function(e){ return doneSets(e).length > 0; })
     .map(function(e){
       var out = { id:e.id, name:e.name, target:e.target, reps:e.reps, rest:e.rest, sets:doneSets(e) };
-      if (isTimed(e)) out.mode = "time";
+      if (isNonRep(e)) out.mode = e.mode;
+      if (e.noWeight) out.noWeight = true;
       return out;
     });
   S.sessions.push(a);
@@ -2856,7 +3012,7 @@ document.addEventListener("click", function(ev){
       if (e2) {
         var lastW = "";
         e2.sets.forEach(function(s){ if (s.w !== "" && s.w != null) lastW = s.w; });
-        e2.sets.push({ w:lastW, r:"", done:false });
+        e2.sets.push(isRide(e2) ? { trail:"", w:"", r:"", done:false } : { w:lastW, r:"", done:false });
         e2.target = Math.max(e2.target, e2.sets.length);
         save(); render();
       }
@@ -3072,7 +3228,9 @@ function onFieldChange(ev){
   var t = ev.target;
   if (!t || !t.getAttribute) return;
 
-  if (t.classList.contains("inp") && t.getAttribute("data-ex") && t.getAttribute("data-f")) {
+  /* Any field carrying both attributes belongs to a set - the weight and
+     reps boxes, and a ride's trail name, which is not a .inp. */
+  if (t.getAttribute("data-ex") && t.getAttribute("data-f")) {
     var e = findEntry(t.getAttribute("data-ex"));
     if (!e) return;
     var s = e.sets[parseInt(t.getAttribute("data-i"), 10)];

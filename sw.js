@@ -13,7 +13,7 @@
    Anything that is not this app is passed straight through, so the other
    sites in this repo are unaffected.
    ===================================================================== */
-var CACHE = "gains-v8";
+var CACHE = "gains-v9";
 var PAGE = new URL("gains.html", self.location).href;
 
 self.addEventListener("install", function(){
