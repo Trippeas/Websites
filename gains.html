@@ -523,8 +523,9 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 7;
+var APP_BUILD = 8;
 var APP_DATE = "17 Sep 2026";
+var ABS_ROUTINE_NAME = "Abs + Forearms + Legs - Wed & Sat";
 var KEY = "liftledger.v1";
 var S = null;
 
@@ -537,6 +538,7 @@ function defaults(){
     routines: seedRoutines(),
     sessions: [],
     goals: [],
+    applied: ["abs-forearms-legs"],
     body: { goalW:0, pTarget:150, w:{}, p:{}, c:{} },
     active: null
   };
@@ -544,6 +546,8 @@ function defaults(){
 
 function seedRoutines(){
   function ex(name, sets, reps, rest){ return { id:uid(), name:name, sets:sets, reps:reps, rest:rest }; }
+  /* A held or carried set is measured in seconds, not reps. */
+  function hold(name, sets, secs, rest){ return { id:uid(), name:name, sets:sets, reps:secs, rest:rest, mode:"time" }; }
   return [
     { id:uid(), name:"Push - Mon & Thu", color:"red", exercises:[
       ex("Barbell Bench Press", 4, "6-8", 180),
@@ -563,8 +567,28 @@ function seedRoutines(){
       ex("Barbell Squat", 3, "8", 180),
       ex("Dumbbell Romanian Deadlift", 2, "10", 150),
       ex("Leg Curl or Glute Bridge", 2, "12", 90)
-    ]}
+    ]},
+    absRoutine()
   ];
+}
+
+/* Kept on its own so it can also be added to a log that already exists. */
+function absRoutine(){
+  function ex(name, sets, reps, rest){ return { id:uid(), name:name, sets:sets, reps:reps, rest:rest }; }
+  function hold(name, sets, secs, rest){ return { id:uid(), name:name, sets:sets, reps:secs, rest:rest, mode:"time" }; }
+  return { id:uid(), name:ABS_ROUTINE_NAME, color:"amber", exercises:[
+    ex("Cable Crunch", 3, "15", 60),
+    ex("Hanging Knee Raise", 3, "12", 60),
+    ex("Cable Woodchopper", 3, "12 ea", 60),
+    hold("Plank", 3, "30-45", 60),
+    ex("Cable Pallof Press", 3, "10 ea", 60),
+    ex("Dumbbell Wrist Curl", 3, "15", 45),
+    ex("Dumbbell Reverse Wrist Curl", 3, "15", 45),
+    hold("Farmer's Carry", 3, "30-40", 90),
+    ex("Smith or Bodyweight Squat", 2, "10", 90),
+    ex("Glute Bridge", 2, "12", 60),
+    ex("Standing Calf Raise", 3, "15", 60)
+  ]};
 }
 
 /* Names of the very first seed, so an untouched copy of it can be
@@ -590,6 +614,16 @@ function load(){
       ["w", "p", "c"].forEach(function(f){ if (!p.body[f] || typeof p.body[f] !== "object") p.body[f] = {}; });
       if (!p.active) p.active = null;
       if (isUntouchedOldSeed(p)) p.routines = d.routines;
+
+      /* Added after the first routines shipped. Once only - deleting it
+         is a decision, so it does not come back. */
+      if (!Array.isArray(p.applied)) p.applied = [];
+      if (p.applied.indexOf("abs-forearms-legs") < 0) {
+        p.applied.push("abs-forearms-legs");
+        var has = false;
+        p.routines.forEach(function(r){ if (norm(r.name) === norm(ABS_ROUTINE_NAME)) has = true; });
+        if (!has) p.routines.push(absRoutine());
+      }
       return p;
     }
   } catch (e) {}
@@ -662,12 +696,25 @@ function e1rm(w, r){
 function doneSets(entry){
   return (entry.sets || []).filter(function(s){ return s.done; });
 }
+function isTimed(e){ return e && e.mode === "time"; }
 function sessionVolume(sess){
   var v = 0;
   (sess.entries || []).forEach(function(e){
+    if (isTimed(e)) return;                /* seconds are not tonnage */
     doneSets(e).forEach(function(s){ v += num(s.w) * num(s.r); });
   });
   return v;
+}
+/* For held and carried work the record is the longest set. */
+function bestSecondsFor(name){
+  var key = norm(name), best = 0;
+  S.sessions.forEach(function(sess){
+    (sess.entries || []).forEach(function(e){
+      if (!isTimed(e) || norm(e.name) !== key) return;
+      doneSets(e).forEach(function(s){ best = Math.max(best, num(s.r)); });
+    });
+  });
+  return best;
 }
 function sessionSetCount(sess){
   var n = 0;
@@ -682,7 +729,7 @@ function bestE1rm(name){
   var key = norm(name), best = 0;
   S.sessions.forEach(function(sess){
     (sess.entries || []).forEach(function(e){
-      if (norm(e.name) !== key) return;
+      if (norm(e.name) !== key || isTimed(e)) return;
       doneSets(e).forEach(function(s){ best = Math.max(best, e1rm(s.w, s.r)); });
     });
   });
@@ -696,7 +743,7 @@ function lastTime(name){
       if (norm(e.name) !== key) return false;
       var d = doneSets(e);
       if (!d.length) return false;
-      out = { date: sess.start, sets: d };
+      out = { date: sess.start, sets: d, timed: isTimed(e) };
       return true;
     });
   });
@@ -999,8 +1046,16 @@ function trainActive(){
   return h;
 }
 
+/* "30-45" means aim for 45. A single number means that number. */
+function holdTarget(e){
+  var m = String(e.reps || "").match(/\d+/g);
+  if (!m || !m.length) return 30;
+  return parseInt(m[m.length - 1], 10);
+}
+
 function exerciseCard(e){
-  var best = bestE1rm(e.name);
+  var timed = isTimed(e);
+  var best = timed ? bestSecondsFor(e.name) : bestE1rm(e.name);
   var prev = lastTime(e.name);
   var d = doneSets(e);
   var complete = d.length >= num(e.target) && d.length > 0;
@@ -1008,8 +1063,10 @@ function exerciseCard(e){
   var h = '<section class="ex' + (complete ? ' complete' : '') + '" data-ex="' + e.id + '">';
   h += '<div class="ex-head"><div style="min-width:0">' +
          '<h3>' + esc(e.name) + '</h3>' +
-         '<div class="ex-meta">' + num(e.target) + ' x ' + esc(e.reps) + ' &middot; rest ' + clock(num(e.rest)) +
-         (best > 0 ? ' &middot; best e1RM ' + fmt(Math.round(best)) + unit() : '') +
+         '<div class="ex-meta">' + num(e.target) + ' x ' + esc(e.reps) + (timed ? ' s' : '') +
+         ' &middot; rest ' + clock(num(e.rest)) +
+         (best > 0 ? (timed ? ' &middot; best ' + fmt(Math.round(best)) + 's'
+                            : ' &middot; best e1RM ' + fmt(Math.round(best)) + unit()) : '') +
          '</div></div>' +
          '<button class="icon-btn pull-right" data-action="ex-menu" data-ex="' + e.id + '" aria-label="Options for ' + esc(e.name) + '">' +
            '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle></svg>' +
@@ -1017,11 +1074,16 @@ function exerciseCard(e){
 
   if (prev) {
     h += '<div class="ex-last">' + dayLabel(prev.date) + ': ' +
-         prev.sets.map(function(s){ return '<b>' + fmt(s.w) + '</b>x' + fmt(s.r); }).join(" &middot; ") +
+         prev.sets.map(function(s){
+           return prev.timed
+             ? (num(s.w) > 0 ? fmt(s.w) + ' ' + unit() + ' ' : '') + '<b>' + fmt(s.r) + 's</b>'
+             : '<b>' + fmt(s.w) + '</b>x' + fmt(s.r);
+         }).join(" &middot; ") +
          '</div>';
   }
 
-  h += '<table class="sets"><thead><tr><th>Set</th><th>' + unit() + '</th><th>Reps</th><th></th></tr></thead><tbody>';
+  h += '<table class="sets"><thead><tr><th>Set</th><th>' + unit() + '</th><th>' +
+       (timed ? 'Secs' : 'Reps') + '</th><th></th></tr></thead><tbody>';
   e.sets.forEach(function(s, i){
     var ph = prev && prev.sets[i] ? fmt(prev.sets[i].w) : (prev && prev.sets.length ? fmt(prev.sets[prev.sets.length - 1].w) : "");
     var phr = prev && prev.sets[i] ? fmt(prev.sets[i].r) : esc(e.reps);
@@ -1030,7 +1092,7 @@ function exerciseCard(e){
            '<td><input class="inp" data-f="w" data-ex="' + e.id + '" data-i="' + i + '" inputmode="decimal" ' +
              'aria-label="Weight, set ' + (i + 1) + '" value="' + esc(s.w === "" || s.w == null ? "" : s.w) + '" placeholder="' + esc(ph) + '"></td>' +
            '<td><input class="inp" data-f="r" data-ex="' + e.id + '" data-i="' + i + '" inputmode="numeric" ' +
-             'aria-label="Reps, set ' + (i + 1) + '" value="' + esc(s.r === "" || s.r == null ? "" : s.r) + '" placeholder="' + esc(phr) + '"></td>' +
+             'aria-label="' + (timed ? 'Seconds' : 'Reps') + ', set ' + (i + 1) + '" value="' + esc(s.r === "" || s.r == null ? "" : s.r) + '" placeholder="' + esc(phr) + '"></td>' +
            '<td><button class="check" data-action="log-set" data-ex="' + e.id + '" data-i="' + i + '" ' +
              'aria-label="' + (s.done ? "Undo set " : "Log set ") + (i + 1) + '">' + ICON_CHECK + '</button></td>' +
          '</tr>';
@@ -1040,6 +1102,10 @@ function exerciseCard(e){
          '<button class="btn btn-ghost btn-sm" data-action="add-set" data-ex="' + e.id + '">+ Set</button>' +
          '<button class="btn btn-ghost btn-sm" data-action="form-sheet" data-name="' + esc(e.name) + '">Form</button>' +
          '<button class="btn btn-ghost btn-sm" data-action="plate-sheet" data-ex="' + e.id + '">Plates</button>' +
+         (timed
+           ? '<button class="btn btn-ghost btn-sm" data-action="hold-now" data-ex="' + e.id +
+             '" data-sec="' + holdTarget(e) + '">Hold ' + holdTarget(e) + 's</button>'
+           : '') +
          '<button class="btn btn-ghost btn-sm" data-action="rest-now" data-ex="' + e.id + '">Rest ' + clock(num(e.rest)) + '</button>' +
        '</div>';
   h += '</section>';
@@ -1188,7 +1254,9 @@ function sessionDetail(id){
     h += '<div class="card card-pad"><h3 style="font-size:17px">' + esc(e.name) + '</h3>';
     d.forEach(function(x, i){
       h += '<div class="kv"><span class="k">Set ' + (i + 1) + (x.pr ? ' <span class="pr">PR</span>' : '') + '</span>' +
-           '<span class="v">' + fmt(x.w) + ' ' + unit() + ' x ' + fmt(x.r) + '</span></div>';
+           '<span class="v">' + (isTimed(e)
+             ? (num(x.w) > 0 ? fmt(x.w) + ' ' + unit() + ' for ' : '') + fmt(x.r) + ' s'
+             : fmt(x.w) + ' ' + unit() + ' x ' + fmt(x.r)) + '</span></div>';
     });
     h += '</div>';
   });
@@ -1199,16 +1267,17 @@ function sessionDetail(id){
 }
 
 function exerciseDetail(name){
-  var key = norm(name), pts = [], best = 0, bestSet = null, totalSets = 0;
+  var key = norm(name), pts = [], best = 0, bestSet = null, totalSets = 0, timed = false;
   finishedSessions().slice().reverse().forEach(function(s){
     (s.entries || []).forEach(function(e){
       if (norm(e.name) !== key) return;
       var d = doneSets(e);
       if (!d.length) return;
+      if (isTimed(e)) timed = true;
       totalSets += d.length;
       var top = 0, topSet = null;
       d.forEach(function(x){
-        var v = e1rm(x.w, x.r);
+        var v = isTimed(e) ? num(x.r) : e1rm(x.w, x.r);
         if (v > top) { top = v; topSet = x; }
         if (v > best) { best = v; bestSet = x; }
       });
@@ -1219,17 +1288,24 @@ function exerciseDetail(name){
   var h = '<div class="stack">';
   h += '<button class="btn btn-ghost btn-sm" data-action="back-log" style="align-self:flex-start">&larr; All lifts</button>';
   h += '<div><p class="eyebrow">Lift</p><h1 class="view-title">' + esc(name) + '</h1>' +
-       '<p class="sub">Estimated one-rep max per session, using the Epley formula on your best set of the day.</p></div>';
+       '<p class="sub">' + (timed
+         ? 'Your longest set each session.'
+         : 'Estimated one-rep max per session, using the Epley formula on your best set of the day.') + '</p></div>';
   h += '<div class="stats">' +
-         '<div class="stat"><div class="k">Best e1RM</div><div class="v">' + fmt(Math.round(best)) + '<small>' + unit() + '</small></div></div>' +
-         '<div class="stat"><div class="k">From</div><div class="v" style="font-size:16px">' + (bestSet ? fmt(bestSet.w) + "x" + fmt(bestSet.r) : "-") + '</div></div>' +
+         '<div class="stat"><div class="k">' + (timed ? 'Longest' : 'Best e1RM') + '</div><div class="v">' +
+           fmt(Math.round(best)) + '<small>' + (timed ? 's' : unit()) + '</small></div></div>' +
+         '<div class="stat"><div class="k">From</div><div class="v" style="font-size:16px">' +
+           (bestSet ? (timed ? (num(bestSet.w) > 0 ? fmt(bestSet.w) + unit() : "bodyweight") : fmt(bestSet.w) + "x" + fmt(bestSet.r)) : "-") + '</div></div>' +
          '<div class="stat"><div class="k">Sets</div><div class="v">' + totalSets + '</div></div>' +
        '</div>';
   h += '<div class="card card-pad"><div class="chart-box">' + buildChart(pts) + '</div></div>';
   h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Session by session</p>';
   pts.slice().reverse().forEach(function(p){
     h += '<div class="kv"><span class="k">' + dayLabel(p.t) + '</span>' +
-         '<span class="v">' + fmt(p.set.w) + ' x ' + fmt(p.set.r) + '  <span style="color:var(--ink-3)">= ' + fmt(Math.round(p.v)) + '</span></span></div>';
+         '<span class="v">' + (timed
+           ? (num(p.set.w) > 0 ? fmt(p.set.w) + ' ' + unit() + ' for ' : '') + fmt(p.set.r) + ' s'
+           : fmt(p.set.w) + ' x ' + fmt(p.set.r) + '  <span style="color:var(--ink-3)">= ' + fmt(Math.round(p.v)) + '</span>') +
+         '</span></div>';
   });
   h += '</div></div>';
   return h;
@@ -1547,8 +1623,73 @@ var GUIDES = [
     miss:"Finishing the rep by arching the lower back instead of extending the hips."
   },
   {
+    key:"plank", title:"Plank", view:"side", load:"none",
+    match:["plank"],
+    props:{ floor:true },
+    a:{ head:[58,148], sho:[72,156], elb:[70,182], han:[44,184], hip:[140,172], kne:[176,179], ank:[202,184] },
+    b:{ head:[58,144], sho:[72,152], hip:[140,160], kne:[176,172], ank:[202,184] },
+    cues:[
+      "Elbows under the shoulders, forearms flat, feet about hip width.",
+      "Tuck the ribs down and squeeze the glutes so the body is one straight line.",
+      "Breathe normally the whole set - if you are holding your breath it is too hard."
+    ],
+    miss:"Letting the hips sag toward the floor, which turns a brace into a lower back stretch."
+  },
+  {
+    key:"kneeraise", title:"Hanging Knee Raise", view:"side", load:"none",
+    match:["hanging knee","knee raise","leg raise","hanging"],
+    props:{ bar:true },
+    a:{ head:[118,74], sho:[110,66], elb:[110,50], han:[110,34], hip:[110,108], kne:[110,146], ank:[112,182] },
+    b:{ kne:[144,102], ank:[156,132] },
+    cues:[
+      "Hang with the shoulders pulled down, not loose in the sockets.",
+      "Curl the pelvis up as the knees rise - that last bit is the abs, not the hip flexors.",
+      "Lower under control and stop the swing before the next rep."
+    ],
+    miss:"Kicking the knees up with momentum, so the body swings and the abs never really work."
+  },
+  {
+    key:"cablecrunch", title:"Cable Crunch", view:"side", load:"cable",
+    match:["cable crunch","crunch"],
+    props:{ floor:true, column:170 },
+    a:{ head:[116,100], sho:[110,112], elb:[122,100], han:[124,88], hip:[104,150], kne:[100,182], ank:[76,182] },
+    b:{ head:[130,128], sho:[118,138], elb:[130,126], han:[132,114] },
+    cues:[
+      "Kneel far enough from the stack that the cable pulls you back a little.",
+      "Hands stay pinned beside the head - the hands never move, the ribs do.",
+      "Crunch by rounding the spine down toward the knees, then uncurl slowly."
+    ],
+    miss:"Hinging at the hips and pulling with the arms, which makes it a bow rather than a crunch."
+  },
+  {
+    key:"calf", title:"Standing Calf Raise", view:"side", load:"db",
+    match:["calf raise","calf"],
+    props:{ floor:true },
+    a:pose({ elb:[102,112], han:[104,132] }),
+    b:{ head:[102,66], sho:[100,80], elb:[102,100], han:[104,120], hip:[100,110], kne:[100,140], ank:[100,170] },
+    cues:[
+      "Knees stay straight - a bent knee hands the work to the soleus instead.",
+      "Rise all the way onto the toes and pause at the top for a beat.",
+      "Lower until you feel the stretch at the bottom before the next rep."
+    ],
+    miss:"Bouncing through a short range, which is mostly the Achilles tendon springing rather than the calf working."
+  },
+  {
+    key:"carry", title:"Farmer's Carry", view:"side", load:"db",
+    match:["farmer","carry","carries"],
+    props:{ floor:true },
+    a:pose({ elb:[102,112], han:[104,132], kne:[112,150], ank:[124,180] }),
+    b:pose({ elb:[102,112], han:[104,132], kne:[96,152], ank:[92,182] }),
+    cues:[
+      "Stand tall first, then walk - shoulders down and back, ribs stacked over hips.",
+      "Short controlled steps. The weights should not swing.",
+      "Grip is usually what gives out first, so set the weights down before your form goes."
+    ],
+    miss:"Shrugging the weights up around the ears and leaning back to counterbalance."
+  },
+  {
     key:"curl", title:"Dumbbell Curl", view:"side", load:"db",
-    match:["curl","bicep","biceps","hammer"], avoid:["leg curl","hamstring"],
+    match:["curl","bicep","biceps","hammer"], avoid:["leg curl","hamstring","wrist"],
     props:{ floor:true },
     a:pose({ elb:[104,112], han:[106,132] }),
     b:pose({ elb:[104,112], han:[116,96] }),
@@ -1599,6 +1740,7 @@ function guideBox(g){
   if (p.floor || p.bench || p.incline || p.pad || p.seat) ys.push(186);
   if (p.bench) { xs.push(58, 188); }
   if (p.pad) { xs.push(56, 178); }
+  if (p.bar) { xs.push(56, 184); ys.push(30); }
   if (p.incline) { xs.push(86, 168); }
   if (p.seat) { xs.push(74, 128); }
   if (p.seatLine) { xs.push(64, 132); }
@@ -1651,6 +1793,10 @@ function propsMarkup(g){
   if (p.incline) {
     s += seg([136, 160], [86, 110], 11, "var(--surface)") + seg([136, 160], [86, 110], 3, edge);
     s += seg([136, 160], [168, 160], 3, edge) + seg([140, 160], [140, 186], 3, edge);
+  }
+  if (p.bar) {
+    s += seg([56, 30], [184, 30], 5, edge);
+    s += seg([64, 30], [64, 14], 3, edge) + seg([176, 30], [176, 14], 3, edge);
   }
   if (p.pad) {
     s += '<rect x="56" y="148" width="122" height="13" rx="6" fill="none" stroke="' + edge + '" stroke-width="3"></rect>';
@@ -1800,7 +1946,7 @@ function formSheet(name){
    actually use: 135 lb and 60 kg are both "one plate" a side. */
 var MILESTONES = [
   { label:"Bench Press",    match:["bench press","bench"], avoid:["incline"], lb:[95,135,185,225,275,315], kg:[40,60,80,100,120,140] },
-  { label:"Back Squat",     match:["squat"], avoid:["split","bulgarian","lunge"], lb:[135,185,225,275,315,405], kg:[60,80,100,120,140,180] },
+  { label:"Back Squat",     match:["squat"], avoid:["split","bulgarian","lunge","smith","bodyweight"], lb:[135,185,225,275,315,405], kg:[60,80,100,120,140,180] },
   { label:"Deadlift",       match:["deadlift"], avoid:["romanian","rdl","stiff","dumbbell","db ","single leg"], lb:[135,225,315,405,495], kg:[60,100,140,180,220] },
   { label:"Overhead Press", match:["overhead press","military","shoulder press"], lb:[75,95,115,135,155,185], kg:[30,40,50,60,70,80] },
   { label:"Barbell Row",    match:["barbell row","bent over row","pendlay"], lb:[95,135,185,225,275], kg:[40,60,80,100,120] },
@@ -1819,7 +1965,8 @@ function allSets(){
   finishedSessions().forEach(function(s){
     (s.entries || []).forEach(function(e){
       doneSets(e).forEach(function(x){
-        out.push({ name:e.name, key:norm(e.name), w:num(x.w), r:num(x.r), ts:x.ts || s.start, pr:!!x.pr });
+        out.push({ name:e.name, key:norm(e.name), w:num(x.w), r:num(x.r), ts:x.ts || s.start,
+                   pr:!!x.pr, timed:isTimed(e) });
       });
     });
   });
@@ -1837,9 +1984,15 @@ function recordRows(){
   var map = {};
   allSets().forEach(function(x){
     var m = map[x.key];
-    if (!m) m = map[x.key] = { name:x.name, bestW:0, bestWr:0, bestWts:0, bestE:0, bestEset:null, sets:0, last:0 };
+    if (!m) m = map[x.key] = { name:x.name, bestW:0, bestWr:0, bestWts:0, bestE:0, bestEset:null,
+                               sets:0, last:0, timed:x.timed, bestS:0, bestSw:0, bestSts:0 };
     m.sets++;
     m.last = Math.max(m.last, x.ts);
+    if (x.timed) {
+      m.timed = true;
+      if (x.r > m.bestS) { m.bestS = x.r; m.bestSw = x.w; m.bestSts = x.ts; }
+      return;
+    }
     if (x.w > m.bestW) { m.bestW = x.w; m.bestWr = x.r; m.bestWts = x.ts; }
     var e = e1rm(x.w, x.r);
     if (e > m.bestE) { m.bestE = e; m.bestEset = x; }
@@ -1853,7 +2006,7 @@ function recordRows(){
 function bestForMilestone(m){
   var best = { w:0, r:0, ts:0 };
   allSets().forEach(function(x){
-    if (!nameMatches(x.key, m)) return;
+    if (x.timed || !nameMatches(x.key, m)) return;
     if (x.w > best.w) best = { w:x.w, r:x.r, ts:x.ts };
   });
   return best;
@@ -2055,9 +2208,13 @@ function viewGoals(){
     rows.forEach(function(r){
       h += '<button class="rec" data-action="open-exercise" data-name="' + esc(r.name) + '">' +
              '<div class="ms-top"><span class="n">' + esc(r.name) + '</span>' +
-               '<span class="v">' + fmt(r.bestW) + ' x ' + fmt(r.bestWr) + '</span></div>' +
-             '<div class="ms-note">Best e1RM ' + fmt(Math.round(r.bestE)) + ' ' + unit() +
-               ' &middot; ' + r.sets + ' sets &middot; heaviest on ' + dayLabel(r.bestWts) + '</div>' +
+               '<span class="v">' + (r.timed
+                 ? fmt(r.bestS) + ' s' + (r.bestSw > 0 ? ' @ ' + fmt(r.bestSw) : '')
+                 : fmt(r.bestW) + ' x ' + fmt(r.bestWr)) + '</span></div>' +
+             '<div class="ms-note">' + (r.timed
+               ? 'Longest set &middot; ' + r.sets + ' sets &middot; set on ' + dayLabel(r.bestSts)
+               : 'Best e1RM ' + fmt(Math.round(r.bestE)) + ' ' + unit() +
+                 ' &middot; ' + r.sets + ' sets &middot; heaviest on ' + dayLabel(r.bestWts)) + '</div>' +
            '</button>';
     });
     h += '</div>';
@@ -2070,7 +2227,7 @@ function viewGoals(){
     h += '<div><p class="eyebrow" style="margin-bottom:8px">Recently broken</p><div class="card">';
     prs.forEach(function(x){
       h += '<div class="rec"><div class="ms-top"><span class="n">' + esc(x.name) + '</span>' +
-           '<span class="v">' + fmt(x.w) + ' x ' + fmt(x.r) + '</span></div>' +
+           '<span class="v">' + (x.timed ? fmt(x.r) + ' s' : fmt(x.w) + ' x ' + fmt(x.r)) + '</span></div>' +
            '<div class="ms-note">' + dayLabel(x.ts) + '</div></div>';
     });
     h += '</div></div>';
@@ -2443,11 +2600,13 @@ function findEntry(id){
   if (S.active) S.active.entries.forEach(function(e){ if (e.id === id) out = e; });
   return out;
 }
-function newEntry(name, target, reps, rest){
+function newEntry(name, target, reps, rest, mode){
   var n = Math.max(1, Math.round(num(target) || 3));
   var sets = [];
   for (var i = 0; i < n; i++) sets.push({ w:"", r:"", done:false });
-  return { id:uid(), name:name, target:n, reps:String(reps || ""), rest:num(rest) || num(S.settings.rest), sets:sets };
+  var e = { id:uid(), name:name, target:n, reps:String(reps || ""), rest:num(rest) || num(S.settings.rest), sets:sets };
+  if (mode === "time") e.mode = "time";
+  return e;
 }
 function startRoutine(id){
   var r = null;
@@ -2458,7 +2617,7 @@ function startRoutine(id){
   }
   S.active = {
     id: uid(), routineId: r.id, name: r.name, start: Date.now(), end: 0,
-    entries: r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest); })
+    entries: r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode); })
   };
   save();
   V.routineId = null;
@@ -2493,12 +2652,20 @@ function logSet(exId, i){
 
   if (s.done) { s.done = false; s.pr = false; save(); render(); return; }
 
-  if (num(s.r) <= 0) { toast("Put the reps in first."); return; }
+  if (num(s.r) <= 0) { toast(isTimed(e) ? "How many seconds?" : "Put the reps in first."); return; }
 
   s.done = true;
   s.ts = Date.now();
-  var prior = Math.max(bestE1rm(e.name), bestInActive(e.name, e.id, i));
-  s.pr = prior > 0 && e1rm(s.w, s.r) > prior + 0.01;
+  if (isTimed(e)) {
+    var priorS = bestSecondsFor(e.name);
+    e.sets.forEach(function(x, j){
+      if (x.done && j !== i) priorS = Math.max(priorS, num(x.r));
+    });
+    s.pr = priorS > 0 && num(s.r) > priorS;
+  } else {
+    var prior = Math.max(bestE1rm(e.name), bestInActive(e.name, e.id, i));
+    s.pr = prior > 0 && e1rm(s.w, s.r) > prior + 0.01;
+  }
 
   /* Carry the weight down to the next empty set - you usually repeat it. */
   var next = e.sets[i + 1];
@@ -2515,7 +2682,8 @@ function logSet(exId, i){
   startRest(num(e.rest) || num(S.settings.rest), "Rest");
   render();
   if (landed) toast("Goal hit: " + landed.name + " " + fmt(landed.w) + " x " + fmt(landed.r) + ".");
-  else if (s.pr) toast("New best on " + e.name + ": " + fmt(s.w) + " x " + fmt(s.r) + ".");
+  else if (s.pr) toast("New best on " + e.name + ": " +
+    (isTimed(e) ? fmt(s.r) + " seconds." : fmt(s.w) + " x " + fmt(s.r) + "."));
 }
 function finishSession(){
   var a = S.active;
@@ -2525,7 +2693,11 @@ function finishSession(){
   }
   a.end = Date.now();
   a.entries = a.entries.filter(function(e){ return doneSets(e).length > 0; })
-    .map(function(e){ return { id:e.id, name:e.name, target:e.target, reps:e.reps, rest:e.rest, sets:doneSets(e) }; });
+    .map(function(e){
+      var out = { id:e.id, name:e.name, target:e.target, reps:e.reps, rest:e.rest, sets:doneSets(e) };
+      if (isTimed(e)) out.mode = "time";
+      return out;
+    });
   S.sessions.push(a);
   S.active = null;
   stopTimer();
@@ -2548,7 +2720,9 @@ function addExerciseSheet(){
       '<div class="field"><label for="axSets">Sets</label><input class="control" id="axSets" type="number" min="1" max="20" value="3"></div>' +
       '<div class="field"><label for="axReps">Reps</label><input class="control" id="axReps" value="8"></div>' +
       '<div class="field"><label for="axRest">Rest (s)</label><input class="control" id="axRest" type="number" min="0" step="5" value="' + num(S.settings.rest) + '"></div>' +
-    '</div><div style="height:14px"></div>' +
+    '</div>' +
+    '<label class="switch"><input type="checkbox" id="axTimed">' +
+      '<span class="txt">Timed<small>For planks and carries - the second column becomes seconds.</small></span></label>' +
     '<div class="row"><button class="btn btn-ghost" style="flex:1" data-action="close-sheet">Cancel</button>' +
     '<button class="btn btn-primary" style="flex:1" data-action="do-add-exercise">Add it</button></div>');
   setTimeout(function(){ var f = $("#axName"); if (f) f.focus(); }, 40);
@@ -2660,7 +2834,8 @@ document.addEventListener("click", function(ev){
       var nm = $("#axName").value.trim();
       if (!nm) { toast("Give the lift a name."); break; }
       if (!S.active) startEmpty();
-      S.active.entries.push(newEntry(nm, $("#axSets").value, $("#axReps").value, $("#axRest").value));
+      S.active.entries.push(newEntry(nm, $("#axSets").value, $("#axReps").value, $("#axRest").value,
+        $("#axTimed").checked ? "time" : ""));
       save(); closeSheet(); render();
       break;
     }
@@ -2692,6 +2867,10 @@ document.addEventListener("click", function(ev){
     case "form-sheet": formSheet(btn.getAttribute("data-name")); break;
     case "demo-play": playDemo(); break;
     case "do-plates": doPlates(); break;
+    case "hold-now": {
+      startRest(num(btn.getAttribute("data-sec")) || 30, "Hold");
+      break;
+    }
     case "rest-now": {
       var e3 = findEntry(exId);
       startRest(e3 ? num(e3.rest) : num(S.settings.rest), "Rest");
