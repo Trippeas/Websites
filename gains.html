@@ -321,6 +321,7 @@ tr.done .check{background:var(--green);border-color:var(--green);color:#fff}
   width:100%;padding:10px 11px;background:var(--paper);
   border:1px solid var(--line-2);border-radius:var(--r-s);font-size:15.5px;
 }
+.control::placeholder{color:var(--ink-3)}
 .control:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 18%,transparent)}
 select.control{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px;background-repeat:no-repeat}
 textarea.control{font-family:var(--mono);font-size:12px;line-height:1.5;resize:vertical}
@@ -407,7 +408,8 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
 .ride.done{background:var(--surface-2)}
 .ride.done .check{background:var(--green);border-color:var(--green);color:#fff}
 .ride.done .inp,.ride.done .control{background:transparent;border-color:transparent;color:var(--ink-2)}
-.ride-row{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end}
+.ride-row,.food-row{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end}
+.food-row{margin-top:9px}
 .ride-f{display:flex;flex-direction:column;gap:4px;min-width:0}
 .ride-f span{
   font-family:var(--display);font-size:10.5px;letter-spacing:.12em;
@@ -540,7 +542,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 9;
+var APP_BUILD = 10;
 var APP_DATE = "17 Sep 2026";
 var WED_NAME = "Abs + Forearms - Wed";
 var SAT_NAME = "Mountain Bike Ride - Sat";
@@ -557,8 +559,9 @@ function defaults(){
     routines: seedRoutines(),
     sessions: [],
     goals: [],
-    applied: ["abs-forearms-legs", "wed-abs-sat-ride"],
-    body: { goalW:0, pTarget:150, w:{}, p:{}, c:{} },
+    applied: ["abs-forearms-legs", "wed-abs-sat-ride", "food-log"],
+    body: { goalW:0, pTarget:150, kTarget:0, dob:"", sex:"", htCm:0, act:1.55, plan:"maintain",
+            w:{}, p:{}, f:{}, c:{} },
     active: null
   };
 }
@@ -629,7 +632,21 @@ function load(){
       if (!Array.isArray(p.sessions)) p.sessions = [];
       if (!Array.isArray(p.goals)) p.goals = [];
       p.body = Object.assign(d.body, p.body || {});
-      ["w", "p", "c"].forEach(function(f){ if (!p.body[f] || typeof p.body[f] !== "object") p.body[f] = {}; });
+      ["w", "p", "f", "c"].forEach(function(f){ if (!p.body[f] || typeof p.body[f] !== "object") p.body[f] = {}; });
+
+      /* Protein used to be a bare list of grams per day. It is now a food
+         log, so each old entry becomes an unnamed item with no calories. */
+      if (!Array.isArray(p.applied)) p.applied = [];
+      if (p.applied.indexOf("food-log") < 0) {
+        p.applied.push("food-log");
+        Object.keys(p.body.p).forEach(function(k){
+          if (p.body.f[k]) return;
+          p.body.f[k] = (p.body.p[k] || []).map(function(g){
+            return { label:"", kcal:0, g:num(g) };
+          });
+        });
+        p.body.p = {};
+      }
       if (!p.active) p.active = null;
       if (isUntouchedOldSeed(p)) p.routines = d.routines;
 
@@ -2419,11 +2436,79 @@ function trainedToday(){
   S.sessions.forEach(function(s){ if (dayKey(s.start) === k) hit = true; });
   return hit;
 }
+function foodOn(k){ return body().f[k] || []; }
 function proteinOn(k){
-  var list = body().p[k] || [], t = 0;
-  list.forEach(function(g){ t += num(g); });
+  var t = 0;
+  foodOn(k).forEach(function(x){ t += num(x.g); });
   return t;
 }
+function caloriesOn(k){
+  var t = 0;
+  foodOn(k).forEach(function(x){ t += num(x.kcal); });
+  return t;
+}
+
+/* ------------------------ the calorie estimate ----------------------
+   Mifflin-St Jeor for resting burn, an activity multiplier for the rest,
+   then an adjustment for what you are trying to do. It is an estimate:
+   the seven-day weight trend is what tells you whether it is right. */
+function ageNow(){
+  var dob = body().dob;
+  if (!dob) return 0;
+  var a = dob.split("-");
+  if (a.length !== 3) return 0;
+  var b = new Date(+a[0], +a[1] - 1, +a[2]), now = new Date();
+  var yrs = now.getFullYear() - b.getFullYear();
+  var m = now.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < b.getDate())) yrs--;
+  return yrs > 0 && yrs < 120 ? yrs : 0;
+}
+function weightKg(){
+  var st = weightStats();
+  if (!st) return 0;
+  var w = st.avg || st.latest;
+  return unit() === "kg" ? w : w * 0.45359237;
+}
+var PLANS = {
+  cut:      { label:"Losing fat",  adj:-500 },
+  maintain: { label:"Maintaining", adj:0 },
+  gain:     { label:"Gaining",     adj:300 }
+};
+var ACTS = [
+  { v:1.2,   label:"Barely moving" },
+  { v:1.375, label:"Light, 1-3 days a week" },
+  { v:1.55,  label:"Moderate, 3-5 days a week" },
+  { v:1.725, label:"Hard, 6-7 days a week" },
+  { v:1.9,   label:"Very hard, plus a physical job" }
+];
+function bmr(){
+  var b = body(), kg = weightKg(), age = ageNow(), cm = num(b.htCm);
+  if (!kg || !age || !cm || !b.sex) return 0;
+  var base = 10 * kg + 6.25 * cm - 5 * age;
+  return b.sex === "f" ? base - 161 : base + 5;
+}
+function maintenance(){
+  var m = bmr();
+  return m ? m * (num(body().act) || 1.55) : 0;
+}
+function suggestedCalories(){
+  var t = maintenance();
+  if (!t) return 0;
+  var plan = PLANS[body().plan] || PLANS.maintain;
+  return Math.max(1200, Math.round((t + plan.adj) / 10) * 10);
+}
+function calTarget(){
+  var manual = num(body().kTarget);
+  return manual > 0 ? manual : suggestedCalories();
+}
+function cmToFtIn(cm){
+  var totalIn = num(cm) / 2.54;
+  var ft = Math.floor(totalIn / 12);
+  var inch = Math.round(totalIn - ft * 12);
+  if (inch === 12) { ft++; inch = 0; }
+  return { ft:ft, inch:inch };
+}
+function kcal(n){ return Math.round(num(n)).toLocaleString(); }
 function latestWeight(){
   var keys = Object.keys(body().w).sort();
   if (!keys.length) return null;
@@ -2467,12 +2552,16 @@ function lastDays(n){
   for (var i = n - 1; i >= 0; i--) out.push(dayKey(t0 - i * 86400000));
   return out;
 }
-function proteinHitRate(n){
-  var target = num(body().pTarget), hit = 0;
+function hitRate(n, valueOf, target, inRange){
+  var hit = 0;
   if (target <= 0) return null;
-  lastDays(n).forEach(function(k){ if (proteinOn(k) >= target) hit++; });
+  lastDays(n).forEach(function(k){ if (inRange(valueOf(k), target)) hit++; });
   return hit;
 }
+/* Protein is a floor - more is fine. Calories are a band: eating 1,200
+   under target is not a good day whether you are cutting or gaining. */
+function atLeast(v, t){ return v >= t; }
+function nearTarget(v, t){ return v > 0 && Math.abs(v - t) <= t * 0.1; }
 function creatineStreak(){
   var n = 0, t0 = keyTs(today());
   for (var i = 0; i < 400; i++) {
@@ -2524,11 +2613,12 @@ function weightChart(){
          '</svg>';
 }
 
-function proteinChart(){
-  var days = lastDays(14), target = num(body().pTarget);
-  var W = 640, H = 180, L = 40, R = 14, TP = 16, B = 28;
+function dayBarChart(valueOf, target, label, inRange){
+  inRange = inRange || atLeast;
+  var days = lastDays(14);
+  var W = 640, H = 180, L = 46, R = 14, TP = 16, B = 28;
   var max = Math.max(target * 1.2, 10);
-  days.forEach(function(k){ max = Math.max(max, proteinOn(k) * 1.1); });
+  days.forEach(function(k){ max = Math.max(max, valueOf(k) * 1.1); });
   var iw = (W - L - R) / days.length;
   var s = "";
   function Y(v){ return TP + (H - TP - B) * (1 - v / max); }
@@ -2536,7 +2626,7 @@ function proteinChart(){
   s += '<line x1="' + L + '" y1="' + Y(0) + '" x2="' + (W - R) + '" y2="' + Y(0) +
        '" stroke="currentColor" stroke-width="1" opacity="0.2"></line>';
   days.forEach(function(k, i){
-    var v = proteinOn(k), h = (H - TP - B) * (v / max);
+    var v = valueOf(k), h = (H - TP - B) * (v / max);
     var x = L + i * iw + iw * 0.2, w = iw * 0.6;
     if (v <= 0) {
       s += '<rect x="' + x.toFixed(1) + '" y="' + (Y(0) - 3).toFixed(1) + '" width="' + w.toFixed(1) +
@@ -2544,7 +2634,7 @@ function proteinChart(){
     } else {
       s += '<rect x="' + x.toFixed(1) + '" y="' + Y(v).toFixed(1) + '" width="' + w.toFixed(1) +
            '" height="' + Math.max(2, h).toFixed(1) + '" rx="2.5" fill="' +
-           (target > 0 && v >= target ? "var(--green)" : "var(--blue)") + '"></rect>';
+           (target > 0 && inRange(v, target) ? "var(--green)" : "var(--blue)") + '"></rect>';
     }
   });
   if (target > 0) {
@@ -2556,7 +2646,7 @@ function proteinChart(){
   s += '<text x="' + L + '" y="' + (H - 7) + '" font-size="12" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">' + dayLabel(keyTs(days[0])) + '</text>' +
        '<text x="' + (W - R) + '" y="' + (H - 7) + '" text-anchor="end" font-size="12" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity="0.6">today</text>';
   return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
-         'aria-label="Protein per day for the last fourteen days" style="color:var(--ink-2)">' + s + '</svg>';
+         'aria-label="' + esc(label) + ' per day for the last fourteen days" style="color:var(--ink-2)">' + s + '</svg>';
 }
 
 /* --------------------- the card on the Goals tab -------------------- */
@@ -2569,6 +2659,8 @@ function checkinCard(){
   bits.push(wToday != null
     ? '<b>' + fmt(num(wToday)) + '</b> ' + unit()
     : (lw ? 'last ' + fmt(lw.v) + ' ' + unit() : 'no weigh-in'));
+  var kc = caloriesOn(k), kt2 = calTarget();
+  if (kc > 0 || kt2 > 0) bits.push('<b>' + kcal(kc) + '</b>' + (kt2 > 0 ? ' / ' + kcal(kt2) : "") + ' kcal');
   bits.push('<b>' + Math.round(pg) + '</b>' + (pt > 0 ? ' / ' + Math.round(pt) : "") + ' g');
   bits.push(b.c[k] ? 'creatine &#10003;' : 'no creatine');
   bits.push(trainedToday() ? 'trained &#10003;' : 'not trained');
@@ -2585,7 +2677,8 @@ function viewBody(){
   var b = body(), k = today();
   var st = weightStats();
   var pg = proteinOn(k), pt = num(b.pTarget);
-  var entries = b.p[k] || [];
+  var kg2 = caloriesOn(k), kt = calTarget();
+  var entries = foodOn(k);
   var lw = latestWeight();
 
   var h = '<div class="stack">';
@@ -2593,38 +2686,120 @@ function viewBody(){
   h += '<div><p class="eyebrow">Check-in</p><h1 class="view-title">' + dayLabel(Date.now()) + '</h1>' +
        '<p class="sub">Weigh in first thing, before food and water, so the numbers compare.</p></div>';
 
-  /* ---- protein ---- */
+  /* ---- food: calories and protein come off the same entry ---- */
   h += '<div class="card ms">' +
-         '<div class="ms-top"><span class="n">Protein today</span>' +
+         '<div class="ms-top"><span class="n">Calories today</span>' +
+           '<span class="v">' + kcal(kg2) + (kt > 0 ? ' / ' + kcal(kt) : "") + '</span></div>' +
+         progressBar(kt > 0 ? (kg2 / kt) * 100 : 0, kt > 0 && nearTarget(kg2, kt)) +
+         '<div class="ms-note">' +
+           (kt <= 0 ? "Fill in the details below and this works out a target."
+             : nearTarget(kg2, kt) ? "On target."
+             : kg2 > kt ? kcal(kg2 - kt) + " over."
+             : kcal(kt - kg2) + " left.") +
+         '</div>' +
+         '<div style="height:4px"></div>' +
+         '<div class="ms-top"><span class="n" style="font-size:15px">Protein</span>' +
            '<span class="v">' + Math.round(pg) + (pt > 0 ? ' / ' + Math.round(pt) : "") + ' g</span></div>' +
          progressBar(pt > 0 ? (pg / pt) * 100 : 0, pt > 0 && pg >= pt) +
          '<div class="ms-note">' +
-           (pt <= 0 ? "Set a daily target below."
-             : pg >= pt ? "Target hit." : Math.round(pt - pg) + " g to go.") +
+           (pt <= 0 ? "Set a protein target below."
+             : pg >= pt ? "Protein done." : Math.round(pt - pg) + " g to go.") +
+         '</div>' +
+
+         '<hr class="rule">' +
+         '<input class="control" id="fLabel" placeholder="What was it? (optional)" autocomplete="off">' +
+         '<div class="food-row">' +
+           '<label class="ride-f"><span>Calories</span><input class="inp" id="fKcal" inputmode="numeric" placeholder="0"></label>' +
+           '<label class="ride-f"><span>Protein g</span><input class="inp" id="fProt" inputmode="numeric" placeholder="0"></label>' +
+           '<button class="btn btn-primary" data-action="food-add">Add</button>' +
          '</div>' +
          '<div class="quick">' +
            [20, 30, 40, 50].map(function(g){
-             return '<button class="preset" data-action="protein-add" data-g="' + g + '">+' + g + '<small>grams</small></button>';
+             return '<button class="preset" data-action="protein-add" data-g="' + g + '">+' + g + '<small>g protein</small></button>';
            }).join("") +
-         '</div>' +
-         '<div class="row"><input class="control" id="pCustom" inputmode="numeric" placeholder="other amount" style="flex:1">' +
-           '<button class="btn" data-action="protein-custom">Add</button></div>';
+         '</div>';
+
   if (entries.length) {
     h += '<div><p class="eyebrow" style="margin-bottom:6px">Logged today &middot; tap to remove</p><div class="chips">';
-    entries.forEach(function(g, i){
-      h += '<button class="chip-x" data-action="protein-undo" data-i="' + i + '"><b>' + Math.round(num(g)) + ' g</b><span>&times;</span></button>';
+    entries.forEach(function(x, i){
+      var parts = [];
+      if (num(x.kcal) > 0) parts.push(kcal(x.kcal));
+      if (num(x.g) > 0) parts.push(Math.round(num(x.g)) + ' g');
+      h += '<button class="chip-x" data-action="food-undo" data-i="' + i + '">' +
+           (x.label ? '<b>' + esc(x.label) + '</b> ' : '') +
+           parts.join(' &middot; ') + '<span>&times;</span></button>';
     });
     h += '</div></div>';
   }
-  h += '<div class="field"><label for="pTarget">Daily target (g)</label>' +
-       '<div class="row"><input class="control" id="pTarget" inputmode="numeric" data-bf="pTarget" value="' + Math.round(pt) + '" style="flex:1">' +
-       (lw ? '<button class="btn btn-sm btn-ghost" data-action="protein-suggest">Use ' + Math.round(unit() === "kg" ? lw.v * 2 : lw.v) + ' g</button>' : "") +
-       '</div><p class="sub" style="font-size:12.5px;margin-top:4px">A gram per pound of bodyweight is the usual rule of thumb.</p></div>';
   h += '</div>';
 
-  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Last 14 days</p>' +
-       '<div class="chart-box">' + proteinChart() + '</div>';
-  var hit = proteinHitRate(7);
+  /* ---- where the calorie number comes from ---- */
+  var age = ageNow(), rest = bmr(), maint = maintenance(), sug = suggestedCalories();
+  var ft = cmToFtIn(b.htCm);
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:10px">Your targets</p>';
+  h += '<div class="grid-2">' +
+         '<div class="field"><label for="bSex">Sex</label><select class="control" id="bSex" data-bs="sex">' +
+           '<option value=""' + (b.sex ? "" : " selected") + '>Pick one</option>' +
+           '<option value="m"' + (b.sex === "m" ? " selected" : "") + '>Male</option>' +
+           '<option value="f"' + (b.sex === "f" ? " selected" : "") + '>Female</option>' +
+         '</select></div>' +
+         '<div class="field"><label for="bDob">Date of birth</label>' +
+           '<input class="control" id="bDob" type="date" data-bs="dob" value="' + esc(b.dob || "") + '"></div>' +
+       '</div><div style="height:10px"></div>';
+  if (unit() === "kg") {
+    h += '<div class="field"><label for="bCm">Height (cm)</label>' +
+         '<input class="control" id="bCm" inputmode="numeric" data-bf="htCm" value="' + (num(b.htCm) || "") + '"></div>';
+  } else {
+    h += '<div class="grid-2">' +
+           '<div class="field"><label for="bFt">Height (ft)</label><input class="control" id="bFt" inputmode="numeric" value="' + (ft.ft || "") + '"></div>' +
+           '<div class="field"><label for="bIn">and inches</label><input class="control" id="bIn" inputmode="numeric" value="' + (num(b.htCm) ? ft.inch : "") + '"></div>' +
+         '</div>' +
+         '<div style="height:6px"></div><button class="btn btn-sm btn-ghost btn-block" data-action="set-height">Save height</button>';
+  }
+  h += '<div style="height:10px"></div>' +
+       '<div class="field"><label for="bAct">How active you are</label><select class="control" id="bAct" data-bf="act">' +
+         ACTS.map(function(a){
+           return '<option value="' + a.v + '"' + (Math.abs(num(b.act) - a.v) < 0.001 ? " selected" : "") + '>' + a.label + '</option>';
+         }).join("") +
+       '</select></div>' +
+       '<div style="height:10px"></div>' +
+       '<div class="field"><label for="bPlan">What you are doing</label><select class="control" id="bPlan" data-bs="plan">' +
+         Object.keys(PLANS).map(function(key){
+           return '<option value="' + key + '"' + (b.plan === key ? " selected" : "") + '>' + PLANS[key].label + '</option>';
+         }).join("") +
+       '</select></div>';
+
+  if (sug > 0) {
+    h += '<div style="height:12px"></div>' +
+         '<div class="kv"><span class="k">Resting burn</span><span class="v">' + kcal(rest) + '</span></div>' +
+         '<div class="kv"><span class="k">Maintenance</span><span class="v">' + kcal(maint) + '</span></div>' +
+         '<div class="kv"><span class="k">' + PLANS[b.plan].label + '</span><span class="v">' + kcal(sug) + '</span></div>' +
+         '<p class="sub" style="font-size:12.5px;margin-top:8px">Worked out from your 7-day average weight at age ' + age +
+         '. It is an estimate - if the trend line is not moving the way you want after a couple of weeks, adjust it by 200 and wait again.</p>';
+  } else {
+    h += '<p class="sub" style="font-size:13px;margin-top:10px">Fill in sex, date of birth and height, and log a weigh-in, and a calorie target appears here.</p>';
+  }
+
+  h += '<div style="height:12px"></div><div class="grid-2">' +
+         '<div class="field"><label for="kTarget">Calorie target</label>' +
+           '<input class="control" id="kTarget" inputmode="numeric" data-bf="kTarget" value="' + (num(b.kTarget) || "") + '" placeholder="' + (sug || 0) + '"></div>' +
+         '<div class="field"><label for="pTarget">Protein target (g)</label>' +
+           '<input class="control" id="pTarget" inputmode="numeric" data-bf="pTarget" value="' + Math.round(pt) + '"></div>' +
+       '</div>' +
+       '<p class="sub" style="font-size:12.5px;margin-top:6px">Leave calories blank to follow the estimate. ' +
+       (lw ? 'A gram of protein per pound of bodyweight is the usual rule - ' : 'A gram of protein per pound of bodyweight is the usual rule.') +
+       (lw ? '<button class="btn-link" data-action="protein-suggest">use ' + Math.round(unit() === "kg" ? lw.v * 2 : lw.v) + ' g</button>.' : '') +
+       '</p></div>';
+
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Calories &middot; last 14 days</p>' +
+       '<div class="chart-box">' + dayBarChart(caloriesOn, kt, "Calories", nearTarget) + '</div>';
+  var khit = hitRate(7, caloriesOn, kt, nearTarget);
+  if (khit !== null) h += '<p class="sub" style="font-size:13px;margin-top:6px">Within 10% of target on ' + khit + ' of the last 7 days.</p>';
+  h += '</div>';
+
+  h += '<div class="card card-pad"><p class="eyebrow" style="margin-bottom:6px">Protein &middot; last 14 days</p>' +
+       '<div class="chart-box">' + dayBarChart(proteinOn, pt, "Protein", atLeast) + '</div>';
+  var hit = hitRate(7, proteinOn, pt, atLeast);
   if (hit !== null) h += '<p class="sub" style="font-size:13px;margin-top:6px">Target hit ' + hit + ' of the last 7 days.</p>';
   h += '</div>';
 
@@ -3144,23 +3319,32 @@ document.addEventListener("click", function(ev){
     }
     case "protein-add": {
       var k1 = today();
-      if (!body().p[k1]) body().p[k1] = [];
-      body().p[k1].push(num(btn.getAttribute("data-g")));
+      if (!body().f[k1]) body().f[k1] = [];
+      body().f[k1].push({ label:"", kcal:0, g:num(btn.getAttribute("data-g")) });
       save(); render();
       break;
     }
-    case "protein-custom": {
-      var pc = num($("#pCustom").value);
-      if (pc <= 0) { toast("How many grams?"); break; }
+    case "food-add": {
+      var fk = num($("#fKcal").value), fp = num($("#fProt").value);
+      var fl = $("#fLabel").value.trim();
+      if (fk <= 0 && fp <= 0) { toast("Add calories, protein, or both."); break; }
       var k2 = today();
-      if (!body().p[k2]) body().p[k2] = [];
-      body().p[k2].push(pc);
+      if (!body().f[k2]) body().f[k2] = [];
+      body().f[k2].push({ label:fl, kcal:fk, g:fp });
       save(); render();
       break;
     }
-    case "protein-undo": {
+    case "food-undo": {
       var k3 = today(), idx = parseInt(btn.getAttribute("data-i"), 10);
-      if (body().p[k3]) { body().p[k3].splice(idx, 1); save(); render(); }
+      if (body().f[k3]) { body().f[k3].splice(idx, 1); save(); render(); }
+      break;
+    }
+    case "set-height": {
+      var ftv = num($("#bFt").value), inv = num($("#bIn").value);
+      if (ftv <= 0 && inv <= 0) { toast("How tall are you?"); break; }
+      body().htCm = Math.round((ftv * 12 + inv) * 2.54 * 10) / 10;
+      save(); render();
+      toast("Height saved.");
       break;
     }
     case "protein-suggest": {
@@ -3254,6 +3438,14 @@ function onFieldChange(ev){
   if (t.id === "rName") {
     var r6 = currentRoutine();
     if (r6) { r6.name = t.value; saveSoon(); }
+    return;
+  }
+  /* Body fields that are text rather than numbers. */
+  var bs = t.getAttribute("data-bs");
+  if (bs) {
+    body()[bs] = t.value;
+    save();
+    if (ev.type === "change") render();
     return;
   }
   var bf = t.getAttribute("data-bf");
