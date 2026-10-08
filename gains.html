@@ -420,6 +420,27 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
   font-variant-numeric:tabular-nums;
 }
 
+/* ---------- streak ---------- */
+.streak-head{display:flex;align-items:center;gap:12px}
+.streak-n{
+  font-family:var(--display);font-size:52px;line-height:.9;
+  font-variant-numeric:tabular-nums;color:var(--ink);
+}
+.streak-unit{
+  font-family:var(--display);font-size:12px;line-height:1.25;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{
+  padding:5px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-3);
+  font-family:var(--display);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+}
+.badge.on{
+  background:var(--green-wash);color:var(--green);
+  border-color:color-mix(in srgb,var(--green) 40%,var(--line));
+}
+
 /* ---------- daily check-in ---------- */
 .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -542,7 +563,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 10;
+var APP_BUILD = 11;
 var APP_DATE = "17 Sep 2026";
 var WED_NAME = "Abs + Forearms - Wed";
 var SAT_NAME = "Mountain Bike Ride - Sat";
@@ -2265,6 +2286,7 @@ function viewGoals(){
   var h = '<div class="stack">';
   h += '<div><p class="eyebrow">Goals</p><h1 class="view-title">What you are chasing</h1></div>';
   h += checkinCard();
+  h += streakCard();
 
   h += '<div class="stats">' +
          '<div class="stat"><div class="k">Last 7 days</div><div class="v">' + lastNDays(7) + '<small>sessions</small></div></div>' +
@@ -2851,6 +2873,114 @@ function viewBody(){
   return h;
 }
 
+/* =====================================================================
+   STREAKS
+   A streak counts scheduled days, and the schedule is Monday to
+   Saturday - so Sunday never extends a streak and never breaks one, and
+   six in a row is a full week rather than seven.
+
+   Today is never counted against you: the day is not over, so an
+   untrained today leaves the streak standing rather than ending it.
+
+   Dates are walked with setDate rather than by adding 86400000, so the
+   two days a year that are 23 or 25 hours long do not shift the day.
+   ===================================================================== */
+var STREAK_LADDER = [
+  { n:3,   label:"Three in a row" },
+  { n:6,   label:"A full week" },
+  { n:12,  label:"Two weeks" },
+  { n:24,  label:"A month" },
+  { n:48,  label:"Two months" },
+  { n:78,  label:"Three months" },
+  { n:156, label:"Six months" },
+  { n:312, label:"A year" }
+];
+
+function trainingDays(){
+  var set = {};
+  S.sessions.forEach(function(s){ set[dayKey(s.start)] = 1; });
+  return set;
+}
+function currentStreak(){
+  var days = trainingDays(), n = 0, d = new Date(keyTs(today())), first = true;
+  for (var i = 0; i < 2000; i++) {
+    if (d.getDay() !== 0) {
+      if (days[dayKey(d.getTime())]) n++;
+      else if (!first) break;
+    }
+    first = false;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
+function longestStreak(){
+  var days = trainingDays(), keys = Object.keys(days).sort();
+  if (!keys.length) return 0;
+  var d = new Date(keyTs(keys[0])), end = keyTs(today());
+  var best = 0, run = 0;
+  while (d.getTime() <= end) {
+    if (d.getDay() !== 0) {
+      if (days[dayKey(d.getTime())]) { run++; if (run > best) best = run; }
+      else run = 0;
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return best;
+}
+/* The last n scheduled days, oldest first - Sundays left out entirely. */
+function lastScheduledDays(n){
+  var out = [], d = new Date(keyTs(today()));
+  while (out.length < n) {
+    if (d.getDay() !== 0) out.unshift(dayKey(d.getTime()));
+    d.setDate(d.getDate() - 1);
+  }
+  return out;
+}
+function nextStreakMark(streak){
+  for (var i = 0; i < STREAK_LADDER.length; i++) {
+    if (STREAK_LADDER[i].n > streak) return STREAK_LADDER[i];
+  }
+  return null;
+}
+
+function streakCard(){
+  var cur = currentStreak(), best = longestStreak(), next = nextStreakMark(cur);
+  var days = trainingDays();
+  var strip = lastScheduledDays(14);
+
+  var h = '<div class="card ms">';
+  h += '<div class="ms-top"><span class="n">Streak</span>' +
+         '<span class="v">best ' + best + '</span></div>';
+  h += '<div class="streak-head">' +
+         '<span class="streak-n">' + cur + '</span>' +
+         '<span class="streak-unit">training day' + (cur === 1 ? "" : "s") + '<br>in a row</span>' +
+       '</div>';
+
+  if (next) {
+    h += progressBar((cur / next.n) * 100, false) +
+         '<div class="ms-note">' + (next.n - cur) + ' more for <b>' + esc(next.label.toLowerCase()) + '</b>' +
+         ' at ' + next.n + '.</div>';
+  } else {
+    h += progressBar(100, true) +
+         '<div class="ms-note">Every mark on the board cleared.</div>';
+  }
+
+  h += '<div class="dots" aria-label="The last fourteen scheduled days">' +
+         strip.map(function(k){
+           return '<span class="dot14' + (days[k] ? " on" : "") + '" title="' + k + '"></span>';
+         }).join("") +
+       '</div>';
+  h += '<div class="badges">' +
+         STREAK_LADDER.map(function(m){
+           return '<span class="badge' + (best >= m.n ? " on" : "") + '">' + m.n + ' &middot; ' + esc(m.label) + '</span>';
+         }).join("") +
+       '</div>';
+  h += '<div class="ms-note">Sundays are a rest day, so they are skipped rather than counted against you. ' +
+       'Six scheduled days is a full week.</div>';
+  h += '</div>';
+  return h;
+}
+
 /* ------------------------------ painting ---------------------------- */
 function paintTimer(){
   var strip = $("#timerStrip");
@@ -3021,6 +3151,7 @@ function finishSession(){
   if (sessionSetCount(a) === 0) {
     return askSheet("Nothing logged", "No sets were ticked off, so there is nothing to save.", "Discard it", "discard-confirm");
   }
+  var streakBefore = currentStreak();
   a.end = Date.now();
   a.entries = a.entries.filter(function(e){ return doneSets(e).length > 0; })
     .map(function(e){
@@ -3038,7 +3169,13 @@ function finishSession(){
   render();
   window.scrollTo(0, 0);
   var n = sessionSetCount(a);
-  toast("Saved: " + n + (n === 1 ? " set, " : " sets, ") + fmt(Math.round(sessionVolume(a))) + " " + unit() + ".");
+  var streakAfter = currentStreak();
+  var mark = null;
+  STREAK_LADDER.forEach(function(m){
+    if (streakAfter >= m.n && streakBefore < m.n) mark = m;
+  });
+  if (mark) toast(mark.label + " - " + mark.n + " training days in a row.");
+  else toast("Saved: " + n + (n === 1 ? " set, " : " sets, ") + fmt(Math.round(sessionVolume(a))) + " " + unit() + ".");
 }
 
 /* ------------------------------ sheets: content --------------------- */
