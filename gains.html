@@ -563,7 +563,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 13;
+var APP_BUILD = 14;
 var APP_DATE = "17 Sep 2026";
 var WED_NAME = "Abs + Forearms - Wed";
 var SAT_NAME = "Mountain Bike Ride - Sat";
@@ -581,7 +581,7 @@ function defaults(){
     routines: seedRoutines(),
     sessions: [],
     goals: [],
-    applied: ["abs-forearms-legs", "wed-abs-sat-ride", "food-log", "misc-day"],
+    applied: ["abs-forearms-legs", "wed-abs-sat-ride", "food-log", "misc-day", "misc-empty"],
     body: { goalW:0, pTarget:150, kTarget:0, dob:"", sex:"", htCm:0, act:1.55, plan:"maintain",
             w:{}, p:{}, f:{}, c:{} },
     active: null
@@ -613,20 +613,15 @@ function seedRoutines(){
   ];
 }
 
-/* A grab-bag for a day that is not on the plan. Nothing here is
-   compulsory - a row you do not tick is dropped when the session is
-   filed, so this is a menu rather than a workout. */
+/* An empty slot for a day that is not on the plan. You add whatever you
+   actually did - a lift, a machine, anything - and can keep the ones you
+   use so the list builds itself over time. */
 function miscRoutine(){
-  function cardio(name, du){
-    return { id:uid(), name:name, sets:1, reps:"", rest:0, mode:"ride", du:du, place:"machine" };
-  }
-  return { id:uid(), name:MISC_NAME, color:"blue", exercises:[
-    cardio("Rowing Machine", "m"),
-    cardio("Treadmill", "mi"),
-    cardio("Stationary Bike", "mi"),
-    { id:uid(), name:"Stair Climber", sets:1, reps:"15-30", rest:0, mode:"mins", noWeight:true }
-  ]};
+  return { id:uid(), name:MISC_NAME, color:"blue", exercises:[] };
 }
+/* What build 13 put in it, so an untouched copy can be emptied without
+   throwing away a list someone has since built up. */
+var MISC_PRESETS = ["rowing machine", "treadmill", "stationary bike", "stair climber"];
 
 /* Kept on their own so they can also be dropped into a log that exists. */
 function wedRoutine(){
@@ -700,6 +695,20 @@ function load(){
         var names = p.routines.map(function(r){ return norm(r.name); });
         if (names.indexOf(norm(WED_NAME)) < 0) p.routines.push(wedRoutine());
         if (names.indexOf(norm(SAT_NAME)) < 0) p.routines.push(satRoutine());
+      }
+
+      /* It first shipped with four machines in it, which was not the
+         point. Empty it, but only if nobody has touched it. */
+      if (p.applied.indexOf("misc-empty") < 0) {
+        p.applied.push("misc-empty");
+        p.routines.forEach(function(r){
+          if (norm(r.name) !== norm(MISC_NAME)) return;
+          var ex = r.exercises || [];
+          var untouched = ex.length === MISC_PRESETS.length && ex.every(function(e){
+            return MISC_PRESETS.indexOf(norm(e.name)) >= 0;
+          });
+          if (untouched) r.exercises = [];
+        });
       }
 
       /* The miscellaneous day, added later. Once only. */
@@ -1154,7 +1163,9 @@ function trainPicker(){
     h += '<button class="pick-item" data-action="start-routine" data-id="' + r.id + '">' +
            '<span class="bar" style="background:var(--' + (r.color || "red") + ')"></span>' +
            '<span><span class="t">' + esc(r.name) + '</span>' +
-           '<span class="m">' + r.exercises.length + ' lifts &middot; ' + setCount + ' sets &middot; ~' + mins + ' min' +
+           '<span class="m">' + (r.exercises.length === 0
+             ? 'empty - add whatever you did'
+             : r.exercises.length + ' lifts &middot; ' + setCount + ' sets &middot; ~' + mins + ' min') +
            (done ? ' &middot; ' + ago(done.start) : '') + '</span></span>' +
            '<span class="go">Start &rarr;</span>' +
          '</button>';
@@ -1188,7 +1199,9 @@ function trainActive(){
        '</div>';
 
   if (!a.entries.length) {
-    h += '<div class="card empty"><h3>No lifts yet</h3><p>Add the first one and the set rows appear underneath it.</p></div>';
+    h += '<div class="card empty"><h3>Nothing in here yet</h3>' +
+         '<p>Add whatever you did - a lift, or a machine with its distance and time. ' +
+         'The options menu on each one can keep it in this routine for next time.</p></div>';
   }
   a.entries.forEach(function(e){ h += exerciseCard(e); });
 
@@ -3296,7 +3309,17 @@ function pastSheet(){
 function exMenuSheet(id){
   var e = findEntry(id);
   if (!e) return;
+  var routine = null;
+  if (S.active && S.active.routineId) {
+    S.routines.forEach(function(r){ if (r.id === S.active.routineId) routine = r; });
+  }
+  var alreadyInRoutine = !!routine && routine.exercises.some(function(x){ return norm(x.name) === norm(e.name); });
+
   openSheet(e.name,
+    (routine && !alreadyInRoutine
+      ? '<button class="btn btn-ghost btn-block" data-action="save-to-routine" data-id="' + e.id + '" ' +
+        'style="margin-bottom:12px">Keep this in ' + esc(routine.name) + '</button>'
+      : '') +
     '<div class="field"><label for="emName">Name</label><input class="control" id="emName" list="exerciseNames" value="' + esc(e.name) + '"></div>' +
     '<div style="height:10px"></div>' +
     '<div class="grid-2">' +
@@ -3449,6 +3472,21 @@ document.addEventListener("click", function(ev){
       var e1 = findEntry(id);
       if (e1) { e1.name = $("#emName").value.trim() || e1.name; e1.reps = $("#emReps").value; e1.rest = num($("#emRest").value); }
       save(); closeSheet(); render();
+      break;
+    }
+    case "save-to-routine": {
+      var se = findEntry(id), sr = null;
+      if (!se || !S.active) break;
+      S.routines.forEach(function(r){ if (r.id === S.active.routineId) sr = r; });
+      if (!sr) break;
+      var row = { id:uid(), name:se.name, sets:se.target, reps:se.reps, rest:se.rest };
+      if (se.mode) row.mode = se.mode;
+      if (se.du) row.du = se.du;
+      if (se.place) row.place = se.place;
+      if (se.noWeight) row.noWeight = true;
+      sr.exercises.push(row);
+      save(); closeSheet(); render();
+      toast(se.name + " kept in " + sr.name + ".");
       break;
     }
     case "remove-ex": {
