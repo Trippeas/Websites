@@ -420,6 +420,41 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
   font-variant-numeric:tabular-nums;
 }
 
+/* ---------- calendar ---------- */
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cal-title{
+  flex:1;text-align:center;font-family:var(--display);font-size:17px;letter-spacing:.02em;
+}
+.icon-btn[disabled]{opacity:.3;pointer-events:none}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-dow{
+  font-family:var(--display);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);text-align:center;padding-bottom:2px;
+}
+.cal-d{
+  aspect-ratio:1;display:grid;place-items:center;padding:0;
+  border-radius:8px;border:1px solid transparent;background:var(--surface-2);
+  font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink-2);
+}
+.cal-d.blank{background:transparent;border-color:transparent}
+.cal-d.pre{background:transparent;color:var(--ink-3);opacity:.4}
+.cal-d.future{background:transparent;color:var(--ink-3);opacity:.28}
+.cal-d.rest{background:transparent;border:1px dashed var(--line);color:var(--ink-3)}
+.cal-d.miss{background:transparent;border:1px solid var(--line-2);color:var(--ink-3)}
+.cal-d.on{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+.cal-d.today{box-shadow:0 0 0 2px var(--red)}
+button.cal-d:hover{border-color:var(--ink-3)}
+button.cal-d.on:hover{border-color:var(--ink)}
+.cal-key{
+  display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;
+  font-size:12.5px;color:var(--ink-2);
+}
+.cal-key span{display:inline-flex;align-items:center;gap:6px}
+.cal-key i{width:12px;height:12px;border-radius:4px;flex:none}
+.cal-key .k-on{background:var(--green)}
+.cal-key .k-miss{border:1px solid var(--line-2)}
+.cal-key .k-rest{border:1px dashed var(--line)}
+
 /* ---------- streak ---------- */
 .streak-head{display:flex;align-items:center;gap:12px}
 .streak-n{
@@ -563,7 +598,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 14;
+var APP_BUILD = 15;
 var APP_DATE = "17 Sep 2026";
 var WED_NAME = "Abs + Forearms - Wed";
 var SAT_NAME = "Mountain Bike Ride - Sat";
@@ -1093,7 +1128,8 @@ function tick(){
 }
 
 /* ------------------------------ ui state ---------------------------- */
-var V = { view:"train", logTab:"sessions", sessionId:null, exName:null, routineId:null, body:false };
+var V = { view:"train", logTab:"sessions", sessionId:null, exName:null, routineId:null,
+          body:false, cal:false, calY:null, calM:null };
 
 var ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>';
 
@@ -1101,7 +1137,7 @@ function go(view){
   V.view = view;
   if (view !== "log") { V.sessionId = null; V.exName = null; }
   if (view !== "plan") { V.routineId = null; }
-  if (view !== "goals") { V.body = false; }
+  if (view !== "goals") { V.body = false; V.cal = false; }
   render();
   window.scrollTo(0, 0);
 }
@@ -1113,7 +1149,7 @@ function render(){
   if (V.view === "train") html = viewTrain();
   else if (V.view === "timer") html = viewTimer();
   else if (V.view === "log") html = viewLog();
-  else if (V.view === "goals") html = V.body ? viewBody() : viewGoals();
+  else if (V.view === "goals") html = V.body ? viewBody() : V.cal ? viewCalendar() : viewGoals();
   else if (V.view === "plan") html = viewPlan();
   else if (V.view === "settings") html = viewSettings();
   m.innerHTML = html;
@@ -3057,6 +3093,123 @@ function streakCard(){
        '</div>';
   h += '<div class="ms-note">Sundays are a rest day, so they are skipped rather than counted against you. ' +
        'Six scheduled days is a full week.</div>';
+  h += '<div><button class="btn btn-ghost btn-sm" data-action="open-calendar">See the calendar</button></div>';
+  h += '</div>';
+  return h;
+}
+
+/* =====================================================================
+   THE CALENDAR
+   A month at a time, weeks running Monday to Sunday so the rest day
+   falls at the end of the row where it belongs.
+
+   A day is only a miss if it was a scheduled day that has already
+   passed and you had already started training - the weeks before your
+   first session are not failures, they are just before.
+   ===================================================================== */
+var DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function firstSessionDay(){
+  var keys = Object.keys(trainingDays()).sort();
+  return keys.length ? keys[0] : null;
+}
+function sessionsOn(k){
+  return S.sessions.filter(function(s){ return dayKey(s.start) === k; })
+    .sort(function(a, b){ return a.start - b.start; });
+}
+function monthCount(y, m){
+  var n = 0;
+  S.sessions.forEach(function(s){
+    var d = new Date(s.start);
+    if (d.getFullYear() === y && d.getMonth() === m) n++;
+  });
+  return n;
+}
+
+function calendarGrid(y, m){
+  var days = trainingDays(), start = firstSessionDay();
+  var startTs = start ? keyTs(start) : Infinity;
+  var todayK = today(), todayTs = keyTs(todayK);
+  var first = new Date(y, m, 1);
+  var offset = (first.getDay() + 6) % 7;            /* Monday is column 0 */
+  var total = new Date(y, m + 1, 0).getDate();
+
+  var h = '<div class="cal">';
+  DOW.forEach(function(d){ h += '<div class="cal-dow">' + d + '</div>'; });
+  for (var i = 0; i < offset; i++) h += '<div class="cal-d blank"></div>';
+
+  for (var day = 1; day <= total; day++) {
+    var d = new Date(y, m, day);
+    var k = dayKey(d.getTime()), ts = d.getTime();
+    var isSunday = d.getDay() === 0;
+    var trained = !!days[k];
+    var cls = "cal-d", label = "";
+
+    if (trained) { cls += " on"; label = k + ", trained"; }
+    else if (ts > todayTs) { cls += " future"; label = k; }
+    else if (ts < startTs) { cls += " pre"; label = k + ", before you started"; }
+    else if (isSunday) { cls += " rest"; label = k + ", rest day"; }
+    else { cls += " miss"; label = k + ", nothing logged"; }
+    if (k === todayK) cls += " today";
+
+    var clickable = ts <= todayTs && ts >= startTs - 86400000;
+    h += (clickable ? '<button' : '<div') + ' class="' + cls + '" ' +
+         (clickable ? 'data-action="cal-day" data-k="' + k + '" ' : '') +
+         'title="' + esc(label) + '" aria-label="' + esc(label) + '">' + day +
+         (clickable ? '</button>' : '</div>');
+  }
+  h += '</div>';
+  return h;
+}
+
+function viewCalendar(){
+  var now = new Date();
+  /* Settle on a month here rather than defaulting on every read - the
+     arrows step V.calM, and stepping back from an unset one lands in
+     year -1. */
+  if (V.calY == null || V.calM == null) { V.calY = now.getFullYear(); V.calM = now.getMonth(); }
+  var y = V.calY, m = V.calM;
+  var start = firstSessionDay();
+  var cur = currentStreak(), best = longestStreak();
+
+  /* Do not page back past the first session, or forward past this month. */
+  var minTs = start ? keyTs(start) : keyTs(today());
+  var minY = new Date(minTs).getFullYear(), minM = new Date(minTs).getMonth();
+  var atStart = (y < minY) || (y === minY && m <= minM);
+  var atEnd = (y > now.getFullYear()) || (y === now.getFullYear() && m >= now.getMonth());
+
+  var h = '<div class="stack">';
+  h += '<button class="btn btn-ghost btn-sm" data-action="back-goals" style="align-self:flex-start">&larr; Goals</button>';
+  h += '<div><p class="eyebrow">Calendar</p><h1 class="view-title">Every day you trained</h1>' +
+       '<p class="sub">' +
+       (start
+         ? 'You started on <b>' + dayLabel(keyTs(start)) + ', ' + new Date(keyTs(start)).getFullYear() + '</b> - ' +
+           ago(keyTs(start)) + '.'
+         : 'Nothing logged yet. Finish a session and it lands here.') +
+       '</p></div>';
+
+  h += '<div class="stats">' +
+         '<div class="stat"><div class="k">Streak</div><div class="v">' + cur + '</div></div>' +
+         '<div class="stat"><div class="k">Best</div><div class="v">' + best + '</div></div>' +
+         '<div class="stat"><div class="k">This month</div><div class="v">' + monthCount(y, m) + '</div></div>' +
+       '</div>';
+
+  h += '<div class="card card-pad">' +
+         '<div class="cal-head">' +
+           '<button class="icon-btn" data-action="cal-prev" aria-label="Previous month"' + (atStart ? " disabled" : "") + '>' +
+             '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>' +
+           '<span class="cal-title">' + MONTHS[m] + ' ' + y + '</span>' +
+           '<button class="icon-btn" data-action="cal-next" aria-label="Next month"' + (atEnd ? " disabled" : "") + '>' +
+             '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>' +
+         '</div>' +
+         calendarGrid(y, m) +
+         '<div class="cal-key">' +
+           '<span><i class="k-on"></i>Trained</span>' +
+           '<span><i class="k-miss"></i>Nothing logged</span>' +
+           '<span><i class="k-rest"></i>Sunday</span>' +
+         '</div>' +
+         '<p class="sub" style="font-size:12.5px;margin-top:10px">Tap a day to open what you did, or to fill one in that you missed.</p>' +
+       '</div>';
   h += '</div>';
   return h;
 }
@@ -3290,12 +3443,13 @@ function addExerciseSheet(){
     '<button class="btn btn-primary" style="flex:1" data-action="do-add-exercise">Add it</button></div>');
   setTimeout(function(){ var f = $("#axName"); if (f) f.focus(); }, 40);
 }
-function pastSheet(){
+function pastSheet(presetKey){
   var d = new Date();
   d.setDate(d.getDate() - 1);
-  openSheet("Log an earlier day",
+  var preset = presetKey || dayKey(d.getTime());
+  openSheet("Log " + dayLabel(keyTs(preset)),
     '<div class="field"><label for="pastDate">Which day</label>' +
-      '<input class="control" id="pastDate" type="date" value="' + esc(dayKey(d.getTime())) + '" max="' + esc(today()) + '"></div>' +
+      '<input class="control" id="pastDate" type="date" value="' + esc(preset) + '" max="' + esc(today()) + '"></div>' +
     '<div style="height:10px"></div>' +
     '<div class="field"><label for="pastRoutine">What you did</label><select class="control" id="pastRoutine">' +
       '<option value="">Something else - start empty</option>' +
@@ -3620,7 +3774,35 @@ document.addEventListener("click", function(ev){
     }
 
     case "open-body": V.body = true; render(); window.scrollTo(0, 0); break;
-    case "back-goals": V.body = false; render(); window.scrollTo(0, 0); break;
+    case "back-goals": V.body = false; V.cal = false; render(); window.scrollTo(0, 0); break;
+    case "open-calendar": {
+      var n = new Date();
+      V.cal = true;
+      if (V.calY == null) { V.calY = n.getFullYear(); V.calM = n.getMonth(); }
+      render(); window.scrollTo(0, 0);
+      break;
+    }
+    case "cal-prev": {
+      V.calM--; if (V.calM < 0) { V.calM = 11; V.calY--; }
+      render();
+      break;
+    }
+    case "cal-next": {
+      V.calM++; if (V.calM > 11) { V.calM = 0; V.calY++; }
+      render();
+      break;
+    }
+    case "cal-day": {
+      var ck = btn.getAttribute("data-k");
+      var onThatDay = sessionsOn(ck);
+      if (onThatDay.length) {
+        V.cal = false; V.view = "log"; V.logTab = "sessions"; V.sessionId = onThatDay[0].id;
+        render(); window.scrollTo(0, 0);
+      } else {
+        pastSheet(ck);
+      }
+      break;
+    }
     case "log-weight": {
       var wv = num($("#bwInput").value);
       if (wv <= 0) { toast("Put a number in first."); break; }
