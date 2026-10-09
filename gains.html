@@ -427,19 +427,21 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
 }
 
 /* ---------- calendar ---------- */
+.cal-card{padding-inline:12px}
 .cal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .cal-title{
   flex:1;text-align:center;font-family:var(--display);font-size:17px;letter-spacing:.02em;
 }
 .icon-btn[disabled]{opacity:.3;pointer-events:none}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;max-width:100%}
+.dow-short{display:none}
 .cal-dow{
   min-width:0;overflow:hidden;
   font-family:var(--display);font-size:9.5px;letter-spacing:.02em;text-transform:uppercase;
   color:var(--ink-3);text-align:center;padding-bottom:2px;
 }
 .cal-d{
-  min-width:0;width:100%;aspect-ratio:1;
+  min-width:0;width:100%;aspect-ratio:1/.92;
   display:flex;align-items:center;justify-content:center;
   padding:0;margin:0;overflow:hidden;
   border-radius:8px;border:1px solid transparent;background:var(--surface-2);
@@ -448,10 +450,21 @@ svg.chart{width:100%;height:auto;display:block;min-width:280px}
 }
 /* A very narrow phone, or a page zoomed up, gets slightly shorter cells
    rather than a row that will not fit. */
-@media (max-width:360px){
+/* Below this the three letter day names start to crowd the columns, so
+   the row drops to single letters and the gutters tighten. */
+@media (max-width:379px){
+  .cal-card{padding-inline:9px}
   .cal{gap:3px}
-  .cal-d{font-size:12px;border-radius:6px}
-  .cal-dow{font-size:8.5px}
+  .cal-d{font-size:12.5px;border-radius:7px;aspect-ratio:1/.88}
+  .dow-long{display:none}
+  .dow-short{display:inline}
+  .cal-dow{font-size:10px;letter-spacing:0}
+  .cal-key{gap:10px;font-size:12px}
+}
+@media (max-width:330px){
+  .cal-card{padding-inline:6px}
+  .cal{gap:2px}
+  .cal-d{font-size:11.5px;border-radius:5px}
 }
 .cal-d.blank{background:transparent;border-color:transparent}
 .cal-d.pre{background:transparent;color:var(--ink-3);opacity:.4}
@@ -615,7 +628,7 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 16;
+var APP_BUILD = 17;
 var APP_DATE = "17 Sep 2026";
 var WED_NAME = "Abs + Forearms - Wed";
 var SAT_NAME = "Mountain Bike Ride - Sat";
@@ -3125,6 +3138,7 @@ function streakCard(){
    first session are not failures, they are just before.
    ===================================================================== */
 var DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+var DOW1 = ["M", "T", "W", "T", "F", "S", "S"];
 
 function firstSessionDay(){
   var keys = Object.keys(trainingDays()).sort();
@@ -3152,7 +3166,10 @@ function calendarGrid(y, m){
   var total = new Date(y, m + 1, 0).getDate();
 
   var h = '<div class="cal">';
-  DOW.forEach(function(d){ h += '<div class="cal-dow">' + d + '</div>'; });
+  DOW.forEach(function(d, i){
+    h += '<div class="cal-dow"><span class="dow-long">' + d + '</span>' +
+         '<span class="dow-short">' + DOW1[i] + '</span></div>';
+  });
   for (var i = 0; i < offset; i++) h += '<div class="cal-d blank"></div>';
 
   for (var day = 1; day <= total; day++) {
@@ -3211,7 +3228,7 @@ function viewCalendar(){
          '<div class="stat"><div class="k">This month</div><div class="v">' + monthCount(y, m) + '</div></div>' +
        '</div>';
 
-  h += '<div class="card card-pad">' +
+  h += '<div class="card card-pad cal-card">' +
          '<div class="cal-head">' +
            '<button class="icon-btn" data-action="cal-prev" aria-label="Previous month"' + (atStart ? " disabled" : "") + '>' +
              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>' +
