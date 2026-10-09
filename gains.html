@@ -563,10 +563,11 @@ a.btn{text-decoration:none}
    ===================================================================== */
 
 /* ------------------------------ storage ---------------------------- */
-var APP_BUILD = 12;
+var APP_BUILD = 13;
 var APP_DATE = "17 Sep 2026";
 var WED_NAME = "Abs + Forearms - Wed";
 var SAT_NAME = "Mountain Bike Ride - Sat";
+var MISC_NAME = "Miscellaneous - Any Day";
 var RETIRED_ROUTINES = ["legs - wed & sat", "abs + forearms + legs - wed & sat"];
 var KEY = "liftledger.v1";
 var S = null;
@@ -580,7 +581,7 @@ function defaults(){
     routines: seedRoutines(),
     sessions: [],
     goals: [],
-    applied: ["abs-forearms-legs", "wed-abs-sat-ride", "food-log"],
+    applied: ["abs-forearms-legs", "wed-abs-sat-ride", "food-log", "misc-day"],
     body: { goalW:0, pTarget:150, kTarget:0, dob:"", sex:"", htCm:0, act:1.55, plan:"maintain",
             w:{}, p:{}, f:{}, c:{} },
     active: null
@@ -607,8 +608,24 @@ function seedRoutines(){
       ex("Face Pull", 3, "15", 45)
     ]},
     wedRoutine(),
-    satRoutine()
+    satRoutine(),
+    miscRoutine()
   ];
+}
+
+/* A grab-bag for a day that is not on the plan. Nothing here is
+   compulsory - a row you do not tick is dropped when the session is
+   filed, so this is a menu rather than a workout. */
+function miscRoutine(){
+  function cardio(name, du){
+    return { id:uid(), name:name, sets:1, reps:"", rest:0, mode:"ride", du:du, place:"machine" };
+  }
+  return { id:uid(), name:MISC_NAME, color:"blue", exercises:[
+    cardio("Rowing Machine", "m"),
+    cardio("Treadmill", "mi"),
+    cardio("Stationary Bike", "mi"),
+    { id:uid(), name:"Stair Climber", sets:1, reps:"15-30", rest:0, mode:"mins", noWeight:true }
+  ]};
 }
 
 /* Kept on their own so they can also be dropped into a log that exists. */
@@ -683,6 +700,14 @@ function load(){
         var names = p.routines.map(function(r){ return norm(r.name); });
         if (names.indexOf(norm(WED_NAME)) < 0) p.routines.push(wedRoutine());
         if (names.indexOf(norm(SAT_NAME)) < 0) p.routines.push(satRoutine());
+      }
+
+      /* The miscellaneous day, added later. Once only. */
+      if (p.applied.indexOf("misc-day") < 0) {
+        p.applied.push("misc-day");
+        var has2 = false;
+        p.routines.forEach(function(r){ if (norm(r.name) === norm(MISC_NAME)) has2 = true; });
+        if (!has2) p.routines.push(miscRoutine());
       }
       return p;
     }
@@ -763,6 +788,7 @@ function isRide(e){ return !!e && e.mode === "ride"; }
 function isNonRep(e){ return isTimed(e) || isRide(e); }
 function timeUnit(e){ return e && e.mode === "mins" ? "min" : "s"; }
 function distUnit(e){ return (e && e.du) || "mi"; }
+function placeWord(e){ return (e && e.place) || (distUnit(e) === "m" ? "machine" : "trail"); }
 function pace(mi, mins){
   mi = num(mi); mins = num(mins);
   if (mi <= 0 || mins <= 0) return 0;
@@ -1183,7 +1209,8 @@ function holdTarget(e){
 function rideCard(e){
   var du = distUnit(e);
   var distLabel = du === "m" ? "Metres" : du === "km" ? "Km" : "Miles";
-  var wherePlaceholder = du === "m" ? "Which machine?" : "Which trail?";
+  var place = placeWord(e);
+  var wherePlaceholder = place === "machine" ? "Which machine?" : "Which trail?";
   var best = bestRideFor(e.name);
   var prev = lastTime(e.name);
   var d = doneSets(e);
@@ -1191,7 +1218,7 @@ function rideCard(e){
   var h = '<section class="ex' + (d.length ? ' complete' : '') + '" data-ex="' + e.id + '">';
   h += '<div class="ex-head"><div style="min-width:0">' +
          '<h3>' + esc(e.name) + '</h3>' +
-         '<div class="ex-meta">' + (du === "m" ? "machine" : "trail") + ', distance and time' +
+         '<div class="ex-meta">' + place + ', distance and time' +
          (best ? ' &middot; longest ' + fmt(best.w) + ' ' + du : '') + '</div></div>' +
          '<button class="icon-btn pull-right" data-action="ex-menu" data-ex="' + e.id + '" aria-label="Options for ' + esc(e.name) + '">' +
            '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle><circle cx="19" cy="12" r="1.3"></circle></svg>' +
@@ -1226,7 +1253,7 @@ function rideCard(e){
 
   h += '<div class="ex-actions">' +
          '<button class="btn btn-ghost btn-sm" data-action="add-set" data-ex="' + e.id + '">+ Another ' +
-           (du === "m" ? "piece" : "ride") + '</button>' +
+           (place === "machine" ? "piece" : "ride") + '</button>' +
        '</div></section>';
   return h;
 }
@@ -1245,7 +1272,7 @@ function exerciseCard(e){
   h += '<div class="ex-head"><div style="min-width:0">' +
          '<h3>' + esc(e.name) + '</h3>' +
          '<div class="ex-meta">' + num(e.target) + ' x ' + esc(e.reps) + (timed ? ' ' + tu : '') +
-         ' &middot; rest ' + clock(num(e.rest)) +
+         (num(e.rest) > 0 ? ' &middot; rest ' + clock(num(e.rest)) : '') +
          (best > 0 ? (timed ? ' &middot; best ' + fmt(Math.round(best)) + tu
                             : ' &middot; best e1RM ' + fmt(Math.round(best)) + unit()) : '') +
          '</div></div>' +
@@ -1290,7 +1317,9 @@ function exerciseCard(e){
            ? '<button class="btn btn-ghost btn-sm" data-action="hold-now" data-ex="' + e.id +
              '" data-sec="' + holdTarget(e) + '">Hold ' + holdTarget(e) + 's</button>'
            : '') +
-         '<button class="btn btn-ghost btn-sm" data-action="rest-now" data-ex="' + e.id + '">Rest ' + clock(num(e.rest)) + '</button>' +
+         (num(e.rest) > 0
+           ? '<button class="btn btn-ghost btn-sm" data-action="rest-now" data-ex="' + e.id + '">Rest ' + clock(num(e.rest)) + '</button>'
+           : '') +
        '</div>';
   h += '</section>';
   return h;
@@ -3084,16 +3113,18 @@ function findEntry(id){
   if (S.active) S.active.entries.forEach(function(e){ if (e.id === id) out = e; });
   return out;
 }
-function newEntry(name, target, reps, rest, mode, noWeight, du){
+function newEntry(name, target, reps, rest, mode, noWeight, du, place){
   var n = Math.max(1, Math.round(num(target) || 3));
   var sets = [];
   for (var i = 0; i < n; i++) {
     sets.push(mode === "ride" ? { trail:"", w:"", r:"", done:false } : { w:"", r:"", done:false });
   }
-  var e = { id:uid(), name:name, target:n, reps:String(reps || ""), rest:num(rest) || num(S.settings.rest), sets:sets };
+  var restVal = (rest == null || rest === "") ? num(S.settings.rest) : num(rest);
+  var e = { id:uid(), name:name, target:n, reps:String(reps || ""), rest:restVal, sets:sets };
   if (mode === "time" || mode === "mins" || mode === "ride") e.mode = mode;
   if (noWeight) e.noWeight = true;
   if (mode === "ride" && du) e.du = du;
+  if (place) e.place = place;
   return e;
 }
 function startRoutine(id){
@@ -3105,7 +3136,7 @@ function startRoutine(id){
   }
   S.active = {
     id: uid(), routineId: r.id, name: r.name, start: Date.now(), end: 0,
-    entries: r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode, e.noWeight, e.du); })
+    entries: r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode, e.noWeight, e.du, e.place); })
   };
   save();
   V.routineId = null;
@@ -3176,7 +3207,7 @@ function logSet(exId, i){
   });
 
   save();
-  if (!isRide(e)) startRest(num(e.rest) || num(S.settings.rest), "Rest");
+  if (!isRide(e) && num(e.rest) > 0) startRest(num(e.rest), "Rest");
   render();
   if (landed) toast("Goal hit: " + landed.name + " " + fmt(landed.w) + " x " + fmt(landed.r) + ".");
   else if (s.pr) toast("New best on " + e.name + ": " +
@@ -3198,6 +3229,7 @@ function finishSession(){
       if (isNonRep(e)) out.mode = e.mode;
       if (e.noWeight) out.noWeight = true;
       if (e.du) out.du = e.du;
+      if (e.place) out.place = e.place;
       return out;
     });
   S.sessions.push(a);
@@ -3376,7 +3408,7 @@ document.addEventListener("click", function(ev){
         id: uid(), routineId: r ? r.id : null,
         name: r ? r.name : dayLabel(when) + " session",
         start: when, end: 0, backdated: true, mins: 60,
-        entries: r ? r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode, e.noWeight, e.du); }) : []
+        entries: r ? r.exercises.map(function(e){ return newEntry(e.name, e.sets, e.reps, e.rest, e.mode, e.noWeight, e.du, e.place); }) : []
       };
       save(); closeSheet(); go("train");
       toast("Filling in " + dayLabel(when) + ".");
